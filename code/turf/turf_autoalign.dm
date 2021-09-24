@@ -702,6 +702,54 @@ ABSTRACT_TYPE(turf/unsimulated/wall/auto/lead)
 /turf/unsimulated/wall/auto/lead/white
 	icon_state = "mapiconw"
 	mod = "leadw-"
+//wall resprite part 2- walls needed for biodome
+ABSTRACT_TYPE(turf/unsimulated/wall/auto/adventure)
+/turf/unsimulated/wall/auto/adventure/
+	name = "uh oh you shouldn't see this"
+	icon = 'icons/turf/walls_auto.dmi'
+	light_mod = "wall-"
+	flags = ALWAYS_SOLID_FLUID | IS_PERSPECTIVE_FLUID
+	connect_overlay = 1
+	connect_diagonal = 1
+	connects_to = list(/turf/cordon, /obj/machinery/door, /obj/window, /turf/unsimulated/wall/, /turf/simulated/wall/false_wall/,
+	/turf/unsimulated/wall/setpieces, /turf/unsimulated/wall/setpieces/stranger, /obj/graveyard/loose_rock)
+	connects_with_overlay = list(/obj/machinery/door, /obj/window)
+
+/turf/unsimulated/wall/auto/adventure/ancient
+	name = "strange wall"
+	icon = 'icons/turf/walls_ancient.dmi'
+	icon_state = "ancient-0"
+	mod = "ancient-"
+
+/turf/unsimulated/wall/auto/adventure/cave
+	name = "cave wall"
+	icon = 'icons/turf/walls_cave.dmi'
+	icon_state = "cave-0"
+	mod = "cave-"
+
+/turf/unsimulated/wall/auto/adventure/root
+	name = "overgrown wall"
+	icon = 'icons/turf/walls_root.dmi'
+	icon_state = "root-0"
+	mod = "root-"
+
+/turf/unsimulated/wall/auto/adventure/rock
+	name = "rock wall"
+	icon = 'icons/turf/walls_rock.dmi'
+	icon_state = "rock-0"
+	mod = "rock-"
+
+/turf/unsimulated/wall/auto/adventure/lshuttle
+	name = "shuttle wall"
+	icon = 'icons/turf/walls_debrisshuttle.dmi'
+	icon_state = "shuttle-0"
+	mod = "shuttle-"
+
+/turf/unsimulated/wall/auto/adventure/dshuttle
+	name = "shuttle wall"
+	icon = 'icons/turf/walls_debrisshuttle.dmi'
+	icon_state = "dshuttle-0"
+	mod = "dshuttle-"
 
 /datum/action/bar/icon/wall_tool_interact
 	id = "wall_tool_interact"
