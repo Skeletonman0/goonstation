@@ -702,7 +702,7 @@ ABSTRACT_TYPE(turf/unsimulated/wall/auto/lead)
 /turf/unsimulated/wall/auto/lead/white
 	icon_state = "mapiconw"
 	mod = "leadw-"
-//wall resprite part 2- walls needed for biodome
+//wall resprite part 2- walls needed for biodome and debris field
 ABSTRACT_TYPE(turf/unsimulated/wall/auto/adventure)
 /turf/unsimulated/wall/auto/adventure/
 	name = "uh oh you shouldn't see this"
@@ -712,8 +712,8 @@ ABSTRACT_TYPE(turf/unsimulated/wall/auto/adventure)
 	connect_overlay = 1
 	connect_diagonal = 1
 	connects_to = list(/turf/cordon, /obj/machinery/door, /obj/window, /turf/unsimulated/wall/, /turf/simulated/wall/false_wall/,
-	/turf/unsimulated/wall/setpieces, /turf/unsimulated/wall/setpieces/stranger, /obj/graveyard/loose_rock)
-	connects_with_overlay = list(/obj/machinery/door, /obj/window)
+	/turf/unsimulated/wall/setpieces, /turf/unsimulated/wall/setpieces/stranger, /obj/graveyard/loose_rock, /obj/indestructible/shuttle_corner)
+	connects_with_overlay = list(/obj/machinery/door, /obj/window, /turf/unsimulated/wall/auto/adventure)
 
 /turf/unsimulated/wall/auto/adventure/ancient
 	name = "strange wall"

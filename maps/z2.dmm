@@ -9622,15 +9622,7 @@
 /turf/space,
 /area/space)
 "aIr" = (
-/turf/unsimulated/wall/cave,
-/area/crater/cave)
-"aIs" = (
-/turf/unsimulated/wall/setpieces{
-	desc = "A weird jet black metal wall indented with strange grooves and lines.";
-	icon = 'icons/turf/walls.dmi';
-	icon_state = "ancient";
-	name = "strange wall"
-	},
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater/cave)
 "aIu" = (
 /obj/item/light_parts,
@@ -9694,9 +9686,6 @@
 "aIC" = (
 /turf/unsimulated/floor/arctic/snow/ice,
 /area/lower_arctic/lower)
-"aID" = (
-/turf/unsimulated/wall/cave,
-/area/crater)
 "aIE" = (
 /obj/item/raw_material/cobryl,
 /obj/decal/cleanable/dirt,
@@ -9974,20 +9963,13 @@
 /obj/decal/fakeobjects/smallrocks,
 /turf/unsimulated/floor/cave,
 /area/crater)
-"aJm" = (
-/obj/river{
-	desc = "It's pouring down from somewhere far above.";
-	name = "Waterfall"
-	},
-/turf/unsimulated/wall/cave,
-/area/crater)
 "aJo" = (
 /obj/decal/cleanable/cobweb,
 /turf/unsimulated/floor/cave,
 /area/crater/cave)
 "aJp" = (
 /obj/item/raw_material/molitz,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater/cave)
 "aJq" = (
 /obj/decal/cleanable/dirt,
@@ -9995,7 +9977,10 @@
 /turf/unsimulated/floor/cave,
 /area/crater/cave)
 "aJr" = (
-/turf/unsimulated/wall/setpieces/stranger,
+/turf/unsimulated/wall/setpieces/stranger{
+	icon = 'icons/turf/walls_ancient.dmi';
+	icon_state = "ancient-12"
+	},
 /area/crater/cave)
 "aJs" = (
 /turf/unsimulated/floor/setpieces{
@@ -10143,14 +10128,14 @@
 	dir = 4;
 	icon_state = "lattice-dir"
 	},
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater)
 "aJO" = (
 /obj/lattice{
 	dir = 5;
 	icon_state = "lattice-dir"
 	},
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater)
 "aJP" = (
 /obj/decal/cleanable/dirt,
@@ -10262,9 +10247,7 @@
 /turf/space/fluid/cenote,
 /area/crater)
 "aKh" = (
-/turf/unsimulated/wall/cave{
-	name = "rock"
-	},
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater)
 "aKi" = (
 /turf/unsimulated/floor/plating/scorched,
@@ -10451,9 +10434,7 @@
 	desc = "It's pouring down from somewhere far above.";
 	name = "Waterfall"
 	},
-/turf/unsimulated/wall/cave{
-	name = "rock"
-	},
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater)
 "aKJ" = (
 /obj/decal/fakeobjects/pipe{
@@ -11170,7 +11151,7 @@
 /area/crater/cave)
 "aMQ" = (
 /obj/decal/cleanable/dirt,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater/cave)
 "aMR" = (
 /turf/unsimulated/floor/red/side{
@@ -13028,7 +13009,7 @@
 "aSt" = (
 /obj/decal/cleanable/dirt,
 /obj/item/raw_material/molitz,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater/cave)
 "aSu" = (
 /turf/unsimulated/floor/setpieces/ancient_pit{
@@ -13331,7 +13312,7 @@
 /area/crater/cave)
 "aTp" = (
 /obj/item/raw_material/gemstone,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater/cave)
 "aTq" = (
 /obj/landmark/artifact,
@@ -13555,7 +13536,7 @@
 /area/crater/cave)
 "aUd" = (
 /obj/item/raw_material/uqill,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater/cave)
 "aUe" = (
 /obj/spacevine{
@@ -14606,7 +14587,7 @@
 /obj/item/raw_material/char,
 /obj/item/raw_material/char,
 /obj/item/raw_material/bohrum,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater/cave)
 "aWX" = (
 /obj/shrub/dead,
@@ -18218,7 +18199,7 @@
 "bfT" = (
 /obj/decal/cleanable/dirt,
 /obj/item/raw_material/bohrum,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater/cave)
 "bfU" = (
 /obj/decal/mushrooms/type2,
@@ -19197,10 +19178,7 @@
 	},
 /area/precursor/pit)
 "biF" = (
-/turf/unsimulated/wall{
-	icon = 'icons/turf/shuttle.dmi';
-	icon_state = "wall3"
-	},
+/turf/unsimulated/wall/auto/adventure/dshuttle,
 /area/drone/crew_quarters)
 "biG" = (
 /obj/decal/fakeobjects{
@@ -19210,10 +19188,7 @@
 	icon_state = "hvent";
 	name = "air vent"
 	},
-/turf/unsimulated/wall{
-	icon = 'icons/turf/shuttle.dmi';
-	icon_state = "wall3"
-	},
+/turf/unsimulated/wall/auto/adventure/dshuttle,
 /area/drone/crew_quarters)
 "biH" = (
 /turf/unsimulated/wall{
@@ -19229,16 +19204,10 @@
 	icon_state = "hvent";
 	name = "air vent"
 	},
-/turf/unsimulated/wall{
-	icon = 'icons/turf/shuttle.dmi';
-	icon_state = "wall3"
-	},
+/turf/unsimulated/wall/auto/adventure/dshuttle,
 /area/drone/engineering)
 "biJ" = (
-/turf/unsimulated/wall{
-	icon = 'icons/turf/shuttle.dmi';
-	icon_state = "wall3"
-	},
+/turf/unsimulated/wall/auto/adventure/dshuttle,
 /area/drone/office)
 "biK" = (
 /obj/decal/fakeobjects{
@@ -19248,18 +19217,10 @@
 	icon_state = "hvent";
 	name = "air vent"
 	},
-/turf/unsimulated/wall{
-	icon = 'icons/turf/shuttle.dmi';
-	icon_state = "wall3"
-	},
+/turf/unsimulated/wall/auto/adventure/dshuttle,
 /area/drone/office)
 "biL" = (
-/turf/unsimulated/wall/setpieces{
-	desc = "A weird jet black metal wall indented with strange grooves and lines.";
-	icon = 'icons/turf/walls.dmi';
-	icon_state = "ancient";
-	name = "strange wall"
-	},
+/turf/unsimulated/wall/auto/adventure/ancient,
 /area/crater/cave/lower)
 "biM" = (
 /obj/table/auto,
@@ -19850,7 +19811,10 @@
 	},
 /area/crater/cave/lower)
 "bkc" = (
-/turf/unsimulated/wall/setpieces/stranger,
+/turf/unsimulated/wall/setpieces/stranger{
+	icon = 'icons/turf/walls_ancient.dmi';
+	icon_state = "ancient-3"
+	},
 /area/crater/cave/lower)
 "bkd" = (
 /obj/decal/fakeobjects{
@@ -19977,10 +19941,7 @@
 	icon_state = "shock";
 	name = "Danger: High Voltage"
 	},
-/turf/unsimulated/wall{
-	icon = 'icons/turf/shuttle.dmi';
-	icon_state = "wall3"
-	},
+/turf/unsimulated/wall/auto/adventure/dshuttle,
 /area/drone/engineering)
 "bkv" = (
 /obj/window/cubicle{
@@ -20343,10 +20304,7 @@
 /turf/unsimulated/floor/specialroom/bar,
 /area/marsoutpost)
 "blq" = (
-/turf/unsimulated/wall{
-	icon = 'icons/turf/shuttle.dmi';
-	icon_state = "wall3"
-	},
+/turf/unsimulated/wall/auto/adventure/dshuttle,
 /area/drone)
 "blr" = (
 /turf/unsimulated/floor/stairs,
@@ -20393,7 +20351,7 @@
 /turf/unsimulated/floor/cave,
 /area/crater/cave/lower)
 "blx" = (
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater/cave/lower)
 "bly" = (
 /obj/map/light/dimreddish,
@@ -20579,7 +20537,8 @@
 /area/drone)
 "blT" = (
 /obj/indestructible/shuttle_corner{
-	icon_state = "wall3_trans"
+	icon = 'icons/turf/walls_debrisshuttle.dmi';
+	icon_state = "dcorner2"
 	},
 /turf/unsimulated/floor{
 	icon = 'icons/turf/shuttle.dmi';
@@ -20598,10 +20557,7 @@
 /area/drone/office)
 "blW" = (
 /obj/noticeboard,
-/turf/unsimulated/wall{
-	icon = 'icons/turf/shuttle.dmi';
-	icon_state = "wall3"
-	},
+/turf/unsimulated/wall/auto/adventure/dshuttle,
 /area/drone/office)
 "blX" = (
 /obj/decal/mushrooms/type5,
@@ -20736,15 +20692,13 @@
 	icon_state = "hvent";
 	name = "air vent"
 	},
-/turf/unsimulated/wall{
-	icon = 'icons/turf/shuttle.dmi';
-	icon_state = "wall3"
-	},
+/turf/unsimulated/wall/auto/adventure/dshuttle,
 /area/drone)
 "bmp" = (
 /obj/indestructible/shuttle_corner{
 	dir = 1;
-	icon_state = "wall3_trans"
+	icon = 'icons/turf/walls_debrisshuttle.dmi';
+	icon_state = "dcorner2"
 	},
 /turf/unsimulated/floor{
 	icon = 'icons/turf/shuttle.dmi';
@@ -21630,10 +21584,7 @@
 	},
 /area/drone/assembly)
 "boh" = (
-/turf/unsimulated/wall{
-	icon = 'icons/turf/shuttle.dmi';
-	icon_state = "wall3"
-	},
+/turf/unsimulated/wall/auto/adventure/dshuttle,
 /area/drone/assembly)
 "boi" = (
 /obj/machinery/conveyor{
@@ -21672,10 +21623,7 @@
 	layer = 2.5;
 	name = "VACUUM AREA"
 	},
-/turf/unsimulated/wall{
-	icon = 'icons/turf/shuttle.dmi';
-	icon_state = "wall3"
-	},
+/turf/unsimulated/wall/auto/adventure/dshuttle,
 /area/drone/assembly)
 "boo" = (
 /obj/decal/lightshaft,
@@ -21689,7 +21637,10 @@
 /area/crater/cave/lower)
 "bop" = (
 /obj/map/light/dimreddish,
-/turf/unsimulated/wall/setpieces/stranger,
+/turf/unsimulated/wall/setpieces/stranger{
+	icon = 'icons/turf/walls_ancient.dmi';
+	icon_state = "ancient-3"
+	},
 /area/crater/cave/lower)
 "boq" = (
 /obj/item/casing/shotgun/orange{
@@ -21766,7 +21717,7 @@
 /turf/unsimulated/floor/cave,
 /area/crater/cave/lower)
 "boz" = (
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/catacombs)
 "boA" = (
 /turf/unsimulated/floor/lava{
@@ -21990,7 +21941,8 @@
 "bpk" = (
 /obj/indestructible/shuttle_corner{
 	dir = 4;
-	icon_state = "wall3_trans"
+	icon = 'icons/turf/walls_debrisshuttle.dmi';
+	icon_state = "dcorner2"
 	},
 /turf/unsimulated/floor{
 	icon = 'icons/turf/shuttle.dmi';
@@ -22532,7 +22484,8 @@
 "bqF" = (
 /obj/indestructible/shuttle_corner{
 	dir = 8;
-	icon_state = "wall3_trans"
+	icon = 'icons/turf/walls_debrisshuttle.dmi';
+	icon_state = "dcorner2"
 	},
 /turf/unsimulated/floor{
 	icon = 'icons/turf/shuttle.dmi';
@@ -25414,7 +25367,7 @@
 /area/iomoon/robot_ruins)
 "bxR" = (
 /obj/decal/cleanable/fungus,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/catacombs)
 "bxS" = (
 /obj/map/light/dimred,
@@ -25936,14 +25889,6 @@
 /obj/decal/cleanable/dirt,
 /turf/unsimulated/dirt,
 /area/catacombs)
-"bzi" = (
-/turf/unsimulated/wall/setpieces/rootwall{
-	desc = "This wall is made of damp stone.";
-	dir = 1;
-	icon_state = "rockwall";
-	name = "Rock Wall"
-	},
-/area/catacombs)
 "bzj" = (
 /obj/decal/lightshaft,
 /obj/map/light/graveyard,
@@ -26430,7 +26375,7 @@
 	},
 /area/iomoon/robot_ruins)
 "bAt" = (
-/turf/simulated/wall/ancient,
+/turf/unsimulated/wall/auto/adventure/ancient,
 /area/crater/cave)
 "bAu" = (
 /obj/window/crystal/reinforced/north,
@@ -27079,12 +27024,7 @@
 	},
 /area/iomoon/robot_ruins)
 "bCb" = (
-/turf/unsimulated/wall/setpieces/rootwall{
-	desc = "This wall is made of damp stone.";
-	dir = 4;
-	icon_state = "rockwall";
-	name = "Rock Wall"
-	},
+/turf/unsimulated/wall/auto/adventure/rock,
 /area/catacombs)
 "bCc" = (
 /obj/decal/stalagmite{
@@ -28753,7 +28693,7 @@
 	},
 /area/iomoon)
 "bFR" = (
-/turf/unsimulated/wall/setpieces/rootwall,
+/turf/unsimulated/wall/auto/adventure/root,
 /area/crypt/graveyard)
 "bFS" = (
 /turf/unsimulated/wall/setpieces/rootwall{
@@ -29544,7 +29484,7 @@
 	},
 /area/crypt/graveyard)
 "bHH" = (
-/turf/unsimulated/wall/setpieces/rootwall,
+/turf/unsimulated/wall/auto/adventure/root,
 /area/crypt/mausoleum)
 "bHI" = (
 /obj/map/light/graveyard,
@@ -29639,7 +29579,7 @@
 /area/crypt/mausoleum)
 "bHZ" = (
 /obj/map/light/graveyard,
-/turf/unsimulated/wall/setpieces/rootwall,
+/turf/unsimulated/wall/auto/adventure/root,
 /area/crypt/graveyard)
 "bIa" = (
 /obj/graveyard/lightning_trigger,
@@ -30234,13 +30174,6 @@
 /obj/iomoon_boss/bot_spawner,
 /turf/unsimulated/iomoon/ancient_floor,
 /area/iomoon/robot_ruins/boss_chamber)
-"bJD" = (
-/turf/unsimulated/wall/setpieces/rootwall{
-	desc = "This wall is made of damp stone.";
-	icon_state = "rockwall";
-	name = "Rock Wall"
-	},
-/area/catacombs)
 "bJE" = (
 /turf/simulated/wall/ancient,
 /area/crunch)
@@ -30312,9 +30245,6 @@
 	dir = 9
 	},
 /area/crypt/graveyard)
-"bJQ" = (
-/turf/unsimulated/wall/setpieces/rootwall,
-/area/catacombs)
 "bJR" = (
 /obj/decal/cleanable/cobweb2,
 /obj/decal/cleanable/cobweb,
@@ -30335,12 +30265,7 @@
 	},
 /area/catacombs)
 "bJU" = (
-/turf/unsimulated/wall/setpieces/rootwall{
-	desc = "This wall is made of damp stone.";
-	dir = 8;
-	icon_state = "rockwall";
-	name = "Rock Wall"
-	},
+/turf/unsimulated/wall/auto/adventure/root,
 /area/catacombs)
 "bJV" = (
 /turf/unsimulated/floor/ancient,
@@ -38765,10 +38690,10 @@
 /obj/decal/nothing{
 	dir = 8
 	},
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/cavetiny)
 "ciR" = (
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/cavetiny)
 "ciS" = (
 /turf/simulated/floor,
@@ -39035,7 +38960,7 @@
 /area/meat_derelict/guts)
 "cjw" = (
 /obj/peninscription,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/cavetiny)
 "cjx" = (
 /obj/decal/runemarks{
@@ -39228,7 +39153,7 @@
 /obj/decal/nothing{
 	dir = 8
 	},
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/cavetiny)
 "cjU" = (
 /obj/candle_light,
@@ -40544,7 +40469,7 @@
 /area/meat_derelict/guts)
 "cmZ" = (
 /obj/spacevine,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/cavetiny)
 "cna" = (
 /turf/unsimulated/floor{
@@ -40598,7 +40523,7 @@
 	},
 /obj/spacevine,
 /obj/spacevine,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/cavetiny)
 "cni" = (
 /obj/stone{
@@ -40619,7 +40544,7 @@
 	icon_state = "vine-med3"
 	},
 /obj/spacevine,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/cavetiny)
 "cnj" = (
 /obj/stone{
@@ -40639,13 +40564,13 @@
 	},
 /obj/spacevine,
 /obj/spacevine,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/cavetiny)
 "cnk" = (
 /obj/spacevine{
 	icon_state = "vine-light3"
 	},
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/cavetiny)
 "cnl" = (
 /obj/decal/poster/wallsign/stencil/left/c,
@@ -49476,7 +49401,7 @@
 	dir = 9;
 	icon_state = "lattice-dir"
 	},
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater/cave)
 "cJD" = (
 /obj/decal/cleanable/dirt,
@@ -57286,21 +57211,21 @@
 /area/iomoon)
 "daw" = (
 /obj/decal/fakeobjects/azarakrocks/rock3,
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater)
 "dax" = (
 /obj/decal/poster/wallsign/warning1{
 	desc = "Smaller text warns of dangerous fauna in the deeper caves.";
 	name = "KEEP OUT!"
 	},
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater)
 "day" = (
 /obj/decal/poster/wallsign/warning1{
 	desc = "Smaller text warns of dangerous fauna in the deeper caves.";
 	name = "KEEP OUT!"
 	},
-/turf/unsimulated/wall/cave,
+/turf/unsimulated/wall/auto/adventure/cave,
 /area/crater/cave)
 "daz" = (
 /turf/unsimulated/floor/dream/beach{
@@ -74113,7 +74038,7 @@
 /turf/unsimulated/floor/caution/corner/ne,
 /area/crypt/sigma/lab)
 "dTQ" = (
-/turf/unsimulated/wall/setpieces/rootwall,
+/turf/unsimulated/wall/auto/adventure/root,
 /area/crypt/graveyard/swamp)
 "dTR" = (
 /turf/unsimulated/floor/stairs/dark{
@@ -75344,6 +75269,9 @@
 	icon_state = "floor3"
 	},
 /area/hospital/samostrel)
+"hzg" = (
+/turf/unsimulated/wall/auto/adventure/dshuttle,
+/area/drone/engineering)
 "hAi" = (
 /obj/decal/fakeobjects{
 	anchored = 1;
@@ -111569,10 +111497,10 @@ aIr
 aIr
 aIr
 aIr
-aID
-aID
-aID
-aID
+aKh
+aKh
+aKh
+aKh
 aIr
 aIr
 aaa
@@ -111850,9 +111778,9 @@ aIr
 aIr
 aIr
 aIr
-aID
-aID
-aID
+aKh
+aKh
+aKh
 bhm
 aKQ
 aVC
@@ -111870,12 +111798,12 @@ aIr
 aIr
 aIr
 aIr
-aID
-aID
-aID
-aID
-aID
-aID
+aKh
+aKh
+aKh
+aKh
+aKh
+aKh
 aIr
 aaa
 daq
@@ -112152,9 +112080,9 @@ aJG
 aIr
 aKH
 aIr
-aID
+aKh
 beH
-aID
+aKh
 aIH
 aIG
 aIG
@@ -112171,14 +112099,14 @@ rtc
 aIr
 aIr
 cJC
-aID
-aID
-aID
+aKh
+aKh
+aKh
 aKg
 aKg
-aID
-aID
-aID
+aKh
+aKh
+aKh
 aaa
 aaa
 daq
@@ -112456,8 +112384,8 @@ aIG
 aIr
 aJk
 beV
-aID
-aID
+aKh
+aKh
 aJk
 aJk
 aIr
@@ -112472,16 +112400,16 @@ rtc
 aIr
 aIr
 aIr
-aID
-aID
+aKh
+aKh
 aKh
 aKg
 aKg
 aKg
 aKg
-aID
-aID
-aID
+aKh
+aKh
+aKh
 aaa
 aaa
 daq
@@ -112762,8 +112690,8 @@ aJk
 bOf
 aJk
 bhF
-aID
-aID
+aKh
+aKh
 rtc
 rtc
 rtc
@@ -112774,17 +112702,17 @@ rtc
 rtc
 rtc
 rtc
-aID
-aJm
+aKh
+aKI
 aKI
 aKZ
 cws
 aKg
 aKg
 aKg
-aID
-aID
-aID
+aKh
+aKh
+aKh
 aaa
 aaa
 daq
@@ -113064,8 +112992,8 @@ aJk
 aJk
 aJk
 aJk
-aID
-aID
+aKh
+aKh
 rtc
 aRW
 aSU
@@ -113076,8 +113004,8 @@ rtc
 aWH
 bMu
 rtc
-aID
-aID
+aKh
+aKh
 aKh
 aKg
 aKg
@@ -113085,9 +113013,9 @@ aKg
 aKg
 aKg
 aJL
-aID
-aID
-aID
+aKh
+aKh
+aKh
 aaa
 aaa
 daq
@@ -113359,7 +113287,7 @@ aIr
 aIr
 aJk
 aJk
-aID
+aKh
 aLB
 aLB
 aLB
@@ -113389,8 +113317,8 @@ aKg
 aJL
 dap
 aJk
-aID
-aID
+aKh
+aKh
 aaa
 aaa
 daq
@@ -113660,8 +113588,8 @@ aIr
 aIr
 aJk
 aJk
-aID
-aID
+aKh
+aKh
 aKg
 aKg
 aLw
@@ -113688,12 +113616,12 @@ bXk
 cwv
 aKg
 aKg
-aID
+aKh
 aJk
 aJk
 beW
-aID
-aID
+aKh
+aKh
 aaa
 aaa
 daq
@@ -113961,8 +113889,8 @@ aIr
 aJk
 aJk
 aJk
-aID
-aID
+aKh
+aKh
 aKg
 aKg
 aLw
@@ -113990,13 +113918,13 @@ bXI
 bXk
 cwv
 aKg
-aID
-aID
+aKh
+aKh
 aLB
 aLB
 aLB
-aID
-aID
+aKh
+aKh
 aaa
 aaa
 daq
@@ -114259,11 +114187,11 @@ ajI
 ajI
 aaa
 aIr
-aID
-aID
+aKh
+aKh
 aJk
 aJk
-aID
+aKh
 aKg
 aKg
 aKg
@@ -114298,8 +114226,8 @@ aKg
 aKg
 aKg
 aKg
-aID
-aID
+aKh
+aKh
 aaa
 aaa
 daq
@@ -114561,7 +114489,7 @@ ajI
 ajI
 aaa
 aIr
-aID
+aKh
 aJk
 aJk
 aJk
@@ -114601,8 +114529,8 @@ aKg
 aKg
 aKg
 aKg
-aID
-aID
+aKh
+aKh
 aaa
 daq
 daq
@@ -114863,8 +114791,8 @@ ajI
 ajI
 aaa
 aIr
-aID
-aID
+aKh
+aKh
 aJk
 aJk
 aJI
@@ -114903,8 +114831,8 @@ aKg
 aKg
 aKg
 aKg
-aID
-aID
+aKh
+aKh
 aaa
 daq
 daq
@@ -115166,10 +115094,10 @@ aaa
 aaa
 aIr
 aIr
-aID
+aKh
 aJk
-aID
-aID
+aKh
+aKh
 aKg
 aKg
 aMj
@@ -115206,7 +115134,7 @@ aKg
 aKg
 aKg
 aKg
-aID
+aKh
 aaa
 daq
 daq
@@ -115468,7 +115396,7 @@ aab
 aaa
 aIr
 aIr
-aID
+aKh
 aJk
 aJI
 aKg
@@ -115508,7 +115436,7 @@ aKg
 aKg
 dcE
 aKg
-aID
+aKh
 aaa
 daq
 daq
@@ -115770,7 +115698,7 @@ aab
 aaa
 aIr
 aIr
-aID
+aKh
 aJk
 aJI
 aKg
@@ -115810,7 +115738,7 @@ cwv
 aKg
 aKg
 aKg
-aID
+aKh
 aaa
 daq
 daq
@@ -116074,8 +116002,8 @@ aIr
 aIr
 aIG
 aIG
-aID
-aID
+aKh
+aKh
 aKg
 aLy
 pTc
@@ -116112,7 +116040,7 @@ bdv
 aKg
 aKg
 aKg
-aID
+aKh
 aaa
 daq
 daq
@@ -116376,8 +116304,8 @@ aIr
 aIr
 aIG
 aIG
-aID
-aID
+aKh
+aKh
 aKg
 aLz
 aQp
@@ -116413,8 +116341,8 @@ gyu
 gyu
 aKg
 aKg
-aID
-aID
+aKh
+aKh
 aaa
 daq
 daq
@@ -116425,12 +116353,12 @@ daq
 daq
 daq
 aaa
-biH
-biH
-biH
-biH
-biH
-biH
+hzg
+hzg
+hzg
+hzg
+hzg
+hzg
 blq
 blR
 bmf
@@ -116677,8 +116605,8 @@ aaa
 aIr
 aIr
 aIE
-aID
-aID
+aKh
+aKh
 aKh
 aKg
 aKg
@@ -116716,7 +116644,7 @@ gyu
 aKg
 aKg
 aKg
-aID
+aKh
 aaa
 daq
 daq
@@ -116727,10 +116655,10 @@ daq
 daq
 daq
 aaa
-biH
+hzg
 bjc
 bjP
-biH
+hzg
 bkR
 blg
 blq
@@ -116979,8 +116907,8 @@ aaa
 aIr
 aIF
 aIG
-aID
-aJm
+aKh
+aKI
 aKI
 aKK
 aLv
@@ -117281,8 +117209,8 @@ aaa
 aIr
 aIr
 aIG
-aID
-aID
+aKh
+aKh
 aKh
 aKg
 aKg
@@ -117320,7 +117248,7 @@ gyu
 aKg
 aKg
 aKg
-aID
+aKh
 aaa
 daq
 daq
@@ -117331,7 +117259,7 @@ daq
 daq
 daq
 aaa
-biH
+hzg
 bje
 bjR
 bku
@@ -117583,8 +117511,8 @@ aaa
 aIr
 aIr
 aSq
-aID
-aID
+aKh
+aKh
 aKg
 aKg
 aLw
@@ -117622,7 +117550,7 @@ gyu
 aKg
 aKg
 aKg
-aID
+aKh
 aaa
 daq
 daq
@@ -117633,10 +117561,10 @@ daq
 daq
 daq
 aaa
-biH
+hzg
 bjc
 bjS
-biH
+hzg
 bNt
 bli
 blq
@@ -117924,7 +117852,7 @@ bdv
 aKg
 aKg
 aKg
-aID
+aKh
 aaa
 daq
 daq
@@ -117935,12 +117863,12 @@ daq
 daq
 daq
 aaa
-biH
-biH
-biH
-biH
-biH
-biH
+hzg
+hzg
+hzg
+hzg
+hzg
+hzg
 blq
 blq
 blT
@@ -118187,7 +118115,7 @@ aaa
 aIr
 aIr
 aIr
-aID
+aKh
 aJI
 aKg
 aKg
@@ -118226,7 +118154,7 @@ bdv
 aKg
 aKg
 aKg
-aID
+aKh
 aaa
 daq
 daq
@@ -118488,8 +118416,8 @@ cnw
 aaa
 aIr
 aIr
-aID
-aID
+aKh
+aKh
 aJI
 aKg
 aKg
@@ -118527,8 +118455,8 @@ gyu
 cww
 aKg
 aKg
-aID
-aID
+aKh
+aKh
 aaa
 daq
 daq
@@ -118790,7 +118718,7 @@ cnw
 aaa
 aIr
 aIr
-aID
+aKh
 aJl
 aJI
 aKg
@@ -118829,8 +118757,8 @@ dah
 bBO
 aKg
 aKg
-aID
-aID
+aKh
+aKh
 aaa
 daq
 daq
@@ -119092,8 +119020,8 @@ cnw
 aaa
 aIr
 aIr
-aID
-aID
+aKh
+aKh
 aKh
 aKg
 aKg
@@ -119131,8 +119059,8 @@ dah
 bBO
 aKg
 aKg
-aID
-aID
+aKh
+aKh
 aaa
 daq
 daq
@@ -119394,8 +119322,8 @@ cnw
 aaa
 aIr
 aIr
-aID
-aJm
+aKh
+aKI
 aKI
 aKK
 aLv
@@ -119434,7 +119362,7 @@ bBO
 aKg
 aKg
 aKg
-aID
+aKh
 aaa
 daq
 daq
@@ -119696,8 +119624,8 @@ cnw
 aaa
 aIr
 aIr
-aID
-aID
+aKh
+aKh
 aKh
 aKg
 aKg
@@ -119735,8 +119663,8 @@ bBN
 aKg
 aKg
 aKg
-aID
-aID
+aKh
+aKh
 aaa
 daq
 daq
@@ -119998,9 +119926,9 @@ cnw
 aaa
 aIr
 aIr
-aID
-aID
-aID
+aKh
+aKh
+aKh
 aKg
 aKg
 aKg
@@ -120037,8 +119965,8 @@ bBO
 aKg
 das
 aKg
-aID
-aID
+aKh
+aKh
 aaa
 daq
 daq
@@ -120301,7 +120229,7 @@ aaa
 aIr
 aIr
 aIr
-aID
+aKh
 aJN
 aKg
 aKg
@@ -120339,8 +120267,8 @@ bBO
 aKg
 aKg
 aKg
-aID
-aID
+aKh
+aKh
 aaa
 aaa
 aaa
@@ -120604,7 +120532,7 @@ aIr
 aIr
 aIr
 aIr
-aID
+aKh
 aLa
 aKg
 aKg
@@ -120641,9 +120569,9 @@ bBO
 aKg
 aKg
 aKg
-aID
-aID
-aID
+aKh
+aKh
+aKh
 aIr
 aIr
 aIr
@@ -120905,10 +120833,10 @@ aaa
 aIr
 aIr
 aIr
-aID
-aID
-aID
-aID
+aKh
+aKh
+aKh
+aKh
 aKg
 aKg
 aKg
@@ -120943,9 +120871,9 @@ bBP
 cwu
 aPi
 aPi
-aID
-aID
-aID
+aKh
+aKh
+aKh
 aIr
 aIr
 aIr
@@ -121207,19 +121135,19 @@ aaa
 aIr
 aIr
 aIr
-aID
+aKh
 aJJ
 aJk
-aID
-aID
+aKh
+aKh
 aKg
 aLW
 aKg
 aKg
 aKg
 aKg
-aID
-aID
+aKh
+aKh
 wkV
 wkV
 bNh
@@ -121247,7 +121175,7 @@ cwq
 cwq
 dah
 aKi
-aID
+aKh
 aIr
 aIr
 aIr
@@ -121509,25 +121437,25 @@ aaa
 aIr
 aIr
 aIr
-aID
+aKh
 aJJ
 aLb
 aJk
-aID
+aKh
 aXH
 aXH
 aXH
 aXH
 aXH
 aXH
-aID
-aID
-aID
+aKh
+aKh
+aKh
 bOW
 bPb
 bPK
-aID
-aID
+aKh
+aKh
 aKh
 aKg
 aKg
@@ -121547,9 +121475,9 @@ bdw
 bdw
 bdw
 bCk
-aID
+aKh
 aJk
-aID
+aKh
 aIr
 aIr
 aIr
@@ -121811,7 +121739,7 @@ aaa
 aIr
 aIr
 aIr
-aID
+aKh
 aJJ
 aJk
 aJl
@@ -121822,14 +121750,14 @@ aJk
 aJk
 aJk
 aJk
-aID
-aID
-aID
+aKh
+aKh
+aKh
 bhF
 bPw
 aJk
-aID
-aJm
+aKh
+aKI
 aKI
 aKZ
 aLx
@@ -121845,13 +121773,13 @@ aKg
 aKg
 aKg
 aKg
-aID
-aID
+aKh
+aKh
 aXH
 aXH
-aID
+aKh
 aJk
-aID
+aKh
 aIr
 aIr
 aIr
@@ -122113,31 +122041,31 @@ aaa
 aIr
 aIr
 aIr
-aID
+aKh
 aJJ
 aJk
 aJk
 aJk
 aJk
-aID
-aID
+aKh
+aKh
 aJk
 aJk
 aJk
 aJk
-aID
-aID
-aID
+aKh
+aKh
+aKh
 bPw
 aJk
-aID
-aID
+aKh
+aKh
 aKh
 aXH
 aLA
 aPj
 baP
-aID
+aKh
 bdw
 aKg
 aKg
@@ -122145,9 +122073,9 @@ aKg
 aKg
 aKg
 aKg
-aID
-aID
-aID
+aKh
+aKh
+aKh
 aJk
 aJk
 aJk
@@ -122415,39 +122343,39 @@ aaa
 aIr
 aIr
 aIr
-aID
+aKh
 aJO
 aLc
 aJk
 aJk
-aID
-aID
-aID
+aKh
+aKh
+aKh
 aJk
 aJk
 aJk
 aJk
-aID
-aID
+aKh
+aKh
 aJk
 bPw
 ybt
 ybt
 ybt
 ybt
-aID
-aID
+aKh
+aKh
 aPj
-aID
-aID
-aID
-aID
+aKh
+aKh
+aKh
+aKh
 aKg
 aKg
-aID
+aKh
 aXH
 aXH
-aID
+aKh
 aJo
 bgn
 aJk
@@ -122718,16 +122646,16 @@ aIr
 aIr
 aIr
 aIr
-aID
+aKh
 dax
 aKL
-aID
-aID
-aID
+aKh
+aKh
+aKh
 bhF
 aJk
-aID
-aID
+aKh
+aKh
 aJk
 aJk
 aJk
@@ -122740,16 +122668,16 @@ ybt
 bRR
 aKi
 aKi
-aID
-aID
-aID
-aID
-aID
-aID
-aID
+aKh
+aKh
+aKh
+aKh
+aKh
+aKh
+aKh
 aIG
 aIG
-aID
+aKh
 aIG
 aIG
 aIG
@@ -123024,12 +122952,12 @@ aIr
 aIr
 aKM
 aIr
-aID
+aKh
 bfl
 bhF
 bOg
-aID
-aID
+aKh
+aKh
 aJk
 aJk
 aJk
@@ -123044,9 +122972,9 @@ aKi
 aKi
 aJk
 aJk
-aID
-aID
-aID
+aKh
+aKh
+aKh
 aIr
 aIr
 aIG
@@ -123329,12 +123257,12 @@ aIr
 bdo
 aJk
 beW
-aID
-aID
+aKh
+aKh
 bOU
 aJk
 beW
-aID
+aKh
 bOZ
 aJk
 ybt
@@ -123347,7 +123275,7 @@ aKi
 aJk
 aJk
 aJk
-aID
+aKh
 aIr
 aIr
 bhj
@@ -123632,7 +123560,7 @@ aJk
 aJk
 bhG
 bOT
-aID
+aKh
 bOV
 aIr
 aIr
@@ -123648,8 +123576,8 @@ cwF
 aJk
 aJk
 aJk
-aID
-aID
+aKh
+aKh
 aIr
 aIH
 aIG
@@ -123930,7 +123858,7 @@ aIr
 aIG
 aIG
 aIr
-aID
+aKh
 bgm
 bMG
 aIr
@@ -130567,21 +130495,21 @@ aES
 dFc
 aaa
 bAt
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
 aIr
 aIr
 aIr
@@ -130869,9 +130797,9 @@ aES
 dFc
 aaa
 bAt
-aIs
+bAt
 aIJ
-aIs
+bAt
 aIM
 aKl
 aIK
@@ -130883,7 +130811,7 @@ aNv
 aIK
 aPk
 aIK
-aIs
+bAt
 aRt
 aIG
 aIG
@@ -131171,7 +131099,7 @@ aES
 dFc
 aaa
 bAt
-aIs
+bAt
 aIK
 aJr
 aJQ
@@ -131473,9 +131401,9 @@ dFl
 dFc
 aaa
 bAt
-aIs
+bAt
 aIK
-aIs
+bAt
 aIK
 aKn
 aIK
@@ -131775,9 +131703,9 @@ aES
 dFc
 aaa
 bAt
-aIs
+bAt
 aIL
-aIs
+bAt
 aIN
 aKl
 aIK
@@ -131789,10 +131717,10 @@ aNv
 aIK
 aPk
 aIK
-aIs
-aIs
-aIs
-aIs
+bAt
+bAt
+bAt
+bAt
 aIr
 aTr
 aIG
@@ -132076,25 +132004,25 @@ aES
 dFc
 dFc
 aaa
-aIs
-aIs
+bAt
+bAt
 aIM
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
 aRu
 aSu
-aIs
+bAt
 aIr
 aIr
 aVC
@@ -132378,8 +132306,8 @@ dFc
 dFc
 dFc
 aaa
-aIs
-aIs
+bAt
+bAt
 aIN
 aJs
 aIK
@@ -132396,7 +132324,7 @@ aIK
 aJs
 aRv
 aSu
-aIs
+bAt
 aIr
 aIr
 aIr
@@ -132680,25 +132608,25 @@ dFc
 dFc
 dFc
 aaa
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
-aIs
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
+bAt
 aIr
 aIr
 aIr
@@ -136720,11 +136648,11 @@ bFN
 bFN
 aaa
 aaa
-bJQ
-bJQ
-bJQ
-bJQ
-bJQ
+bJU
+bJU
+bJU
+bJU
+bJU
 aaa
 bUU
 bFd
@@ -137022,11 +136950,11 @@ bFN
 bFN
 aaa
 aaa
-bJQ
+bJU
 bKq
 bKr
 bKK
-bJQ
+bJU
 aaa
 bUU
 bFd
@@ -137324,11 +137252,11 @@ aaa
 aaa
 aaa
 aaa
-bJQ
+bJU
 bKr
 bKr
 bKL
-bJQ
+bJU
 aaa
 bUU
 bFd
@@ -137626,11 +137554,11 @@ aaa
 aaa
 aaa
 aaa
-bJQ
+bJU
 bKs
 bKr
 bKL
-bJQ
+bJU
 aaa
 bUU
 bFd
@@ -137908,31 +137836,31 @@ bpo
 aaa
 aaa
 bCb
-bzi
-bzi
 bCb
-bzi
-bzi
 bCb
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bJD
-bJD
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bJU
+bJU
 bJU
 dvE
 bJU
-bJD
+bJU
 aaa
 bUU
 bFd
@@ -138209,27 +138137,27 @@ bpo
 aaa
 aaa
 aaa
-bzi
+bCb
 bCF
 bzH
 bzH
 bzH
 dtI
-bzi
-bzi
+bCb
+bCb
 bFB
-bzi
+bCb
 bGe
-bzi
+bCb
 bGJ
-bzi
+bCb
 bHv
-bzi
+bCb
 bIi
-bzi
+bCb
 bIU
-bzi
-bJD
+bCb
+bJU
 dvB
 bKt
 bFD
@@ -138510,15 +138438,15 @@ aaa
 aaa
 aaa
 aaa
-bzi
-bzi
+bCb
+bCb
 bCG
 bzH
 bzH
 bzH
 bCG
-bzi
-bzi
+bCb
+bCb
 bFC
 bFC
 bFC
@@ -138530,13 +138458,13 @@ bFC
 bFC
 bFC
 bFC
-bzi
-bJD
+bCb
+bJU
 bJS
-bJD
+bJU
 bFD
-bJD
-bJD
+bJU
+bJU
 aaa
 bUU
 bFd
@@ -138812,7 +138740,7 @@ boz
 boz
 boz
 boz
-bzi
+bCb
 bzH
 bzH
 bzH
@@ -138820,7 +138748,7 @@ bzH
 bzH
 bEL
 bzH
-bzi
+bCb
 bFD
 bFD
 bFD
@@ -138838,7 +138766,7 @@ bFD
 bFD
 bFD
 bKO
-bJD
+bJU
 aaa
 bUU
 bFd
@@ -139113,8 +139041,8 @@ boz
 boz
 bzh
 bzG
-bzi
-bzi
+bCb
+bCb
 bzH
 bzH
 bzH
@@ -139122,25 +139050,25 @@ bzH
 bzH
 bzH
 bzH
-bzi
+bCb
 bFD
 bFD
-bzi
-bzi
+bCb
+bCb
 bGK
-bzi
+bCb
 bHw
-bzi
+bCb
 bIj
-bzi
+bCb
 bIV
-bzi
-bJD
+bCb
+bJU
 bFE
-bJD
+bJU
 bFD
-bJD
-bJD
+bJU
+bJU
 aaa
 bUU
 bFd
@@ -139428,16 +139356,16 @@ bFs
 bFD
 bFD
 bGf
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bJD
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bJU
 bzH
 bKt
 bFD
@@ -139715,36 +139643,36 @@ aaa
 boz
 bpr
 byD
-bzi
+bCb
 bzH
 bzH
-bzi
-bzH
-bzH
-bzH
+bCb
 bzH
 bzH
 bzH
 bzH
-bzi
+bzH
+bzH
+bzH
+bCb
 bFD
 bFD
-bzi
-bzi
+bCb
+bCb
 bGL
-bzi
+bCb
 bHw
-bzi
+bCb
 bIk
-bzi
+bCb
 bIW
-bzi
-bJD
+bCb
+bJU
 bFC
-bJD
+bJU
 bFD
-bJD
-bJD
+bJU
+bJU
 aaa
 bUU
 bFd
@@ -140020,7 +139948,7 @@ boT
 bzj
 byC
 bAv
-bzi
+bCb
 bzH
 bzH
 bzH
@@ -140028,7 +139956,7 @@ bzH
 bzH
 bzH
 bzH
-bzi
+bCb
 bFD
 bFD
 bFD
@@ -140046,7 +139974,7 @@ bFD
 bFD
 bFD
 bKQ
-bJD
+bJU
 aaa
 bUU
 bUU
@@ -140322,15 +140250,15 @@ boT
 boT
 byD
 bAw
-bzi
-bzi
+bCb
+bCb
 bCG
 bzH
 bzH
 bzH
 bCG
-bzi
-bzi
+bCb
+bCb
 bFE
 bFE
 bFE
@@ -140342,13 +140270,13 @@ bFE
 bFE
 bFE
 bFE
-bzi
-bJD
+bCb
+bJU
 bJT
-bJD
+bJU
 bFD
-bJD
-bJD
+bJU
+bJU
 aaa
 aaa
 aaa
@@ -140625,27 +140553,27 @@ boT
 bzI
 boz
 boz
-bzi
+bCb
 bCH
 bzH
 bzH
 bzH
 bzH
-bzi
-bzi
+bCb
+bCb
 bFF
-bzi
+bCb
 bGg
-bzi
+bCb
 bGM
-bzi
+bCb
 bHx
-bzi
+bCb
 bIl
-bzi
+bCb
 bIX
-bzi
-bJD
+bCb
+bJU
 bJR
 bKt
 bFD
@@ -140928,31 +140856,31 @@ boz
 boz
 boz
 bCb
-bzi
-bzi
 bCb
-bzi
-bzi
 bCb
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bzi
-bJD
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
+bCb
 bJU
-bJD
-bJD
-bJD
-bJD
+bJU
+bJU
+bJU
+bJU
+bJU
 aaa
 aaa
 aaa
