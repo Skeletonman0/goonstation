@@ -73,10 +73,7 @@
 /turf/space,
 /area/diner/tug)
 "am" = (
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hallway)
 "an" = (
 /turf/simulated/floor/grime,
@@ -374,10 +371,7 @@
 	icon_state = "space";
 	name = "VACUUM AREA"
 	},
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hangar)
 "ba" = (
 /obj/grille/steel,
@@ -585,10 +579,7 @@
 /turf/simulated/floor/scorched2,
 /area/diner/hangar)
 "bG" = (
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hangar)
 "bH" = (
 /obj/decal/tile_edge/stripe/extra_big{
@@ -756,10 +747,7 @@
 	},
 /area/noGenerate)
 "cg" = (
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/kitchen)
 "ch" = (
 /obj/lattice{
@@ -815,10 +803,7 @@
 /area/noGenerate)
 "co" = (
 /obj/machinery/r_door_control/podbay/diner1,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hangar)
 "cp" = (
 /turf/simulated/floor/scorched,
@@ -1116,10 +1101,7 @@
 /area/diner/kitchen)
 "dg" = (
 /obj/decal/cleanable/fungus,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/kitchen)
 "dh" = (
 /obj/lattice{
@@ -1341,17 +1323,11 @@
 /turf/simulated/floor/plating,
 /area/diner/hallway/docking)
 "dz" = (
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/bathroom)
 "dA" = (
 /obj/decal/cleanable/fungus,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/bathroom)
 "dB" = (
 /obj/machinery/light/small/cool/very,
@@ -1450,7 +1426,7 @@
 /area/diner/hangar)
 "dN" = (
 /obj/decal/cleanable/fungus,
-/turf/simulated/wall,
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hangar)
 "dO" = (
 /obj/decal/cleanable/dirt,
@@ -1796,10 +1772,7 @@
 	},
 /area/shuttle/mining/space)
 "eN" = (
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hallway/docking)
 "eO" = (
 /obj/decal/cleanable/dirt,
@@ -1809,10 +1782,7 @@
 	},
 /area/diner/dining)
 "eP" = (
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel)
 "eQ" = (
 /turf/simulated/floor/plating/scorched,
@@ -1853,10 +1823,7 @@
 /turf/simulated/floor/plating,
 /area/diner/hangar)
 "eX" = (
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/dining)
 "eY" = (
 /obj/table/reinforced/bar/auto,
@@ -1994,10 +1961,7 @@
 /area/diner/hangar)
 "fr" = (
 /obj/item/poster/titled_photo/bee,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hangar)
 "fs" = (
 /obj/stool/bar,
@@ -2092,10 +2056,7 @@
 	icon_state = "space";
 	name = "VACUUM AREA"
 	},
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hallway)
 "fG" = (
 /obj/decal/cleanable/dirt,
@@ -2213,10 +2174,7 @@
 /area/diner/dining)
 "fY" = (
 /obj/item/poster/titled_photo/bee,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/dining)
 "fZ" = (
 /obj/grille/steel,
@@ -2738,10 +2696,7 @@
 /area/diner/solar)
 "ho" = (
 /obj/machinery/r_door_control/podbay/diner2,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hangar)
 "hp" = (
 /obj/machinery/vending/cigarette,
@@ -2782,10 +2737,7 @@
 	},
 /area/diner/solar)
 "hv" = (
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel/observatory)
 "hw" = (
 /obj/decal/fakeobjects/pipe{
@@ -3029,10 +2981,7 @@
 /area/diner/motel)
 "ic" = (
 /obj/decal/poster/wallsign/stencil/right/five,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel)
 "id" = (
 /obj/decal/cleanable/dirt,
@@ -3080,10 +3029,7 @@
 /area/diner/hallway)
 "ij" = (
 /obj/decal/poster/wallsign/stencil/left/six,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel)
 "ik" = (
 /obj/grille/catwalk,
@@ -3091,10 +3037,7 @@
 /area/noGenerate)
 "il" = (
 /obj/decal/poster/wallsign/escape_left,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel)
 "im" = (
 /turf/simulated/floor/darkblue,
@@ -3141,10 +3084,7 @@
 /area/diner/motel)
 "it" = (
 /obj/decal/poster/wallsign/escape_right,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel)
 "iu" = (
 /obj/machinery/light/small{
@@ -3430,17 +3370,11 @@
 /area/diner/motel)
 "jb" = (
 /obj/decal/poster/wallsign/stencil/right/three,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel)
 "jc" = (
 /obj/decal/poster/wallsign/stencil/left/four,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel)
 "jd" = (
 /obj/grille/steel,
@@ -3690,17 +3624,11 @@
 /area/diner/motel)
 "jC" = (
 /obj/decal/poster/wallsign/stencil/right/one,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel)
 "jD" = (
 /obj/decal/poster/wallsign/stencil/left/two,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel)
 "jE" = (
 /obj/decal/cleanable/dirt,
@@ -3881,10 +3809,7 @@
 	d2 = 2;
 	icon_state = "1-2"
 	},
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hallway)
 "kd" = (
 /obj/cable{
@@ -3896,10 +3821,7 @@
 /area/diner/dining)
 "ke" = (
 /obj/decal/poster/wallsign/poster_rand,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hallway)
 "kf" = (
 /obj/window/reinforced/east,
@@ -3970,10 +3892,7 @@
 	icon_state = "1-2"
 	},
 /obj/decal/cleanable/ripped_poster,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hallway)
 "kn" = (
 /obj/shrub{
@@ -3993,10 +3912,7 @@
 /area/diner/hallway)
 "kq" = (
 /obj/decal/poster/wallsign/space,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hallway)
 "kr" = (
 /obj/decal/cleanable/dirt,
@@ -4089,10 +4005,7 @@
 /area/diner/hallway)
 "kB" = (
 /obj/machinery/computer/tanning,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel/pool)
 "kC" = (
 /obj/cable{
@@ -4140,10 +4053,7 @@
 /turf/simulated/floor/darkblue,
 /area/diner/hallway)
 "kF" = (
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel/pool)
 "kG" = (
 /obj/decal/fakeobjects/pipe{
@@ -4168,10 +4078,7 @@
 /area/diner/hallway)
 "kI" = (
 /obj/decal/poster/wallsign/pool,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hallway)
 "kJ" = (
 /obj/decal/tile_edge/stripe/extra_big{
@@ -4264,10 +4171,7 @@
 /area/diner/hallway/docking)
 "kS" = (
 /obj/decal/poster/wallsign/escape,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/hallway)
 "kT" = (
 /obj/pool/perspective{
@@ -4333,10 +4237,7 @@
 /area/diner/hallway)
 "kZ" = (
 /obj/decal/poster/wallsign/poster_sol,
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel/pool)
 "la" = (
 /obj/decal/tile_edge/line/blue{
@@ -4370,10 +4271,7 @@
 /turf/simulated/floor/plating,
 /area/diner/motel/pool)
 "ld" = (
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/motel/chemstorage)
 "le" = (
 /obj/pool/perspective{
@@ -5156,10 +5054,7 @@
 	},
 /area/noGenerate)
 "mL" = (
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/noGenerate)
 "mM" = (
 /turf/simulated/floor/damaged5,
@@ -5526,10 +5421,7 @@
 /turf/space,
 /area/noGenerate)
 "qB" = (
-/turf/simulated/wall/r_wall{
-	icon = 'icons/misc/evilreaverstation.dmi';
-	icon_state = "old_rwall"
-	},
+/turf/simulated/wall/auto/reinforced/old,
 /area/diner/arcade)
 "qU" = (
 /obj/decal/fakeobjects/shuttlethruster{
