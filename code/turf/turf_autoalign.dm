@@ -811,7 +811,8 @@ ABSTRACT_TYPE(turf/unsimulated/wall/auto/adventure)
 	icon = 'icons/turf/walls_beehive.dmi'
 	mod = "bee-"
 	icon_state = "cave-0"
-	connects_to += list(/turf/unsimulated/wall/auto/adventure/bee,/turf/simulated/wall/false_wall/hive,/turf/unsimulated/wall/auto/adventure/bee/exterior)
+	connect_overlay = 0
+	connects_to = list(/turf/unsimulated/wall/auto/adventure/bee, /turf/simulated/wall/false_wall/hive, /turf/unsimulated/wall/auto/adventure/bee/exterior)
 
 	exterior // so i dont have to make more parts for it to look good
 		mod = "beeout-"
