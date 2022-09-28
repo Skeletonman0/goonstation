@@ -92,7 +92,7 @@
 /obj/spacevine
 	name = "space kudzu"
 	desc = "An extremely expansionistic species of vine."
-	icon = 'icons/obj/objects.dmi'
+	icon = 'icons/obj/kudzu.dmi'
 	icon_state = "vine-light1"
 	anchored = 1
 	density = 0
@@ -107,7 +107,6 @@
 	var/aggressive = 0
 	var/to_spread = 10				//bascially the radius of child kudzu plants that any given kudzu object can create.
 	var/stunted = FALSE
-
 
 	get_desc()
 		var/flavor
@@ -167,6 +166,12 @@
 		var/obj/machinery/door/D = locate(/obj/machinery/door) in T.contents
 		if (D)
 			D.locked = 0
+		if (istype(src,/obj/spacevine/living/dense))
+			for(var/obj/spacevine/living/dense/S in orange(1,src))
+				S.autowall("vines-")
+		if (istype(src,/obj/spacevine/living/wall))
+			for(var/obj/spacevine/living/wall/S in orange(1,src))
+				S.autowall("vines-W-")
 		..()
 
 	attackby(obj/item/W, mob/user)
@@ -189,6 +194,13 @@
 		..()
 
 /obj/spacevine/proc/update_self()
+	if (istype(src,/obj/spacevine/living/wall))
+		src.autowall("vines-W-")
+		for(var/obj/spacevine/living/wall/S in orange(1,src))
+			S.autowall("vines-W-")
+		return
+	if (istype(src,/obj/spacevine/living/dense))
+		return
 	switch(src.growth)
 		if (-INFINITY to 9)
 			if (src.current_stage == 1)
@@ -198,22 +210,64 @@
 			src.icon_state = "[src.base_state]-light[rand(1,3)]"
 			src.RL_SetOpacity(0)
 			src.set_density(0)
+			if (istype(src,/obj/spacevine/living/wall))
+				src.autowall("vines-W-")
+				for(var/obj/spacevine/living/wall/S in orange(1,src))
+					S.autowall("vines-W-")
 		if (10 to 19)
 			if (src.current_stage == 2)
 				return
 			src.current_stage = 2
 			src.name = "thick [initial(src.name)]"
 			src.icon_state = "[src.base_state]-med[rand(1,3)]"
-			src.RL_SetOpacity(1)
+			src.RL_SetOpacity(0)
 			src.set_density(0)
 		if (20 to INFINITY)
 			if (src.current_stage == 3)
 				return
 			src.current_stage = 3
-			src.name = "dense [initial(src.name)]"
-			src.icon_state = "[src.base_state]-hvy[rand(1,3)]"
-			src.RL_SetOpacity(1)
-			src.set_density(1)
+			var/obj/spacevine/living/dense/V = new /obj/spacevine/living/dense(loc=get_turf(src), to_spread=to_spread-1)
+			V.name = "dense [initial(src.name)]"
+			V.RL_SetOpacity(1)
+			V.set_density(1)
+			V.autowall("vines-")
+			V.current_stage = 3
+			V.growth = src.growth
+			var/turf/T = get_turf(src)
+			qdel(src)
+			for(var/obj/spacevine/living/dense/S in orange(1,T))
+				S.autowall("vines-")
+
+/obj/spacevine/proc/autowall(var/mod)
+	var/turf/simulated/wall/auto/wall_path = ispath(map_settings.walls) ? map_settings.walls : /turf/simulated/wall/auto
+
+	var/static/list/wall_connects_to = typecacheof(list(/turf/simulated/wall/auto/supernorn, /turf/simulated/wall/auto/reinforced/supernorn,
+	/turf/simulated/wall/auto/jen, /turf/simulated/wall/auto/reinforced/jen,
+	/turf/simulated/wall/false_wall, /turf/simulated/wall/auto/shuttle, /obj/machinery/door,
+	/obj/window, /obj/wingrille_spawn, /turf/simulated/wall/auto/reinforced/supernorn/yellow,
+	/turf/simulated/wall/auto/reinforced/supernorn/blackred, /turf/simulated/wall/auto/reinforced/supernorn/orange,
+	/turf/simulated/wall/auto/old, /turf/simulated/wall/auto/reinforced/old,
+	/turf/unsimulated/wall/auto/supernorn,/turf/unsimulated/wall/auto/reinforced/supernorn,/obj/spacevine/living/wall))
+
+	var/static/list/dense_connects_to = typecacheof(list(/obj/spacevine/living/dense))
+
+	var/static/list/s_connects_with_overlay = typecacheof(list(/turf/simulated/wall/auto/shuttle,
+	/turf/simulated/wall/auto/shuttle, /obj/machinery/door, /obj/window, /obj/wingrille_spawn))
+
+	var/list/connectlist = wall_connects_to
+	if (istype(src,/obj/spacevine/living/dense))
+		connectlist = dense_connects_to
+
+	/// this was borrowed from autowalls
+	var/typeinfo/turf/simulated/wall/auto/typinfo = get_type_typeinfo(wall_path)
+	var/static/list/s_connects_with_overlay_exceptions = list()
+	var/static/list/s_connects_to_exceptions = typecacheof(/turf/simulated/wall/auto/shuttle)
+
+	var/s_connect_diagonal =  typinfo.connect_diagonal
+
+	var/connectdir = get_connected_directions_bitflag(connectlist, s_connects_to_exceptions, TRUE, s_connect_diagonal)
+	var/the_state = "[mod][connectdir]"
+	icon_state = the_state
 
 /obj/spacevine/proc/Life()
 	if (!src || to_spread <= 0)
@@ -223,41 +277,66 @@
 		if (K)
 			K.kudzu -= src
 		return
-	var/Vspread
+	var/turf/Vspread
 	if (prob(50))
 		Vspread = locate(src.x + rand(-1,1),src.y,src.z)
 	else
 		Vspread = locate(src.x,src.y + rand(-1, 1),src.z)
 	var/dogrowth = 1
-	if (!istype(Vspread, /turf/simulated/floor) || isfeathertile(Vspread))
+
+	if (!istype(Vspread, /turf/simulated/floor))
 		dogrowth = 0
-	for (var/obj/O in Vspread)
+	var/obj/machinery/door/D = null
+	var/obj/window/auto/W = null
+	if (istype(Vspread, /turf/simulated/wall/auto)) // spread onto walls, but dont spread off of them
+		dogrowth = 1
+	if (isfeathertile(Vspread))
+		dogrowth = 0
 
-		if (istype(O, /obj/window) || istype(O, /obj/forcefield) || istype(O, /obj/blob) || istype(O, /obj/spacevine) || istype(O, /obj/kudzu_marker))
-			dogrowth = 0
-			return
-
-		if (istype(O, /obj/machinery/door))
-			var/obj/machinery/door/door = O
-			if(!door.density)
-				dogrowth = 1
-				continue
-			if (door_open_prob())
-				//force open doors too and keep it open
-				door.interrupt_autoclose = 1
-				// var/temp_op = door.operating
-				// door.operating = 1
-				// door.locked = 0
-				door.open()
-				// door.operating = temp_op
-				// door.locked = 1
-
-				dogrowth = 1 //for clarity
-			else
+	if (dogrowth)
+		for (var/obj/O in Vspread)
+			if (istype(O, /obj/forcefield) || istype(O, /obj/blob) || istype(O, /obj/kudzu_marker))
 				dogrowth = 0
+				return
 
-	if (dogrowth == 1)
-		var/obj/V = new src.vinepath(loc=Vspread, to_spread=to_spread-1)
+			if (istype(O, /obj/window/auto))
+				dogrowth = 1
+				W = O
+				break
+
+			if (istype(O, /obj/machinery/door))
+				var/obj/machinery/door/door = O
+				D = O
+				if(!door.density)
+					dogrowth = 1
+					//force open doors too and keep it open
+					door.interrupt_autoclose = 1
+					continue
+				else
+					// instead of opening the door, jam the mechanism
+					door.locked = 1
+
+					dogrowth = 1 //for clarity
+				break
+	if (!istype(get_turf(src), /turf/simulated/floor))
+		dogrowth = 0
+		if (istype(src,/obj/spacevine/living/wall))
+			var/obj/spacevine/living/wall/Wv = src
+			if (Vspread == Wv.origin || istype(Vspread, /turf/simulated/wall/auto))
+				dogrowth = 1
+
+	if (dogrowth && !locate(/obj/spacevine) in Vspread)
+		var/obj/spacevine/living/wall/V
+		if (istype(Vspread, /turf/simulated/wall/auto))
+			V = new /obj/spacevine/living/wall(loc=Vspread, to_spread=to_spread-1)
+			V.RL_SetOpacity(1)
+			V.origin = get_turf(src)
+		else if (istype(W) || D?.density)
+			V = new /obj/spacevine/living/wall(loc=Vspread, to_spread=to_spread-1)
+			V.RL_SetOpacity(1)
+			V.origin = get_turf(src)
+		else
+			V = new src.vinepath(loc=Vspread, to_spread=to_spread-1)
 		V.set_loc(Vspread)
 	if (src.growth < 20 && !stunted)
 		src.growth++
@@ -351,6 +430,9 @@
 /obj/spacevine/living // these ones grow
 	run_life = 1
 
+	wall // grows on walls
+		var/origin = null // the turf on the side of the wall we grew from
+	dense // dense
 /obj/spacevine/alien
 	name = "strange alien vine"
 	icon_state = "avine-light1"
