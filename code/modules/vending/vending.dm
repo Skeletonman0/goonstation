@@ -61,6 +61,7 @@
 	flags = TGUI_INTERACTIVE
 	var/freestuff = 0
 	var/obj/item/card/id/scan = null
+	custom_suicide = 1
 
 	var/image/panel_image = null
 
@@ -520,6 +521,32 @@
 /obj/machinery/vending/attack_ai(mob/user as mob)
 	return attack_hand(user)
 
+/obj/machinery/vending/suicide(mob/user as mob,nodamage=FALSE)
+	if (!istype(user) || !src.user_can_suicide(user))
+		return 0
+	user.visible_message("<span class='alert'><b>[user] shoves [himself_or_herself(user)] into [src]!</b></span>")
+	var/price
+	var/role = user.mind?.assigned_role
+	var/datum/job/J = find_job_in_controller_by_string(role)
+	if (J?.wages)
+		price = J.wages
+	else
+		price = 15
+	price += rand(-10,10) // plus or minus up to 10
+	user.set_loc(src)
+	if (!nodamage)
+		user.TakeDamage("head", 175, 0)
+
+	var/datum/data/vending_product/player_product/itemEntry = new/datum/data/vending_product/player_product(user, max(-10,price))
+
+	if(istype(src,/obj/machinery/vending/player))
+		var/obj/machinery/vending/player/playervendor = src
+		itemEntry.icon = playervendor.getScaledIcon(user)
+		player_list += itemEntry
+	else
+		product_list += itemEntry
+
+
 /obj/machinery/vending/ui_interact(mob/user, datum/tgui/ui)
   ui = tgui_process.try_update_ui(user, src, ui)
   if(!ui)
@@ -701,8 +728,11 @@
 						if(isitem(vended))
 							usr.put_in_hand_or_eject(vended) // try to eject it into the users hand, if we can
 							src.postvend_effect()
-						if (plist == player_list && product_amount == 1)
-							player_list -= product
+						if (product_amount == 1 && istype(product,/datum/data/vending_product/player_product))
+							if (plist ==  player_list)
+								player_list -= product
+							if (plist == product_list)
+								product_list -= product
 						product.product_amount--
 						if (src.pay && vended) // do we need to take their money
 							if (src.acceptcard && account)
@@ -1010,6 +1040,8 @@
 			src.layer = victim.layer+1
 		src.set_loc(vicTurf)
 		random_brute_damage(victim, rand(20,40),1)
+		if (prob(1) && victim.mind?.assigned_role == "Clown")
+			src.suicide(victim,nodamage=TRUE) // get shoved in the vendor NERD
 	else
 		src.visible_message("<b><font color=red>[src.name] tips over!</font></b>")
 
@@ -1895,6 +1927,16 @@ ABSTRACT_TYPE(/obj/machinery/vending/cola)
 		real_name = product.real_name
 		contents += product
 		product_cost = price
+
+	getBase64Img()
+		var/path = src.product_path
+		var/atom/found = locate(path) in src
+		if(!istype(path,/mob/living/carbon/human) || istype(path,/mob/living/carbon/human/npc/monkey))
+			. = ..()
+		else
+			var/mob/living/carbon/instance = found
+			var/icon/dummy_icon = getFlatIcon(instance,initial(instance.dir),no_anim=TRUE)
+			. = icon2base64(dummy_icon)
 
 /obj/item/machineboard
 	name = "machine module"
