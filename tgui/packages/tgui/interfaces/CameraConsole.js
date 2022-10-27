@@ -45,7 +45,7 @@ export const CameraConsole = (props, context) => {
       font-size="10pt"
       height="400">
       <Window.Content
-        fitted height="100%" mx="1%"
+        height="100%" mx="1%"
         onKeyUp={(ev) => {
           if (keybindToggle) {
             act("moveClosest", { camera: current, direction: getDirection(ev.key) });
@@ -65,13 +65,14 @@ export const CameraConsole = (props, context) => {
               {cameras.map(camera => {
                 return (
                   <Flex key={camera.name}>
-                    <Flex.Item grow bold>
+                    <Flex.Item grow>
                       <Button content={camera.name}
                         disabled={camera.deactivated}
+                        color="#a4bad6"
                         onClick={() => act("switchCamera", { camera: camera.camera })} />
                     </Flex.Item>
                     <Flex.Item align="end">
-                      <Button icon="star"
+                      <Button icon="save"
                         color="green"
                         onClick={() => act("addfavorite", { camera: camera.camera })} />
                     </Flex.Item>
@@ -82,7 +83,7 @@ export const CameraConsole = (props, context) => {
           </Stack.Item>
           <Stack.Item grow maxWidth="50%" >
             <Section scrollable title="Favorites" fill maxHeight="50%">
-              {favorites.map(camera => {
+              {favorites && favorites.map(camera => {
                 return (
                   <Flex key={camera.name}>
                     <Flex.Item grow bold>
@@ -91,16 +92,17 @@ export const CameraConsole = (props, context) => {
                         onClick={() => act("switchCamera", { camera: camera.camera })} />
                     </Flex.Item>
                     <Flex.Item shrink align="end">
-                      <Button content="-"
-                        color="red"
+                      <Button icon="times"
                         onClick={() => act("removefavorite", { camera: camera.camera })} />
                     </Flex.Item>
                   </Flex>
                 );
               })}
             </Section>
-            <Section fill fontSize="25px">
-              <Flex align="center" direction="column">
+            <Section fill fitted maxHeight="50%">
+              <Button icon="eye" content="Viewport"
+                onClick={() => act("createViewport", { camera: current, direction: "NORTH" })} />
+              <Flex align="center" direction="column" fontSize="25px" m="1%">
                 <Flex.Item>
                   <Button icon="arrow-up"
                     onClick={() => act("moveClosest", { camera: current, direction: "NORTH" })} />

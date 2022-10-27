@@ -33,6 +33,8 @@
 
 	//This might not be needed. I thought that the proc should be on the computer instead of the mob switching, but maybe not
 	proc/switchCamera(var/mob/living/user, var/obj/machinery/camera/C)
+		if (!user?.client)
+			return
 		if (!C)
 			src.remove_dialog(user)
 			user.set_eye(null)
@@ -40,8 +42,11 @@
 
 		if (user.stat == 2 || C.network != src.network) return 0
 
-		src.current = C
-		user.set_eye(C)
+		if (length(user.client.getViewportsByType("cameras: Viewport")))
+			src.move_viewport_to_camera(C, user.client)
+		else
+			src.current = C
+			user.set_eye(C)
 		return 1
 
 	proc/move_viewport_to_camera(var/obj/machinery/camera/C, client/clint)
@@ -143,6 +148,24 @@
 
 	window.Subscribe( user.client )*/
 
+/obj/machinery/computer/security/proc/create_viewport(mob/user, turf/T)
+	if (!user.client)
+		return
+	if(BOUNDS_DIST(src, user) > 0)
+		boutput(user,"<span class='alert'>You are too far to see the screen.</span>")
+	else
+		var/list/viewports = user.client.getViewportsByType("cameras: Viewport")
+		if(length(viewports))
+			boutput( user, "<b>You can only have 1 active viewport. Close the existing viewport to create another.</b>" )
+			return
+		var/datum/viewport/vp = new(user.client, "cameras: Viewport")
+		var/turf/startPos = null
+		for(var/i = 4, i >= 0 || !startPos, i--)
+			startPos = locate(T.x - i, T.y + i, T.z)
+			if(startPos) break
+		vp.clickToMove = 1
+		vp.SetViewport(startPos, 8, 8)
+
 /obj/machinery/computer/security/ui_static_data(mob/user)
 	. = list()
 	var/list/L = list()
@@ -154,7 +177,7 @@
 	for (var/obj/machinery/camera/C in L)
 		if (C.network == src.network)
 			// Don't draw if it's in favorites or AI core/upload
-			if (C.ai_only)
+			if (C.ai_only || !C.c_tag)
 				continue
 			if(C in src.favorites)
 				.["favorites"] += list(list("camera"="\ref[C]",
@@ -173,6 +196,7 @@
 /obj/machinery/computer/security/ui_status(mob/user, datum/ui_state/state)
 	. = ..()
 	if(. <= UI_CLOSE || !IN_RANGE(src, user, 1))
+		user.client?.clearViewportsByType("cameras: Viewport")
 		user.set_eye(null)
 		user.reset_keymap()
 		return UI_CLOSE
@@ -185,10 +209,10 @@
 	switch(action)
 		if("switchCamera")
 			if(istype(C))
-				if ((!isAI(usr)) && (BOUNDS_DIST(usr, src) > 0 || !( usr.canmove ) || !( C.camera_status )))
-					usr.set_eye(null)
+				if ((!isAI(user)) && (BOUNDS_DIST(user, src) > 0 || !( user.canmove ) || !( C.camera_status )))
+					user.set_eye(null)
 				else
-					src.switchCamera(usr, C)
+					src.switchCamera(user, C)
 					use_power(50)
 		if("addfavorite")
 			if (istype(C) && length(src.favorites) <= src.favorites_Max)
@@ -199,18 +223,24 @@
 		if("moveClosest")
 			if (ON_COOLDOWN(user,"camera_move",1 SECOND)) // tgui can spam the hell out of this
 				return FALSE
-			user.cooldowns["instrument_play"] += 1 SECOND
 			var/direct = text2dir(params["direction"])
 			if (direct && src.current)
+				user.cooldowns["instrument_play"] += 1 SECOND
 				src.move_security_camera(direct, user.client)
 		if("keyboard_on")
 			user.client.apply_keybind("camera_console")
 		if("keyboard_off")
 			user.client?.mob?.reset_keymap()
+		if("createViewport")
+			if (!current)
+				boutput(user, "<b>You need to select a camera before creating a viewport.</b>")
+				return FALSE
+			src.create_viewport(user,get_turf(src.current))
 
 	update_static_data(usr)
 /obj/machinery/computer/security/ui_close(mob/user)
 	 // let people have their vision back and let them walk away
+	user.client?.clearViewportsByType("cameras: Viewport")
 	user.set_eye(null)
 	user.reset_keymap()
 
