@@ -350,6 +350,14 @@ var/global/list/datum/keybind_style/keybind_styles = null
 		"N" = "",
 		"M" = "",
 	)
+/datum/keybind_style/camera_console
+	name = "camera_console"
+	changed_keys = list(
+		"W" = "",
+		"A" = "",
+		"S" = "",
+		"D" = "",
+	)
 
 /datum/keybind_style/pod
 	name = "pod"

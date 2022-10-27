@@ -12,7 +12,7 @@
 	var/chui/window/security_cameras/window
 	var/first_click = 1				//for creating the chui on first use
 	var/skip_disabled = 1			//If we skip over disabled cameras in AI camera movement mode. Just leaving it in for admins maybe.
-
+	flags = TGUI_INTERACTIVE
 	light_r =1
 	light_g = 0.7
 	light_b = 0.74
@@ -132,8 +132,8 @@
 /obj/machinery/computer/security/attack_hand(var/mob/user)
 	if (status & (NOPOWER|BROKEN) || !user.client)
 		return
-
-	if (first_click)
+	src.ui_interact(user)
+	/*if (first_click)
 		window = new (src)
 		first_click = 0
 
@@ -141,7 +141,78 @@
 	//winset(user, "camera_console.exitbutton", "command=\".windowclose \ref[src]\"")
 	//winshow(user, "camera_console", 1)
 
-	window.Subscribe( user.client )
+	window.Subscribe( user.client )*/
+
+/obj/machinery/computer/security/ui_static_data(mob/user)
+	. = list()
+	var/list/L = list()
+	for_by_tcl(C, /obj/machinery/camera)
+		L.Add(C)
+
+	L = camera_sort(L)
+	. = list("current" = src.current,"windowName" = src.name)
+	for (var/obj/machinery/camera/C in L)
+		if (C.network == src.network)
+			// Don't draw if it's in favorites or AI core/upload
+			if (C.ai_only)
+				continue
+			if(C in src.favorites)
+				.["favorites"] += list(list("camera"="\ref[C]",
+				"name"="[C.c_tag][C.camera_status ? null : " (Deactivated)"]",
+				"deactivated"=!C.camera_status))
+			else
+				.["cameras"] += list(list("camera"="\ref[C]",
+				"name"="[C.c_tag][C.camera_status ? null : " (Deactivated)"]",
+				"deactivated"=!C.camera_status))
+/obj/machinery/computer/security/ui_interact(mob/user, datum/tgui/ui)
+	ui = tgui_process.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "CameraConsole")
+		ui.open()
+
+/obj/machinery/computer/security/ui_status(mob/user, datum/ui_state/state)
+	. = ..()
+	if(. <= UI_CLOSE || !IN_RANGE(src, user, 1))
+		user.set_eye(null)
+		user.reset_keymap()
+		return UI_CLOSE
+
+/obj/machinery/computer/security/ui_act(action, params)
+	. = ..()
+	if (.) return
+	var/obj/machinery/camera/C = locate(params["camera"])
+	var/mob/user = usr
+	switch(action)
+		if("switchCamera")
+			if(istype(C))
+				if ((!isAI(usr)) && (BOUNDS_DIST(usr, src) > 0 || !( usr.canmove ) || !( C.camera_status )))
+					usr.set_eye(null)
+				else
+					src.switchCamera(usr, C)
+					use_power(50)
+		if("addfavorite")
+			if (istype(C) && length(src.favorites) <= src.favorites_Max)
+				src.favorites += C
+		if("removefavorite")
+			if (istype(C) && locate(C) in favorites)
+				src.favorites -= C
+		if("moveClosest")
+			if (ON_COOLDOWN(user,"camera_move",1 SECOND)) // tgui can spam the hell out of this
+				return FALSE
+			user.cooldowns["instrument_play"] += 1 SECOND
+			var/direct = text2dir(params["direction"])
+			if (direct && src.current)
+				src.move_security_camera(direct, user.client)
+		if("keyboard_on")
+			user.client.apply_keybind("camera_console")
+		if("keyboard_off")
+			user.client?.mob?.reset_keymap()
+
+	update_static_data(usr)
+/obj/machinery/computer/security/ui_close(mob/user)
+	 // let people have their vision back and let them walk away
+	user.set_eye(null)
+	user.reset_keymap()
 
 /obj/machinery/computer/security/Topic(href, href_list)
 	if (!usr)
