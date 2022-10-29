@@ -338,6 +338,91 @@
 					setup_bg_color = "#4242E7"
 
 	return
+/obj/machinery/computer3/ui_interact(mob/user, datum/tgui/ui)
+  ui = tgui_process.try_update_ui(user, src, ui)
+  if(!ui)
+    ui = new(user, src, "Terminal")
+    ui.open()
+
+/obj/machinery/computer3/ui_static_data(mob/user)
+	var/font_size = user.client ? (((user.client.preferences.font_size/100) * 10) || 10) : 10 // font size pref is null if you haven't changed it from the default, so we need extra logic
+	. = list(
+		"fontSize" = font_size,
+		"windowName" = src.name,
+		"user" = user,
+		"fontColor" = src.setup_font_color, // display monochrome values
+		"bgColor" = src.setup_bg_color,
+		)
+	if(src.setup_has_internal_disk) // the magic internal floppy drive is in here
+		. += list("peripherals" = list(list(
+		"icon" = "save",
+		"card" = "internal",
+		"color" = src.diskette ? TRUE : FALSE,
+		"contents" = src.diskette,
+		"label" = "Disk"
+		)))
+	for(var/obj/item/peripheral/periph in src.peripherals)
+		if(periph.setup_has_badge)
+			var/pdata = periph.return_badge() // reduces copy pasting
+			if(pdata)
+				var/isfull = pdata["contents"] ? TRUE : FALSE
+				var/bcolor = pdata["color"]
+				pdata += list("color" = bcolor, "card" = "\ref[periph]","contents" = isfull)
+				.["peripherals"] += list(pdata)
+
+/obj/machinery/computer3/ui_data(mob/user)
+ . = list(
+	"TermActive" = src.active_program, // is the terminal running or restarting
+	"displayHTML" = src.temp, // display data
+  )
+
+/obj/machinery/computer3/ui_act(action, params)
+	. = ..()
+	if (.) return
+
+	switch(action)
+		if("restart")
+			src.restart()
+		if("text")
+			if(src.active_program && params["value"]) // haha it fucking works WOOOOOO
+				if(params["value"] == "term_clear")
+					src.temp = "Cleared<br>"
+					return
+				src.active_program.input_text(strip_html_tags(params["value"]))
+				playsound(src.loc, "keyboard", 50, 1, -15)
+		if("buttonPressed")
+			var/obj/item/I = usr.equipped() // how the old code did it
+			if(params["card"] == "internal") // the hacky magic floppy disk reader
+				if(src.diskette)
+					usr.put_in_hand_or_eject(src.diskette)
+					src.diskette= null
+				else if(istype(I,/obj/item/disk/data/floppy))
+					usr.drop_item()
+					I.loc = src
+					src.diskette = I
+			else
+				var/obj/item/peripheral/card = locate(params["card"])in src.peripherals
+				if(istype(card,/obj/item/peripheral/card_scanner))
+					var/obj/item/peripheral/card_scanner/dv = card
+					if(dv.authid)
+						usr.put_in_hand_or_eject(dv.authid)
+						dv.authid = null
+					else if(istype(I,/obj/item/card/id))
+						usr.drop_item()
+						I.loc = src
+						dv.authid = I
+				else if(istype(card,/obj/item/peripheral/drive))
+					var/obj/item/peripheral/drive/dv = card
+					if(dv.disk)
+						usr.put_in_hand_or_eject(dv.disk)
+						dv.disk = null
+					else if(istype(I,/obj/item/disk/data))
+						usr.drop_item()
+						I.loc = src
+						dv.disk = I
+
+	src.updateUsrDialog()
+	update_static_data(usr)
 
 /obj/machinery/computer3/attack_hand(mob/user)
 	if(..() && !istype(user, /mob/dead/target_observer/mentor_mouse_observer))
@@ -347,226 +432,7 @@
 		boutput(user, "<span class='alert'>You don't know how to read or write, operating a computer isn't going to work!</span>")
 		return
 
-	if (user.using_dialog_of(src))
-		if (!src.temp)
-			user << output(null, "comp3.browser:con_clear")
-
-		if (src.temp_add)
-			user << output(url_encode(src.temp_add), "comp3.browser:con_output")
-/*
-			if (src.current_user == user)
-				src.temp += temp_add
-				src.temp_add = null
-*/
-		update_peripheral_menu(user)
-	else
-		src.add_dialog(user)
-
-		if (src.temp_add)
-			src.temp += temp_add
-			temp_add = null
-
-		// preference is in a percentage of the default
-		var/font_size = user.client ? (((user.client.preferences.font_size/100) * 10) || 10) : 10 // font size pref is null if you haven't changed it from the default, so we need extra logic
-		var/dat = {"<title>Computer Terminal</title>
-		<style type="text/css">
-		body
-		{
-			background-color:#999876;
-		}
-
-		img
-		{
-			border-style: none;
-		}
-
-		#consolelog
-		{
-			border: 1px grey solid;
-			height: 280px;
-			width: 410px;
-			overflow-y: scroll;
-			word-wrap: break-word;
-			word-break: break-all;
-			background-color:[src.setup_bg_color];
-			color:[src.setup_font_color];
-			font-family: "Consolas", monospace;
-			font-size:[font_size]pt;
-		}
-
-		#consoleshell
-		{
-			border: 1px grey solid;
-			height: 280px;
-			width: 410px;
-			overflow-x: hidden;
-			overflow-y: hidden;
-			word-wrap: break-word;
-			word-break: break-all;
-			background-color:#1B1E1B;
-			color:#19A319;
-			font-family: "Consolas", monospace;
-			font-size:10pt;
-		}
-
-		</style>
-		<body scroll=no>
-		<div id=\"consolelog\">[src.temp]</div>
-		<script language="JavaScript">
-			var objDiv = document.getElementById("consolelog");
-			objDiv.scrollTop = objDiv.scrollHeight;
-
-var lastVals = new Array();
-var lastValsOffset = 0;
-function keydownfunc (event)
-{
-	var theKey = (event.which) ? event.which : event.keyCode;
-	if (theKey == 38)
-	{
-		if (lastVals.length > lastValsOffset)
-		{
-			document.getElementById("consoleinput_text").value = lastVals\[lastVals.length - lastValsOffset - 1];
-			lastValsOffset++;
-			if (lastValsOffset >= lastVals.length)
-			{
-				lastValsOffset = 0;
-			}
-		}
-	}
-	else if (theKey == 40)
-	{
-		if (lastValsOffset > 0)
-		{
-			lastValsOffset--;
-			document.getElementById("consoleinput_text").value = lastVals\[lastVals.length - lastValsOffset - 1];
-		}
-	}
-}
-
-function lineEnter (ev)
-{
-	if (document.getElementById("consoleinput_text").value != null)
-	{
-		lastVals.push(document.getElementById("consoleinput_text").value);
-		document.location = "byond://?src=\ref[src]&command=" + encodeURIComponent(document.getElementById("consoleinput_text").value);
-		document.getElementById("consoleinput_text").focus();
-		if (lastVals.length > 10)
-		{
-			lastVals.shift();
-		}
-	}
-	ev.preventDefault();
-	return false;
-}
-
-		</script>
-		<br>
-		<form name="consoleinput" action="byond://?src=\ref[src]" method="get" onsubmit="javascript:return lineEnter(event)">
-			<input id = "consoleinput_text" type="text" name="command" maxlength="300" size="40" onKeyDown="javascript:return keydownfunc(event)">
-			<input type="submit" value="Enter">
-		</form>
-		<table cellspacing=5><tr>"}
-		if(setup_has_internal_disk)
-			dat += "<td id=\"internaldisk\">Disk: <a href='byond://?src=\ref[src];disk=1'>[src.diskette ? "Eject" : "-----"]</a></td>"
-		else
-			dat += "<td id = \"internaldisk\" style=\"display: none;\"></td>"
-
-		//Show up to two card "badges," so ID scanners can present a slot, etc
-		var/count = 0
-		for(var/obj/item/peripheral/C in src.peripherals)
-			if(C.setup_has_badge) //If it has an interface to present here, let it
-				dat += "<td id=\"badge[count]\">[C.return_badge()]</td>"
-				count++
-
-		if(!count)
-			dat += "<td></td><td></td>"
-
-		dat += {"<script language="JavaScript">
-		document.consoleinput.command.focus();
-		var printing = "";
-		var t_count = 0;
-		var last_output;
-
-		function input_clear()
-		{
-			document.getElementById("consoleinput_text").value = '';
-		}
-
-		function setInternalDisk(t)
-		{
-			document.getElementById("internaldisk").innerHTML = t;
-		}
-
-		function setBadge0(t)
-		{
-			document.getElementById("badge0").innerHTML = t;
-		}
-
-		function setBadge1(t)
-		{
-			document.getElementById("badge1").innerHTML = t;
-		}
-
-
-		function setBadge2(t)
-		{
-			document.getElementById("badge2").innerHTML = t;
-		}
-
-		function con_output(t)
-		{
-			if (printing.length > 0)
-			{
-				var toadd = t.split("<br>");
-				if (t.substr(t.length - 4,4) == "<br>")
-				{
-					toadd.pop();
-				}
-				printing = printing.concat(toadd);
-			}
-			else
-			{
-				printing = t.split("<br>");
-				if (t.substr(t.length - 4,4) == "<br>")
-				{
-					printing.pop();
-				}
-				last_output = window.setInterval((function () {real_con_output();}), 10);
-			}
-
-		}
-
-		function real_con_output()
-		{
-			if (printing.length > 0)
-			{
-				var t_bit = printing.shift();
-				if (t_bit != undefined)
-				{
-					objDiv.innerHTML += t_bit + "<br>";
-				}
-				objDiv.scrollTop = objDiv.scrollHeight;
-				return;
-			}
-
-			window.clearTimeout(last_output);
-			return;
-		}
-
-		function con_clear()
-		{
-			printing.length = 0;
-			objDiv.innerHTML = "";
-		}
-
-		</script>"}
-
-		dat += {"<td><a href='byond://?src=\ref[src];restart=1'>Restart</a></td>
-		</body>"}
-
-		user.Browse(dat,"window=comp3;size=455x405")
-		onclose(user,"comp3")
-	return
+	src.ui_interact(user)
 
 /obj/machinery/computer3/proc/update_peripheral_menu(mob/user as mob)
 	var/count = 0

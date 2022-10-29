@@ -940,6 +940,10 @@
 		desc = "A peripheral board for editing ID cards."
 		can_manage_access = 1
 
+		return_badge()
+			var/dat = list("label" = "Card","icon" = "edit","contents" = src.authid,"Clown" = TRUE)
+			return dat
+
 	register //A card scanner...that manages money??
 		name = "ATM card module"
 		desc = "A peripheral board for managing an ID card's credit balance."
@@ -952,6 +956,10 @@
 				status_text = "Balance: [authid.money]"
 			return status_text
 
+		return_badge()
+			var/dat = list("label" = "Card","icon" = "credit-card","contents" = src.authid)
+			return dat
+
 	clownifier //An ID scanner that set's the user's assignment to "Clown" on ejecting. What a fun prank!
 		name = "Circus board"
 		desc = "A weird-looking peripheral board made out of brightly-colored plastic. It looks like there's a slot to insert an ID card."
@@ -960,7 +968,7 @@
 		clownifies_card = 1
 
 		return_badge()
-			var/dat = "<font face='Comic Sans MS'>Card: <a href='?src=\ref[src];card=1'>[src.authid ? "Eject" : "-----"]</a></font>"
+			var/dat = list("label" = "Card","icon" = "id-card","contents" = src.authid,"Clown" = TRUE)
 			return dat
 
 	return_status_text()
@@ -974,7 +982,7 @@
 		return status_text
 
 	return_badge()
-		var/dat = "Card: <a href='?src=\ref[src];card=1'>[src.authid ? "Eject" : "-----"]</a>"
+		var/dat = list("label" = "Card","icon" = "id-card","contents" = src.authid)
 		return dat
 
 	proc/eject_card()
@@ -1194,7 +1202,7 @@
 		return 0
 
 	return_badge()
-		var/dat = "Disk: <a href='?src=\ref[src];disk=1'>[src.disk ? "Eject" : "-----"]</a>"
+		var/dat = list("label" = "Cart","icon" = "rom","contents" = src.disk)
 		return dat
 
 	uninstalled()
@@ -1273,7 +1281,7 @@
 	func_tag = "SHU_ROM"
 
 	return_badge()
-		var/dat = "Cart: <a href='?src=\ref[src];disk=1'>[src.disk ? "Eject" : "-----"]</a>"
+		var/dat = list("label" = "Disk","icon" = "microchip","contents" = src.disk)
 		return dat
 
 	return_status_text()
@@ -1296,7 +1304,7 @@
 	func_tag = "SHU_TAPE"
 
 	return_badge()
-		var/dat = "Tape: <a href='?src=\ref[src];disk=1'>[src.disk ? "Eject" : "-----"]</a>"
+		var/dat = list("label" = "Tape","icon" = "database","contents" = src.disk)
 		return dat
 
 	return_status_text()
@@ -1351,9 +1359,9 @@
 				if(76 to 100)
 					readout_color = "#33FF00"
 
-			readout = charge_percentage
+			readout = "[charge_percentage]%"
 
-		var/dat = {"Cell: <font color=[readout_color]>[readout]%</font>"}
+		var/dat = list("label" = readout,"icon" = "bolt","contents" = cell,"color" = readout_color)
 		return dat
 
 
