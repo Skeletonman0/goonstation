@@ -352,6 +352,9 @@
 		"user" = user,
 		"fontColor" = src.setup_font_color, // display monochrome values
 		"bgColor" = src.setup_bg_color,
+		"changedHTML" = length(splittext(src.temp_add,"<BR>")), // has the data changed?
+		"displayHTML" = src.temp, // display data
+		"TermActive" = src.active_program, // is the terminal running or restarting
 		)
 	if(src.setup_has_internal_disk) // the magic internal floppy drive is in here
 		. += list("peripherals" = list(list(
@@ -369,12 +372,6 @@
 				var/bcolor = pdata["color"]
 				pdata += list("color" = bcolor, "card" = "\ref[periph]","contents" = isfull)
 				.["peripherals"] += list(pdata)
-
-/obj/machinery/computer3/ui_data(mob/user)
- . = list(
-	"TermActive" = src.active_program, // is the terminal running or restarting
-	"displayHTML" = src.temp, // display data
-  )
 
 /obj/machinery/computer3/ui_act(action, params)
 	. = ..()
@@ -494,6 +491,7 @@
 	..()
 	if (src.temp_add)
 		src.temp += src.temp_add
+		tgui_process.update_uis(src)
 		src.temp_add = null
 
 /obj/machinery/computer3/process()
