@@ -603,54 +603,59 @@
 #define QUOTE_SYMBOL "\""
 #define QUOTE_SYMBOL_LENGTH 1
 /proc/command2list(text, separator, list/replaceList, list/substitution_feedback_thing)
-	var/textlength = length(text)
-	var/separatorlength = length(separator)
+	//var/textlength = length(text)
+	//var/separatorlength = length(separator)
 	var/list/textList = new()
-	var/searchPosition = 1
+	//var/searchPosition = 1
 	var/findPosition = 1
-	var/buggyText
 
+	var/regex/substitution = new(@# *\$\((?=[^\(]*$)[^\)]+\) *#) // removes spaces, gets $( )'d text
+	var/regex/quotes = new(@# *\"(?<=\")[^\"]*(?=\")\" *#) // removes spaces around it, gets " "'d text
 
-	//substitution_feedback_thing = list()	//debug
-	while(1)
-		text = html_decode(text) // makes it so this works again
-		findPosition = findtext(text, separator, searchPosition, 0)
-		var/quotePoint = findtext(text, QUOTE_SYMBOL, searchPosition, findPosition)
-		if (quotePoint)
-			text = copytext(text, 1, quotePoint) + copytext(text, quotePoint + QUOTE_SYMBOL_LENGTH, 0)
-			var/quotePointEnd = findtext(text, QUOTE_SYMBOL, quotePoint, 0)
-			buggyText = copytext(text, searchPosition, quotePointEnd)
-			findPosition = quotePointEnd+QUOTE_SYMBOL_LENGTH
-		else
-			var/subStartPoint = findtext(text, "$(", searchPosition, findPosition)
-			if (substitution_feedback_thing && subStartPoint)
-				var/subEndPoint = findtext(text, ")", subStartPoint)
-				substitution_feedback_thing[++substitution_feedback_thing.len] = copytext(text, subStartPoint+2, subEndPoint)
+	var/quoteText
 
-				text = copytext(text, 1, subStartPoint) + "_sub[substitution_feedback_thing.len]" + copytext(text, subEndPoint ? subEndPoint + 1 : 0)
-				//boutput(world, "text changed to \"[text]\"")
+	// actually detailed info about what this does
+	// takes stuff like "command arg1 arg2", spits out
+	// returns list("command","arg","arg2")
+	// also lets you omit certain information from being processed by later code
 
-				//boutput(world, "added: \[[substitution_feedback_thing[substitution_feedback_thing.len]]]")
+	//TODO: the part here outside the for loop is dumb. replace this shit
+	text = html_decode(text)
+	if (quotes.Find(text) && !quoteText) // text in quotes is escaped if we havent stored the text
+		quoteText = quotes.Find(text)
+		text = quotes.Replace(text," _\"")
+	else
 
-				continue
+		if (substitution.Find(text)) // get text surrounded by $() if its not in a quote
+			substitution_feedback_thing += substitution.match
+			text = substitution.Replace(text," _sub[length(substitution_feedback_thing)]")
 
-			else
-				buggyText = trim(copytext(text, searchPosition, findPosition))
+	textList = splittext(text,separator)
+	. = list()
+	if (!textList) // could not split
+		textList += text
+	for(var/line in textList)
+		line = trim(line)
+		var/replaceText = null
+		if (findtext(line, "_\"")) // quoted text
+			replaceText = trim(quotes.match)
+		if (substitution.Find(line)) // get text surrounded by $() if its not in a quote
+			substitution_feedback_thing += substitution.match
+			line = substitution.Replace(line," _sub[length(substitution_feedback_thing)]")
+		if (isnull(replaceText))
+			replaceText = line
 
-		if(buggyText)
+		// this part replaces values with inputted replacement values
+		// either from replaceList, or from the above parts
+		if (dd_hasprefix(replaceText, "$") && (copytext(replaceText,2) in replaceList))
+			. += "[replaceList[copytext(replaceText, 2)]]"
+		else // change from something other than replaceList
+			. += "[replaceText]"
 
-			if (replaceList && dd_hasprefix(buggyText, "$") && (copytext(buggyText,2) in replaceList))
-				textList += "[replaceList[copytext(buggyText, 2)]]"
-			else
-				textList += "[buggyText]"
-		if(!findPosition)
-			//boutput(world, english_list(textList))
-			return textList
-		searchPosition = findPosition + separatorlength
+		/*searchPosition = findPosition + separatorlength
 		if(searchPosition > textlength)
 			//boutput(world, english_list(textList))
-			return textList
-	return
+			return textList*/
 
 #undef QUOTE_SYMBOL
 #undef QUOTE_SYMBOL_LENGTH
