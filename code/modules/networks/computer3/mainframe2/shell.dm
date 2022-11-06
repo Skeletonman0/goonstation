@@ -169,8 +169,12 @@
 						else
 							stack = list()
 
-						result = script_evaluate2(command_list, 0)
-						switch(result)
+						var/results = script_evaluate2(command_list, 0)
+						var/success = results[1]
+						if (length(results) > 1)
+							result = results[2]
+
+						switch(success)
 							if (ERR_STACK_OVER)
 								message_user("Error: Stack overflow.")
 								return 1
@@ -339,26 +343,33 @@
 
 						if (!length(command_list))
 							return 1
-						var/result = script_evaluate2(command_list, 1)
-						switch (result)
-							if (1)
-								pipetemp = null
-								scriptstat |= SCRIPT_IF_TRUE
-								var/elsePosition = piped_list.Find("else")
-								if (elsePosition)
-									piped_list.Cut(elsePosition)
-									piping = length(piped_list)
-								continue //Continue processing any piped commands following this.
-							if (0)
-								scriptstat &= ~SCRIPT_IF_TRUE
+						var/results = script_evaluate2(command_list, 1)
+						var/success = results[1]
+						var/result
+						if (length(results) > 1)
+							result = results[2]
 
-								var/elsePosition = piped_list.Find("else")
-								if (elsePosition)
-									piped_list.Cut(1,elsePosition+1)
-									piping = length(piped_list)
+						if(success == EVAL_BOOL_TRUE)
+							switch (result)
+								if (1)
 									pipetemp = null
-									continue
-								return 0 //Move to the next line of the script, dropping any following commands on this line.
+									scriptstat |= SCRIPT_IF_TRUE
+									var/elsePosition = piped_list.Find("else")
+									if (elsePosition)
+										piped_list.Cut(elsePosition)
+										piping = length(piped_list)
+									continue //Continue processing any piped commands following this.
+								if (0)
+									scriptstat &= ~SCRIPT_IF_TRUE
+
+									var/elsePosition = piped_list.Find("else")
+									if (elsePosition)
+										piped_list.Cut(1,elsePosition+1)
+										piping = length(piped_list)
+										pipetemp = null
+										continue
+									return 0 //Move to the next line of the script, dropping any following commands on this line.
+						switch(success)
 							if (ERR_STACK_OVER)
 								message_user("Error: Stack overflow.")
 								return 1
@@ -383,14 +394,20 @@
 					if ("while")
 						if (!length(command_list) || (scriptstat & SCRIPT_IN_LOOP))
 							return 1
-
-						switch (script_evaluate2(command_list, 1))
-							if (1)
-								scriptstat |= SCRIPT_IN_LOOP
-								continue
-							if (0)
-								scriptstat &= ~SCRIPT_IN_LOOP
-								return 0
+						var/results = script_evaluate2(command_list, 1)
+						var/succeeded = results[1]
+						var/result
+						if (length(results) > 1)
+							result = results[2]
+						if (succeeded == EVAL_BOOL_TRUE)
+							switch (result)
+								if (1)
+									scriptstat |= SCRIPT_IN_LOOP
+									continue
+								if (0)
+									scriptstat &= ~SCRIPT_IN_LOOP
+									return 0
+						switch(succeeded)
 							if (ERR_STACK_OVER)
 								message_user("Error: Stack overflow.")
 								return 1
@@ -401,8 +418,6 @@
 
 							if (ERR_UNDEFINED)
 								message_user("Error: Undefined result.")
-								return 1
-							else
 								return 1
 
 					if ("break")
@@ -486,6 +501,8 @@
 							//boutput(world, "here is the path: \"[command]\" and the name \"[recname]\"")
 							var/datum/computer/file/record/rec = new /datum/computer/file/record(  )
 							rec.fields = splittext(pipetemp, "|n")
+							if (dd_hassuffix(recname, "\n")) // i cant find out where this is coming from
+								recname = copytext(recname, 1, -2)
 							rec.name = recname
 							rec.metadata["owner"] = read_user_field("name")
 							rec.metadata["permission"] = COMP_ALLACC
@@ -554,10 +571,16 @@
 
 		script_process()
 
+			var/lastline
 			for (var/i = 1, i <= 5 && length(shscript), i++)
 				if (src.input_text(shscript[1], script_iteration))
 					message_user("Break at line [scriptline+1]")
-					message_user("Error in: \"[shscript[scriptline+1]]\"")
+					// debugging info for NERDS
+					if (lastline)
+						message_user("[scriptline]: \"[lastline]\"")
+					message_user("[scriptline+1]: !! \"[shscript[1]]\"")
+					if (length(shscript) > 1)
+						message_user("[scriptline+2]: \"[shscript[2]]\"")
 
 					if (scriptprocess)
 						signal_program(1, list("command"=DWAINE_COMMAND_TKILL,"target"=scriptprocess))
@@ -574,6 +597,7 @@
 					continue
 
 				if (length(shscript))
+					lastline = shscript[1]
 					shscript.Cut(1,2)
 
 				scriptline++
@@ -608,7 +632,10 @@
 
 		//Something something immersion something something 32-bit signed someting fixed point something.
 		script_clampvalue(var/clampnum)
-			if (!text2num_safe(clampnum)) return clampnum
+			if (!text2num_safe(clampnum))
+				if (clampnum == "0") // what
+					return 0
+				return clampnum
 			//return round( min( max(text2num_safe(clampnum), -2147483647), 2147483648) ) // good riddance
 			return round( clamp(text2num_safe(clampnum), -2147483647, 2147483600), 0.01 ) // 2147483648
 
@@ -618,12 +645,12 @@
 				return 1
 
 			return 0
-		script_isValidCommand(var/string)
+		script_isValidCommand(var/string,var/list/command_stream)
 			// tells us if there's a valid eval command
 			var/list/validCommands = list("+","-","*","/","%","rand","eq","ne","lt","gt","le","ge",
 			"and","nor","not","!","xor","eor","dup","&#39;","'","d","e","f","x","#","del","value","to",
 			".s",".")
-			if (validCommands.Find(string))
+			if (validCommands.Find(string) && (string == command_stream[2] || string == command_stream[3]))
 				return TRUE
 			else
 				return FALSE
@@ -636,8 +663,8 @@
 			// generate stack and the current command
 			for (var/arg in command_stream)
 				if (stacklen > MAX_STACK_DEPTH) // over the limit
-					return ERR_STACK_OVER
-				if (script_isValidCommand(arg))
+					return list(ERR_STACK_OVER)
+				if (script_isValidCommand(arg,command_stream))
 					current_command = arg // command
 				else
 					stack += arg // arguments
@@ -654,13 +681,13 @@
 			else if (stacklen)
 				arg1 = script_clampvalue(stack[1])
 			else
-				return ERR_STACK_UNDER // no arguments to EVAL
+				return list(ERR_STACK_UNDER) // no arguments to EVAL
 
 			if (stacklen)
 				switch ( lowertext(current_command) )
 					if ("+") //(1X 2X -- (1X + 2X))
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (script_isNumResult(arg2, arg1))
 							result = text2num_safe(arg2) + text2num_safe(arg1)
@@ -669,7 +696,7 @@
 
 					if ("-") //(1X 2X -- (1X - 2X)
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (script_isNumResult(arg2, arg1))
 							result = arg1 - arg2
@@ -678,11 +705,11 @@
 							result = copytext(arg1, 1, max( length(arg1)-arg2, 1))
 
 						else
-							return ERR_UNDEFINED
+							return list(ERR_UNDEFINED)
 
 					if ("*") //(1X 2X -- (1X * 2X))
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (script_isNumResult(arg2, arg1))
 							result = arg1 * arg2
@@ -696,63 +723,63 @@
 							result = copytext(result, 1, MAX_MESSAGE_LEN)
 
 						else
-							return ERR_UNDEFINED
+							return list(ERR_UNDEFINED)
 
 					if ("/") //(1X 2X -- (1X / 2X))
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (script_isNumResult(arg2, arg1))
 							if (arg2 == 0)
-								return ERR_UNDEFINED
+								return list(ERR_UNDEFINED)
 
 							result = arg1 / arg2
 
 						else if (istext(arg2) && istext(arg1))
 							var/list/explodedString = splittext("[arg1]", "[arg2]")
 							if (length(explodedString) + stacklen > MAX_STACK_DEPTH)
-								return ERR_STACK_OVER
+								return list(ERR_STACK_OVER)
 
 							stack.len -= 2
 							stack += explodedString
 
 						else
-							return ERR_UNDEFINED
+							return list(ERR_UNDEFINED)
 
 					if ("%")
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (script_isNumResult(arg2, arg1))
 							if (arg2 == 0)
-								return ERR_UNDEFINED
+								return list(ERR_UNDEFINED)
 
 							result = script_clampvalue(arg1 % arg2)
 
 						else
-							return ERR_UNDEFINED
+							return list(ERR_UNDEFINED)
 
 					if ("rand")
 						if (stacklen < 1)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 						result = script_clampvalue(rand(1, arg2))
 						arg2 = result
 
 					if ("eq") //(1X 2X -- (1X == 2X))
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						result = arg1 == arg2 //todo: figure out why the fuck this broke
 
 					if ("ne") //(1X 2X -- (1X != 2X))
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						result = arg1 != arg2
 
 					if ("gt") //(1X 2X -- (1X > 2X))
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (script_isNumResult(arg2, arg1))
 							result = arg1 > arg2
@@ -768,7 +795,7 @@
 
 					if ("ge") //(1X 2X -- (1X >= 2X))
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (script_isNumResult(arg2, arg1))
 							result = arg1 >= arg2
@@ -784,7 +811,7 @@
 
 					if ("lt") //(1X 2X -- (1X < 2X))
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (script_isNumResult(arg2, arg1))
 							result = arg1 < arg2
@@ -800,7 +827,7 @@
 
 					if ("le") //(1X 2X -- (1X <= 2X))
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (script_isNumResult(arg2, arg1))
 							result = arg1 <= arg2
@@ -816,7 +843,7 @@
 
 					if ("and") //(1X 2X -- (1X && 2X))
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (script_isNumResult(arg2, arg1))
 							result = script_clampvalue( arg2 & arg1 )
@@ -826,7 +853,7 @@
 
 					if ("or") //(1X 2X -- (1X || 2X))
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (script_isNumResult(arg2, arg1))
 							result = script_clampvalue( arg2 | arg1 )
@@ -837,7 +864,7 @@
 
 					if ("not","!") //(1X -- (!1X))
 						if (!stacklen)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (isnum(arg2))
 							arg2 = ~arg2
@@ -847,13 +874,13 @@
 
 					if ("xor","eor") //(1X 2X -- (1X ^ 2X))
 						if (stacklen < 2)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (script_isNumResult(arg2, arg1))
 							result = arg1 ^ arg2
 
 						else
-							return ERR_UNDEFINED
+							return list(ERR_UNDEFINED)
 
 					if ("dup")
 						if (stacklen)
@@ -890,11 +917,11 @@
 
 					if ("d","e","f","x")
 						if (!stacklen)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						. = arg2
 						if (!istext(.))
-							return ERR_UNDEFINED
+							return list(ERR_UNDEFINED)
 
 						. = signal_program(1, list("command"=DWAINE_COMMAND_FGET, "path"="[.]"))
 						if (!istype(., /datum/computer))
@@ -921,24 +948,23 @@
 
 					if ("del") //  removes the topmost item from the stack (most recently added)
 						if (!stacklen)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 						stack.len--
 						result = EVAL_BOOL_TRUE
 
 					if ("value", "to") //Define/Set a variable value.
 						if (!stacklen)
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 
 						if (!length(command_stream))
-							return ERR_UNDEFINED
+							return list(ERR_UNDEFINED)
 
-						var/valueName = lowertext(ckeyEx(command_stream[1]))
+						var/valueName = lowertext(ckeyEx(stack[stacklen]))
 						if (!valueName)
-							return ERR_UNDEFINED
+							return list(ERR_UNDEFINED)
 
-						scriptvars["[valueName]"] = stack[stacklen]
+						scriptvars["[valueName]"] = arg1
 						stack.len--
-						result = EVAL_BOOL_TRUE
 
 					if (".s") // print the whole goddamn stack! stolen from forth, doesnt consume the stack.
 						message_user("<[stacklen]>") // does not check if its in a script or not
@@ -950,7 +976,7 @@
 
 					if (".") // print JUST the most recent stack item. also stolen from forth
 						if(!stacklen) // same as above, no script check "eval 3 2 . 4 | echo" -> "2" output
-							return ERR_STACK_UNDER
+							return list(ERR_STACK_UNDER)
 						message_user("[arg2]")
 						stack.len-- //consume it, because thats what forth does
 						result = EVAL_BOOL_TRUE
@@ -966,13 +992,22 @@
 						else if (istext(current_command))
 							stack += "[current_command]"
 
-			//boutput(world, "STACK: [english_list(stack)]")
+			// allow saving output even if doing other operations
+			if (stacklen && (current_command != "value" || current_command != "to"))
+				if (stack[stacklen-1] == "value" || stack[stacklen-1] == "to")
+					var/valueName = lowertext(ckeyEx(stack[stacklen]))
+					if (!valueName)
+						return list(ERR_UNDEFINED)
+					scriptvars["[valueName]"] = script_clampvalue(result)
+					stack.len--
+
+			//boutput(world, "STACK: [english_list(stack)]")b
 			if (return_bool)
 				if (!result)
-					return EVAL_BOOL_FALSE
-				return (result ? EVAL_BOOL_TRUE : EVAL_BOOL_FALSE)
+					return list(EVAL_BOOL_FALSE)
+				return list(EVAL_BOOL_TRUE, (result ? EVAL_BOOL_TRUE : EVAL_BOOL_FALSE))
 			else
-				return script_clampvalue(result)
+				return list(EVAL_BOOL_TRUE, script_clampvalue(result)) // successfully parsed
 
 
 	receive_progsignal(var/sendid, var/list/data, var/datum/computer/file/theFile)
@@ -992,7 +1027,9 @@
 			if (DWAINE_COMMAND_BREAK)
 				if (length(shscript))
 					message_user("Break at line [scriptline+1]")
-					message_user("Error in: \"[shscript[scriptline+1]]\"")
+					message_user("[scriptline+1]: !! \"[shscript[1]]\"")
+					if (length(shscript) > 1)
+						message_user("[scriptline+2]: \"[shscript[2]]\"")
 					shscript.len = 0
 					scriptline = 0
 					//script_iteration = 1

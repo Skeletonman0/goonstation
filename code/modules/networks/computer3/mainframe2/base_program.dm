@@ -603,54 +603,61 @@
 #define QUOTE_SYMBOL "\""
 #define QUOTE_SYMBOL_LENGTH 1
 /proc/command2list(text, separator, list/replaceList, list/substitution_feedback_thing)
-	//var/textlength = length(text)
-	//var/separatorlength = length(separator)
 	var/list/textList = new()
-	//var/searchPosition = 1
-	var/findPosition = 1
 
-	var/regex/substitution = new(@# *\$\((?=[^\(]*$)[^\)]+\) *#) // removes spaces, gets $( )'d text
-	var/regex/quotes = new(@# *\"(?<=\")[^\"]*(?=\")\" *#) // removes spaces around it, gets " "'d text
+	var/regex/substitution = new(@#\$\((?=[^\(]*$)[^\)]+\)#) // removes spaces, gets $( )'d text
+	var/regex/quotes = new(@#\"(?<=\")[^\"]*(?=\")\"#) // removes spaces around it, gets " "'d text
 
-	var/quoteText
+	// splits text by "^" unless in quotes or $()
+	var/regex/pipedelim = new(@#(?:[\"\(][^\"]*[\)\"]|[^\^])+#)
+	// splits text by " " unless in quotes or $()
+	var/regex/spacedelim = new(@#(?:[\"\(][^\"]*[\)\"]|[^ ])+#)
 
-	// actually detailed info about what this does
+	// actually detailed info about what this proc  does
 	// takes stuff like "command arg1 arg2", spits out
 	// returns list("command","arg","arg2")
 	// also lets you omit certain information from being processed by later code
 
-	//TODO: the part here outside the for loop is dumb. replace this shit
+	// seemingly used by the mainframe to generate subcommands, piping info, split commands into arguments, etc.
+
 	text = html_decode(text)
-	if (quotes.Find(text) && !quoteText) // text in quotes is escaped if we havent stored the text
-		quoteText = quotes.Find(text)
-		text = quotes.Replace(text," _\"")
-	else
+	var/regex/delim
+	if (separator == " ")
+		delim = spacedelim
+	else if (separator == "^")
+		delim = pipedelim
+	// delimiting loop that actually respects quotes
+	while (delim.Find(text) && text != "")
+		if(delim.match == "") break
+		textList += delim.match // remove what we delimited
+		text = delim.Replace(text,"")
 
-		if (substitution.Find(text)) // get text surrounded by $() if its not in a quote
-			substitution_feedback_thing += substitution.match
-			text = substitution.Replace(text," _sub[length(substitution_feedback_thing)]")
 
-	textList = splittext(text,separator)
+	if (!textList)
+		if(splittext(text,separator))
+			textList = splittext(text,separator)
+		else // incase we cant split it
+			textList += text
 	. = list()
-	if (!textList) // could not split
-		textList += text
 	for(var/line in textList)
-		line = trim(line)
 		var/replaceText = null
-		if (findtext(line, "_\"")) // quoted text
-			replaceText = trim(quotes.match)
-		if (substitution.Find(line)) // get text surrounded by $() if its not in a quote
-			substitution_feedback_thing += substitution.match
-			line = substitution.Replace(line," _sub[length(substitution_feedback_thing)]")
+		if (separator == "^") // only do it after piping
+			if (quotes.Find(line))
+				// remove quotes surrounding
+				var/quoteText = copytext(trim(quotes.match),2,length(trim(quotes.match)))
+				replaceText = quotes.Replace(line,"") + quoteText
+			else if (substitution.Find(line)) // get text surrounded by $() if its not in a quote
+				substitution_feedback_thing += copytext(trim(substitution.match),1,length(trim(substitution.match)))
+				replaceText = substitution.Replace(line,"_sub[length(substitution_feedback_thing)]")
 		if (isnull(replaceText))
-			replaceText = line
+			replaceText = trim(line)
 
 		// this part replaces values with inputted replacement values
 		// either from replaceList, or from the above parts
 		if (dd_hasprefix(replaceText, "$") && (copytext(replaceText,2) in replaceList))
 			. += "[replaceList[copytext(replaceText, 2)]]"
 		else // change from something other than replaceList
-			. += "[replaceText]"
+			. += replaceText
 
 		/*searchPosition = findPosition + separatorlength
 		if(searchPosition > textlength)
