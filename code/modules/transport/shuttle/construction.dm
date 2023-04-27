@@ -240,7 +240,7 @@
 			continue
 		turfs += C
 		for(var/obj/O in C)
-			//if (istype(O,/obj/overlay/tile_effect)) continue
+			if (istype(O,/obj/overlay/tile_effect)) continue
 			shipparts += O
 
 		var/turf/N
