@@ -102,6 +102,8 @@ ABSTRACT_TYPE(/obj/machinery/computer/transit_shuttle)
 	. = list("shuttlename" = src.shuttlename)
 	for(var/path in destinations)
 		var/area/A = locate(path)
+		if (!A)
+			continue
 		.["destinations"] +=  list(list("type" = A?.type,"name" = A?.name))
 
 /obj/machinery/computer/transit_shuttle/ui_data(mob/user)
@@ -141,7 +143,8 @@ ABSTRACT_TYPE(/obj/machinery/computer/transit_shuttle)
 				Console.visible_message("<span class='alert'>[src.shuttlename] is moving to [end_location]!</span>")
 				playsound(Console.loc, 'sound/machines/transport_move.ogg', 75, 0)
 	return (currentlocation && end_location)
-
+/obj/machinery/computer/transit_shuttle/proc/move_shuttle(area/end_location)
+	currentlocation.move_contents_to(end_location, turf_to_skip=list(/turf/space, global.map_settings.shuttle_map_turf))
 /obj/machinery/computer/transit_shuttle/proc/call_shuttle(area/end_location)
 	// shuttle crush stuff stolen from shuttle_controller.dm
 	if (currentlocation && end_location)
@@ -185,7 +188,7 @@ ABSTRACT_TYPE(/obj/machinery/computer/transit_shuttle)
 						ejectT = locate(westBound - 1,T.y,T.z)
 				AM.set_loc(ejectT)
 
-		currentlocation.move_contents_to(end_location, turf_to_skip=list(/turf/space, global.map_settings.shuttle_map_turf))
+		src.move_shuttle(end_location)
 
 		// cant figure out why the walls arent behaving when moved so
 		for (var/turf/unsimulated/wall/auto/wall in end_location)
