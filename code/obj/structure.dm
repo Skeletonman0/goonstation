@@ -30,6 +30,42 @@ obj/structure
 	meteorhit(obj/O as obj)
 		qdel(src)
 
+	destroyed_wall //
+		name = "wall"
+		icon_state = "0"
+		anchored = ANCHORED
+		desc = "A mangled piece of metal that used to be a wall."
+		plane = PLANE_WALL
+
+		var/static/list/connects_to = typecacheof(list(/turf/simulated/wall/auto/supernorn,
+		/turf/simulated/wall/auto/reinforced/supernorn,
+		/obj/machinery/door,
+		/obj/window))
+		var/static/list/exceptions = typecacheof(list())
+
+		reinforced
+			icon_state = "r0"
+		New()
+			..()
+			src.update_neighbors()
+			src.update_icon()
+
+		proc/update_neighbors()
+			for (var/obj/structure/destroyed_wall/D in orange(1,src))
+				D.update_icon()
+
+		update_icon()
+			. = ..()
+			var/connectdir = get_connected_directions_bitflag(src.connects_to, src.exceptions,cross_areas = TRUE, connect_diagonal = TRUE)
+			if (!connectdir) // we have no reason to exist
+				qdel(src)
+				return
+
+			src.icon_state = "[istype(src,/obj/structure/destroyed_wall/reinforced) ? "r" : ""][connectdir]"
+		disposing()
+			src.update_neighbors()
+			..()
+
 obj/structure/ex_act(severity)
 	switch(severity)
 		if(1)

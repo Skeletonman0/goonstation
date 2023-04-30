@@ -209,19 +209,40 @@
 					else
 						C.setMaterial(getMaterial("steel"), copy = FALSE)
 
+	var/type = src.type
+	var/obj/structure/destroyed_wall/W
+	if (istype(src,/turf/simulated/wall/auto/supernorn))
+		W = new /obj/structure/destroyed_wall(src)
+	else if (istype(src,/turf/simulated/wall/auto/reinforced/supernorn))
+		W = new /obj/structure/destroyed_wall/reinforced(src)
 	var/atom/D = ReplaceWithFloor()
+	W.update_neighbors()
 	if (src.material && keep_material)
 		D.setMaterial(src.material)
 	else
 		D.setMaterial(getMaterial("steel"), copy = FALSE)
 
 /turf/simulated/wall/burn_down()
+	var/obj/structure/destroyed_wall/D
+	if (istype(type,/turf/simulated/wall/auto/supernorn))
+		D = new /obj/structure/destroyed_wall(src)
+	else if (istype(type,/turf/simulated/wall/auto/reinforced/supernorn))
+		D = new /obj/structure/destroyed_wall/reinforced(src)
+
 	src.ReplaceWithFloor()
+
+	D.update_neighbors()
 
 /turf/simulated/wall/ex_act(severity)
 	switch(severity)
 		if(1)
+			var/obj/structure/destroyed_wall/D
+			if (istype(type,/turf/simulated/wall/auto/supernorn))
+				new /obj/structure/destroyed_wall(src)
+			else if (istype(type,/turf/simulated/wall/auto/reinforced/supernorn))
+				new /obj/structure/destroyed_wall/reinforced(src)
 			src.ReplaceWithSpace()
+			D.update_neighbors()
 			return
 		if(2)
 			if (prob(66))
