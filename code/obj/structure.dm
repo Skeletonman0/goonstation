@@ -336,8 +336,46 @@ obj/structure/ex_act(severity)
 	var/builtby = null
 	var/anti_z = 0
 
+	var/auto = TRUE // toggles the fancy behavior off
+	layer = GRILLE_LAYER + 0.2
+	flags = ON_BORDER // allows us to hit the damn thing if its over a window
+
+	var/static/list/connects_to = typecacheof(list(
+			/obj/machinery/door,
+			/obj/window,
+			/turf/simulated/wall/auto/supernorn,
+			/turf/simulated/wall/auto/reinforced/supernorn,
+			/turf/unsimulated/wall/auto/reinforced/supernorn,
+
+			/turf/simulated/shuttle/wall,
+			/turf/unsimulated/wall,
+			/turf/simulated/wall/auto/shuttle,
+			/obj/indestructible/shuttle_corner,
+
+			/turf/simulated/wall/auto/reinforced/supernorn/yellow,
+			/turf/simulated/wall/auto/reinforced/supernorn/blackred,
+			/turf/simulated/wall/auto/reinforced/supernorn/orange,
+			/turf/simulated/wall/auto/reinforced/paper,
+			/turf/simulated/wall/auto/jen,
+			/turf/simulated/wall/auto/reinforced/jen,
+			/turf/simulated/wall/auto/supernorn/wood,
+			/turf/unsimulated/wall/auto/supernorn/wood,
+
+			/turf/unsimulated/wall/auto/lead/blue,
+			/turf/unsimulated/wall/auto/adventure/shuttle/dark,
+			/turf/simulated/wall/auto/reinforced/old,
+			/turf/unsimulated/wall/auto/adventure/old,
+			/turf/unsimulated/wall/auto/adventure/mars/interior,
+			/turf/unsimulated/wall/auto/adventure/shuttle,
+			/turf/simulated/wall/auto/marsoutpost,
+			/turf/simulated/wall/false_wall,
+			/turf/simulated/wall/auto/feather,
+			/obj/structure/woodwall
+		))
+
 	virtual
 		icon = 'icons/effects/VR.dmi'
+		auto = FALSE
 
 	anti_zombie
 		name = "anti-zombie wooden barricade"
@@ -346,22 +384,33 @@ obj/structure/ex_act(severity)
 		get_desc()
 			..()
 			. += "Looks like normal spacemen can easily pull themselves over or crawl under it."
+	New()
+		..()
+		if (!auto) return
+		src.update_icon()
+		src.update_neighbors()
+
 	proc/checkhealth()
 		if (src.health <= 0)
 			src.visible_message("<span class='alert'><b>[src] collapses!</b></span>")
 			playsound(src.loc, 'sound/impact_sounds/Metal_Hit_Lowfi_1.ogg', 100, 1)
 			qdel(src)
 			return
-		else if (src.health <= 5)
-			icon_state = "woodwall4"
+
+		if (src.health <= 10)
 			set_opacity(0)
-		else if (src.health <= 10)
-			icon_state = "woodwall3"
-			set_opacity(0)
-		else if (src.health <= 20)
-			icon_state = "woodwall2"
+
+		if (!auto)
+			if (src.health <= 5)
+				icon_state = "woodwall4"
+			else if (src.health <= 10)
+				icon_state = "woodwall3"
+			else if (src.health <= 20)
+				icon_state = "woodwall2"
+			else
+				icon_state = "woodwall"
 		else
-			icon_state = "woodwall"
+			src.update_icon()
 
 	attack_hand(mob/user)
 		if (ishuman(user) && !user.is_zombie)
@@ -404,3 +453,30 @@ obj/structure/ex_act(severity)
 		src.health -= W.force
 		checkhealth()
 		return
+	proc/update_neighbors()
+		for (var/turf/simulated/wall/auto/T in orange(1,src))
+			T.UpdateIcon()
+		for (var/obj/window/auto/O in orange(1,src))
+			O.UpdateIcon()
+		for (var/obj/grille/G in orange(1,src))
+			G.UpdateIcon()
+		for (var/obj/structure/woodwall/W in orange(1,src))
+			W.UpdateIcon()
+
+	update_icon()
+		..()
+		var/connectdir = get_connected_directions_bitflag(connects_to)
+		src.icon_state = "barricade-[connectdir]"
+
+		var/damage = 0
+		if (src.health <= 5)
+			damage = 3
+		else if (src.health <= 10)
+			damage = 2
+		else if (src.health <= 20)
+			damage = 1
+
+		src.filters = filter(type="alpha", icon=icon(src.icon,"woodwall_damage[damage]"))
+	disposing()
+		..()
+		src.update_neighbors()

@@ -203,14 +203,16 @@ TYPEINFO_NEW(/turf/simulated/wall/auto/jen)
 		/turf/simulated/wall/auto/supernorn, /turf/simulated/wall/auto/reinforced/supernorn,
 		/turf/simulated/wall/false_wall, /obj/machinery/door, /obj/window, /obj/wingrille_spawn,
 		/turf/simulated/wall/auto/reinforced/supernorn/yellow, /turf/simulated/wall/auto/reinforced/supernorn/blackred,
-		/turf/simulated/wall/auto/jen, /turf/simulated/wall/auto/reinforced/jen
+		/turf/simulated/wall/auto/jen, /turf/simulated/wall/auto/reinforced/jen,
+		/obj/structure/woodwall
 	))
 	connects_with_overlay = typecacheof(list(
 		/turf/simulated/wall/auto/reinforced/supernorn, /turf/simulated/wall/auto/supernorn,
 		/turf/simulated/wall/auto/shuttle, /turf/simulated/wall/auto/shuttle,
 		/obj/machinery/door, /obj/window, /obj/wingrille_spawn,
 		/turf/simulated/wall/auto/reinforced/supernorn/yellow, /turf/simulated/wall/auto/reinforced/supernorn/blackred,
-		/turf/simulated/wall/auto/reinforced/jen
+		/turf/simulated/wall/auto/reinforced/jen,
+		/obj/structure/woodwall
 	))
 /turf/simulated/wall/auto/jen
 	icon = 'icons/turf/walls_jen.dmi'
@@ -269,14 +271,16 @@ TYPEINFO_NEW(/turf/simulated/wall/auto/reinforced/jen)
 		/turf/simulated/wall/auto/supernorn, /turf/simulated/wall/auto/reinforced/supernorn,
 		/turf/simulated/wall/auto/jen, /turf/simulated/wall/auto/reinforced/jen,
 		/turf/simulated/wall/false_wall, /obj/machinery/door, /obj/window, /obj/wingrille_spawn,
-		/turf/simulated/wall/auto/reinforced/supernorn/yellow, /turf/simulated/wall/auto/reinforced/supernorn/blackred
+		/turf/simulated/wall/auto/reinforced/supernorn/yellow, /turf/simulated/wall/auto/reinforced/supernorn/blackred,
+		/obj/structure/woodwall
 	))
 	connects_with_overlay = typecacheof(list(
 		/turf/simulated/wall/auto/reinforced/supernorn,
 		/turf/simulated/wall/auto/jen,
 		/turf/simulated/wall/auto/shuttle, /turf/simulated/wall/auto/shuttle,
 		/obj/machinery/door, /obj/window, /obj/wingrille_spawn,
-		/turf/simulated/wall/auto/reinforced/supernorn/yellow, /turf/simulated/wall/auto/reinforced/supernorn/blackred
+		/turf/simulated/wall/auto/reinforced/supernorn/yellow, /turf/simulated/wall/auto/reinforced/supernorn/blackred,
+		/obj/structure/woodwall
 	))
 	connects_with_overlay_exceptions = typecacheof(list(/turf/simulated/wall/auto/reinforced/jen))
 /turf/simulated/wall/auto/reinforced/jen
@@ -338,12 +342,14 @@ TYPEINFO_NEW(/turf/simulated/wall/auto/supernorn)
 		/turf/simulated/wall/auto/supernorn, /turf/simulated/wall/auto/reinforced/supernorn,
 		/turf/simulated/wall/false_wall, /obj/machinery/door, /obj/window, /obj/wingrille_spawn,
 		/turf/simulated/wall/auto/jen, /turf/simulated/wall/auto/reinforced/jen,
-		/turf/simulated/wall/auto/old, /turf/simulated/wall/auto/reinforced/old
+		/turf/simulated/wall/auto/old, /turf/simulated/wall/auto/reinforced/old,
+		/obj/structure/woodwall
 	))
 	connects_with_overlay = typecacheof(list(
 		/turf/simulated/wall/auto/shuttle,
 		/turf/simulated/wall/auto/shuttle, /obj/machinery/door, /obj/window, /obj/wingrille_spawn,
-		/turf/simulated/wall/auto/jen, /turf/simulated/wall/auto/reinforced/jen
+		/turf/simulated/wall/auto/jen, /turf/simulated/wall/auto/reinforced/jen,
+		/obj/structure/woodwall
 	))
 /turf/simulated/wall/auto/supernorn
 	icon = 'icons/turf/walls_supernorn_smooth.dmi'
@@ -371,12 +377,14 @@ TYPEINFO_NEW(/turf/simulated/wall/auto/reinforced/supernorn)
 		/turf/simulated/wall/false_wall, /turf/simulated/wall/auto/shuttle, /obj/machinery/door,
 		/obj/window, /obj/wingrille_spawn, /turf/simulated/wall/auto/reinforced/supernorn/yellow,
 		/turf/simulated/wall/auto/reinforced/supernorn/blackred, /turf/simulated/wall/auto/reinforced/supernorn/orange,
-		/turf/simulated/wall/auto/old, /turf/simulated/wall/auto/reinforced/old
+		/turf/simulated/wall/auto/old, /turf/simulated/wall/auto/reinforced/old,
+		/obj/structure/woodwall
 	))
 	connects_with_overlay = typecacheof(list(
 		/turf/simulated/wall/auto/jen, /turf/simulated/wall/auto/reinforced/jen,
 		/turf/simulated/wall/auto/shuttle, /obj/machinery/door, /obj/window,
-		/obj/wingrille_spawn, /turf/simulated/wall/auto/reinforced/paper
+		/obj/wingrille_spawn, /turf/simulated/wall/auto/reinforced/paper,
+		/obj/structure/woodwall
 	))
 /turf/simulated/wall/auto/reinforced/supernorn
 	icon = 'icons/turf/walls_supernorn_smooth.dmi'
