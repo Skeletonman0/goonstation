@@ -85,10 +85,7 @@
 		if (src.linked_human)
 			if (isskeleton(src.linked_human))
 				var/datum/mutantrace/skeleton/S = src.linked_human.mutantrace
-				S.head_tracker = null
-			src.UnregisterSignal(src.linked_human, COMSIG_CREATE_TYPING)
-			src.UnregisterSignal(src.linked_human, COMSIG_REMOVE_TYPING)
-			src.UnregisterSignal(src.linked_human, COMSIG_SPEECH_BUBBLE)
+				S.set_head(null)
 		if (holder)
 			holder.head = null
 		if (donor_original?.eye == src)
@@ -530,10 +527,10 @@
 	attach_organ(var/mob/living/carbon/M as mob, var/mob/user as mob)
 		/* Overrides parent function to handle special case for attaching heads. */
 
-		if (src.linked_human && isskeleton(M))// return the typing indicator to the human only if we're put on a skeleton
-			src.UnregisterSignal(src.linked_human, COMSIG_CREATE_TYPING)
-			src.UnregisterSignal(src.linked_human, COMSIG_REMOVE_TYPING)
-			src.UnregisterSignal(src.linked_human, COMSIG_SPEECH_BUBBLE)
+		if (isskeleton(src.linked_human) && isskeleton(M))// return the typing indicator to the human only if we're put on a skeleton
+			var/datum/mutantrace/skeleton/S = src.linked_human.mutantrace
+			S.set_head(null)
+
 		var/mob/living/carbon/human/H = M
 		if (!isskeleton(M) && !src.can_attach_organ(H, user))
 			return 0
