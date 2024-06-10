@@ -1127,27 +1127,29 @@ TYPEINFO(/datum/mutantrace/skeleton)
 		. = ..()
 
 	/// this code calls the required code to set up / un-setup skeleton heads
-	proc/head_moved(var/reset = FALSE)
+	proc/head_moved(var/removed = FALSE)
 		if (src.head_tracker == null) // only do this if there's a head to set up
 			return
-		var/head_attached = src.head_tracker == src.mob?.organHolder.head
-		if (head_attached || reset)
-			src.mob.set_eye(null)
-			// once the migration PR is merged, test these
-			//src.mob.update_speaker_origin(src.mob)
-			//src.mob.update_listener_origin(src.mob)
-
-			src.head_tracker.UnregisterSignal(src.head_tracker.linked_human, COMSIG_CREATE_TYPING)
-			src.head_tracker.UnregisterSignal(src.head_tracker.linked_human, COMSIG_REMOVE_TYPING)
-			src.head_tracker.UnregisterSignal(src.head_tracker.linked_human, COMSIG_SPEECH_BUBBLE)
-		else
+		var/datum/listen_module_tree/listen_tree = src.mob.ensure_listen_tree()
+		var/datum/speech_module_tree/speech_tree = src.mob.ensure_say_tree()
+		if (removed)
 			src.mob.set_eye(src.head_tracker)
-			//src.mob.update_speaker_origin(src.head_tracker)
-			//src.mob.update_listener_origin(src.head_tracker)
+
+			speech_tree.update_speaker_origin(src.head_tracker)
+			listen_tree.update_listener_origin(src.head_tracker)
 			// these might be unnecessary now, but i havent checked yet
 			src.head_tracker.RegisterSignal(src.head_tracker.linked_human, COMSIG_CREATE_TYPING)
 			src.head_tracker.RegisterSignal(src.head_tracker.linked_human, COMSIG_REMOVE_TYPING)
 			src.head_tracker.RegisterSignal(src.head_tracker.linked_human, COMSIG_SPEECH_BUBBLE)
+		else
+			src.mob.set_eye(null)
+
+			speech_tree.update_speaker_origin(src.mob)
+			listen_tree.update_listener_origin(src.mob)
+
+			src.head_tracker.UnregisterSignal(src.head_tracker.linked_human, COMSIG_CREATE_TYPING)
+			src.head_tracker.UnregisterSignal(src.head_tracker.linked_human, COMSIG_REMOVE_TYPING)
+			src.head_tracker.UnregisterSignal(src.head_tracker.linked_human, COMSIG_SPEECH_BUBBLE)
 
 
 	proc/set_head(var/obj/item/organ/head/head)

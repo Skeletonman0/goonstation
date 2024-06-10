@@ -741,10 +741,9 @@
 						W.set_loc(myHead)
 						myHead.wear_mask = W
 					if (isskeleton(src.donor) && myHead.head_type == HEAD_SKELETON) // must be skeleton AND have skeleton head
-						src.donor.set_eye(myHead)
 						var/datum/mutantrace/skeleton/S = H.mutantrace
 						S.set_head(myHead)
-						S.head_moved() // update tracking
+						S.head_moved(TRUE) // update tracking
 
 				myHead.set_loc(location)
 				myHead.update_head_image()
