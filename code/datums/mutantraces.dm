@@ -1137,19 +1137,12 @@ TYPEINFO(/datum/mutantrace/skeleton)
 
 			speech_tree.update_speaker_origin(src.head_tracker)
 			listen_tree.update_listener_origin(src.head_tracker)
-			// these might be unnecessary now, but i havent checked yet
-			src.head_tracker.RegisterSignal(src.head_tracker.linked_human, COMSIG_CREATE_TYPING)
-			src.head_tracker.RegisterSignal(src.head_tracker.linked_human, COMSIG_REMOVE_TYPING)
-			src.head_tracker.RegisterSignal(src.head_tracker.linked_human, COMSIG_SPEECH_BUBBLE)
+
 		else
 			src.mob.set_eye(null)
 
 			speech_tree.update_speaker_origin(src.mob)
 			listen_tree.update_listener_origin(src.mob)
-
-			src.head_tracker.UnregisterSignal(src.head_tracker.linked_human, COMSIG_CREATE_TYPING)
-			src.head_tracker.UnregisterSignal(src.head_tracker.linked_human, COMSIG_REMOVE_TYPING)
-			src.head_tracker.UnregisterSignal(src.head_tracker.linked_human, COMSIG_SPEECH_BUBBLE)
 
 
 	proc/set_head(var/obj/item/organ/head/head)
