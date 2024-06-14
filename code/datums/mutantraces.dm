@@ -1145,13 +1145,13 @@ TYPEINFO(/datum/mutantrace/skeleton)
 		if (isnull(head))
 			src.mob.set_eye(null)
 
-		if (isskeleton(head?.linked_human) && src.mob != head.linked_human)
+		if (isskeleton(head?.linked_human) && (src.mob != head.linked_human))
 			var/datum/mutantrace/skeleton/S = head.linked_human.mutantrace
 			S.set_head(null)
 			boutput(head.linked_human, SPAN_ALERT("<b>You feel as if your head has been repossessed by another!</b>"))
 			head.linked_human = null
 
-		if (head != head_tracker && head_tracker != null)
+		if ((head != head_tracker) && !isnull(head_tracker))
 			head_tracker.linked_human = null
 
 		head_tracker = head
