@@ -98,13 +98,12 @@
 
 /// Displays an atom's speech bubble overlay, then removes it after a short delay.
 /atom/proc/show_speech_bubble(image/override_image)
-	if (SEND_SIGNAL(src, COMSIG_SPEECH_BUBBLE, src.speech_bubble))
-		return FALSE
-
 	src.AddOverlays(override_image || src.speech_bubble, "speech_bubble")
+	OVERRIDE_COOLDOWN(src, "speech_bubble", 1.5 SECONDS)
 
 	SPAWN(1.5 SECONDS)
-		src.ClearSpecificOverlays("speech_bubble")
+		if (!GET_COOLDOWN(src, "speech_bubble"))
+			src.ClearSpecificOverlays("speech_bubble")
 
 /// Returns this atom's speech module tree. If this atom does not possess a speech module tree, instantiates one.
 /atom/proc/ensure_say_tree()
@@ -157,7 +156,6 @@ Cleanup:
 Things To Implement:
 - AI
 - Observers (not ghosts)
-- Skeleton heads
 - Ghostdrones (language)
 - Radio brain (bioeffect)
 - Radio station mixing desk

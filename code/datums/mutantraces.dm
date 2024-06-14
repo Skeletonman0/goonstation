@@ -1126,33 +1126,24 @@ TYPEINFO(/datum/mutantrace/skeleton)
 			src.mob.mob_flags &= ~IS_BONEY
 		. = ..()
 
-	/// this code calls the required code to set up / un-setup skeleton heads
-	proc/head_moved(var/removed = FALSE)
-		if (src.head_tracker == null) // only do this if there's a head to set up
+	proc/head_moved(removed = FALSE)
+		if (isnull(src.head_tracker))
 			return
-		var/datum/listen_module_tree/listen_tree = src.mob.ensure_listen_tree()
-		var/datum/speech_module_tree/speech_tree = src.mob.ensure_say_tree()
+
 		if (removed)
 			src.mob.set_eye(src.head_tracker)
-
-			speech_tree.update_speaker_origin(src.head_tracker)
-			listen_tree.update_listener_origin(src.head_tracker)
+			src.mob.ensure_say_tree().update_speaker_origin(src.head_tracker)
+			src.mob.ensure_listen_tree().update_listener_origin(src.head_tracker)
 
 		else
 			src.mob.set_eye(null)
+			src.mob.ensure_say_tree().update_speaker_origin(src.mob)
+			src.mob.ensure_listen_tree().update_listener_origin(src.mob)
 
-			speech_tree.update_speaker_origin(src.mob)
-			listen_tree.update_listener_origin(src.mob)
-
-
-	proc/set_head(var/obj/item/organ/head/head)
+	proc/set_head(obj/item/organ/head/head)
 		// if the head was previous linked to someone else
-		if (head == null)
+		if (isnull(head))
 			src.mob.set_eye(null)
-		if (src.head_tracker && head != src.head_tracker)
-			src.head_tracker.UnregisterSignal(src.head_tracker.linked_human, COMSIG_CREATE_TYPING)
-			src.head_tracker.UnregisterSignal(src.head_tracker.linked_human, COMSIG_REMOVE_TYPING)
-			src.head_tracker.UnregisterSignal(src.head_tracker.linked_human, COMSIG_SPEECH_BUBBLE)
 
 		if (isskeleton(head?.linked_human) && src.mob != head.linked_human)
 			var/datum/mutantrace/skeleton/S = head.linked_human.mutantrace
