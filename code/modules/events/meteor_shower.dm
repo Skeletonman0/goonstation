@@ -53,7 +53,7 @@ var/global/meteor_shower_active = 0
 			#endif
 		if(istext(transmute_material_instead))
 			transmute_material_instead = getMaterial(transmute_material_instead)
-		if(transmute_material_instead?.mat_id == "jean")
+		if(transmute_material_instead?.getID() == "jean")
 			shower_name = "jeteor jower"
 
 		if (isnum(direction) && direction == -1)
@@ -121,6 +121,23 @@ var/global/meteor_shower_active = 0
 				command_alert("The [shower_name] has reached the [station_or_ship()]. Brace for impact.", "Meteor Alert", alert_origin = ALERT_WEATHER)
 				playsound_global(world, 'sound/machines/disaster_alert.ogg', 60)
 
+	#ifndef UNDERWATER_MAP
+			switch(src.wave_direction)
+				if (NORTH)
+					ADD_PARALLAX_RENDER_SOURCE_TO_GROUP(Z_LEVEL_STATION, /atom/movable/screen/parallax_render_source/meteor_shower/north, 0 SECONDS)
+				if (EAST)
+					ADD_PARALLAX_RENDER_SOURCE_TO_GROUP(Z_LEVEL_STATION, /atom/movable/screen/parallax_render_source/meteor_shower/east, 0 SECONDS)
+				if (SOUTH)
+					ADD_PARALLAX_RENDER_SOURCE_TO_GROUP(Z_LEVEL_STATION, /atom/movable/screen/parallax_render_source/meteor_shower/south, 0 SECONDS)
+				if (WEST)
+					ADD_PARALLAX_RENDER_SOURCE_TO_GROUP(Z_LEVEL_STATION, /atom/movable/screen/parallax_render_source/meteor_shower/west, 0 SECONDS)
+				if (-1)	// from ALL DIRECTIONS (may cause lag? probably not though, it's only 4 layers)
+					ADD_PARALLAX_RENDER_SOURCE_TO_GROUP(Z_LEVEL_STATION, /atom/movable/screen/parallax_render_source/meteor_shower/north, 0 SECONDS)
+					ADD_PARALLAX_RENDER_SOURCE_TO_GROUP(Z_LEVEL_STATION, /atom/movable/screen/parallax_render_source/meteor_shower/east, 0 SECONDS)
+					ADD_PARALLAX_RENDER_SOURCE_TO_GROUP(Z_LEVEL_STATION, /atom/movable/screen/parallax_render_source/meteor_shower/south, 0 SECONDS)
+					ADD_PARALLAX_RENDER_SOURCE_TO_GROUP(Z_LEVEL_STATION, /atom/movable/screen/parallax_render_source/meteor_shower/west, 0 SECONDS)
+	#endif
+
 			var/start_x
 			var/start_y
 			var/targ_x
@@ -179,6 +196,13 @@ var/global/meteor_shower_active = 0
 			meteor_shower_active = 0
 			for (var/obj/machinery/shield_generator/S as anything in machine_registry[MACHINES_SHIELDGENERATORS])
 				S.UpdateIcon()
+
+	#ifndef UNDERWATER_MAP
+			REMOVE_PARALLAX_RENDER_SOURCE_FROM_GROUP(Z_LEVEL_STATION, /atom/movable/screen/parallax_render_source/meteor_shower/north, 0 SECONDS)
+			REMOVE_PARALLAX_RENDER_SOURCE_FROM_GROUP(Z_LEVEL_STATION, /atom/movable/screen/parallax_render_source/meteor_shower/east, 0 SECONDS)
+			REMOVE_PARALLAX_RENDER_SOURCE_FROM_GROUP(Z_LEVEL_STATION, /atom/movable/screen/parallax_render_source/meteor_shower/south, 0 SECONDS)
+			REMOVE_PARALLAX_RENDER_SOURCE_FROM_GROUP(Z_LEVEL_STATION, /atom/movable/screen/parallax_render_source/meteor_shower/west, 0 SECONDS)
+	#endif
 
 	admin_call(var/source)
 		if (..())
@@ -345,11 +369,15 @@ var/global/meteor_shower_active = 0
 			process()
 
 	proc/check_hits()
-		for(var/turf/simulated/S in range(1,src))
-			if(!S.density) continue
+		for(var/turf/T in range(1,src))
+			if(!T.density)
+				continue
+			//let's not just go straight through unsimmed turfs and total the inside of the listening post
+			if (!issimulatedturf(T) || !istype(T, /turf/unsimulated))
+				continue
 			hit_object = 1
 			if (prob(meteorhit_chance))
-				S.meteorhit(src)
+				T.meteorhit(src)
 
 		for(var/mob/M in range(1,src))
 			if(M == src) continue //Just to make sure
@@ -499,7 +527,7 @@ var/global/meteor_shower_active = 0
 		for(var/turf/T in range(src,1))
 			if (T.density || prob(40))
 				continue
-			var/turf/simulated/wall/auto/asteroid/asteroid = new(T)
+			var/turf/simulated/wall/auto/asteroid/asteroid = T.ReplaceWith(/turf/simulated/wall/auto/asteroid, FALSE, force = TRUE)
 			if (src.transmute_material)
 				asteroid.setMaterial(src.transmute_material)
 			turfs += asteroid

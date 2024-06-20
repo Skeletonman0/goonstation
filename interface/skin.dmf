@@ -15,7 +15,7 @@ macro "base_macro"
 		command = ".winset \"command=\".start_typing say\";command=.init_say;saywindow.is-visible=true;saywindow.say-input.focus=true\""
 	elem "radiosay"
 		name = ";"
-		command = "say_main_radio"
+		command = ".winset \"command=.init_radiosay;radiosaywindow.is-visible=true;radiosaywindow.say-input.focus=true\""
 	elem "ooc"
 		name = "O"
 		command = "ooc"
@@ -114,6 +114,13 @@ menu "menu"
 	elem "icon128"
 		name = "&128x128"
 		command = ".winset \"mapwindow.map.icon-size=128\""
+		category = "&Icon Settings"
+		can-check = true
+		group = "size"
+		saved-params = "is-checked"
+	elem "icon88"
+		name = "&88x88"
+		command = ".winset \"mapwindow.map.icon-size=88\""
 		category = "&Icon Settings"
 		can-check = true
 		group = "size"
@@ -256,6 +263,20 @@ menu "menu"
 		is-checked = true
 		can-check = true
 		saved-params = "is-checked"
+	elem "set_distort"
+		name = "&Distortion"
+		command = "apply-depth-shadow"
+		category = "&Effects"
+		is-checked = true
+		can-check = true
+		saved-params = "is-checked"
+	elem "toggle_parallax"
+		name = "&Parallax"
+		command = "toggle-parallax"
+		category = "&Effects"
+		is-checked = true
+		can-check = true
+		saved-params = "is-checked"
 	elem "adjust_saturation"
 		name = "&Saturation"
 		command = "adjust-saturation"
@@ -264,6 +285,13 @@ menu "menu"
 	elem "set_tint"
 		name = "&View Tint"
 		command = "apply-view-tint"
+		category = "&Effects"
+		is-checked = true
+		can-check = true
+		saved-params = "is-checked"
+	elem "toggle_camera_recoil"
+		name = "&Camera Recoil"
+		command = "toggle-camera-recoil"
 		category = "&Effects"
 		is-checked = true
 		can-check = true
@@ -301,7 +329,7 @@ menu "menu"
 		command = ""
 		category = "&Interface"
 		saved-params = "is-checked"
-	elem "wasd_controls"
+	elem "modify_keybinds"
 		name = "&Modify Keybinds"
 		command = "modify-keybinds"
 		category = "&Interface"
@@ -670,6 +698,19 @@ window "joinmenu"
 		saved-params = "is-checked"
 		text = ""
 		image = 'icons\\ui\\declare-ready.png'
+		command = ".ready"
+	elem "button_joingame"
+		type = BUTTON
+		pos = 18,80
+		size = 200x40
+		anchor1 = none
+		anchor2 = none
+		font-family = "Verdana"
+		font-size = 10
+		font-style = "bold"
+		saved-params = "is-checked"
+		text = ""
+		image = 'icons\\ui\\join-game.png'
 		command = ".ready"
 	elem "button_charsetup"
 		type = BUTTON

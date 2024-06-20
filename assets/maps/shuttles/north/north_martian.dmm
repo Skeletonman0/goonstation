@@ -23,7 +23,7 @@
 	icon_state = "line1";
 	tag = "icon-line1 (NORTH)"
 	},
-/obj/machinery/atmospherics/portables_connector,
+/obj/machinery/atmospherics/unary/portables_connector,
 /obj/decal/fakeobjects{
 	density = 1;
 	icon = 'icons/obj/atmospherics/atmos.dmi';
@@ -55,7 +55,7 @@
 	desc = "It's a pipe manifold.";
 	dir = 6;
 	icon = 'icons/obj/atmospherics/pipes/manifold_pipe.dmi';
-	icon_state = "manifold";
+	icon_state = "manifold-map";
 	name = "pipe"
 	},
 /turf/unsimulated/floor/shuttlebay,
@@ -63,7 +63,7 @@
 "bQ" = (
 /obj/indestructible/shuttle_corner{
 	dir = 10;
-	icon = 'icons/turf/walls_martian.dmi';
+	icon = 'icons/turf/walls/martian.dmi';
 	icon_state = "diagonal"
 	},
 /turf/unsimulated/floor{
@@ -107,7 +107,8 @@
 	},
 /obj/decal/fakeobjects/pipe{
 	dir = 6;
-	name = "pipe"
+	name = "pipe";
+	color = "b4b4b4"
 	},
 /turf/unsimulated/floor{
 	icon_state = "floor"
@@ -151,16 +152,6 @@
 /obj/stool/chair/comfy/shuttle/pilot{
 	dir = 1
 	},
-/turf/unsimulated/floor{
-	icon = 'icons/turf/martian.dmi';
-	icon_state = "floor1"
-	},
-/area/shuttle/escape/centcom)
-"dD" = (
-/obj/stool/chair/comfy/shuttle/pilot{
-	dir = 1
-	},
-/obj/critter/martian/warrior,
 /turf/unsimulated/floor{
 	icon = 'icons/turf/martian.dmi';
 	icon_state = "floor1"
@@ -210,7 +201,7 @@
 "eZ" = (
 /obj/indestructible/shuttle_corner{
 	dir = 10;
-	icon = 'icons/turf/walls_martian.dmi';
+	icon = 'icons/turf/walls/martian.dmi';
 	icon_state = "diagonal"
 	},
 /turf/unsimulated/floor/shuttlebay,
@@ -236,7 +227,7 @@
 "gn" = (
 /obj/indestructible/shuttle_corner{
 	dir = 9;
-	icon = 'icons/turf/walls_martian.dmi';
+	icon = 'icons/turf/walls/martian.dmi';
 	icon_state = "diagonal"
 	},
 /turf/unsimulated/floor{
@@ -275,7 +266,8 @@
 "hi" = (
 /obj/decal/fakeobjects/pipe{
 	desc = "A pipe.";
-	name = "pipe"
+	name = "pipe";
+	color = "b4b4b4"
 	},
 /obj/decal/tile_edge/stripe/extra_big{
 	dir = 1
@@ -293,7 +285,7 @@
 "hL" = (
 /obj/indestructible/shuttle_corner{
 	dir = 5;
-	icon = 'icons/turf/walls_martian.dmi';
+	icon = 'icons/turf/walls/martian.dmi';
 	icon_state = "diagonal"
 	},
 /turf/unsimulated/floor{
@@ -304,7 +296,7 @@
 "ib" = (
 /obj/indestructible/shuttle_corner{
 	dir = 6;
-	icon = 'icons/turf/walls_martian.dmi';
+	icon = 'icons/turf/walls/martian.dmi';
 	icon_state = "diagonal"
 	},
 /turf/unsimulated/floor{
@@ -388,16 +380,6 @@
 	icon_state = "floor"
 	},
 /area/centcom/outside)
-"lQ" = (
-/obj/stool/chair/comfy/shuttle/brown{
-	dir = 1
-	},
-/obj/critter/martian/warrior,
-/turf/unsimulated/floor{
-	icon = 'icons/turf/martian.dmi';
-	icon_state = "floor1"
-	},
-/area/shuttle/escape/centcom)
 "lU" = (
 /obj/decal/tile_edge/line/black{
 	dir = 8;
@@ -407,7 +389,7 @@
 	desc = "It's a pipe manifold.";
 	dir = 8;
 	icon = 'icons/obj/atmospherics/pipes/manifold_pipe.dmi';
-	icon_state = "manifold";
+	icon_state = "manifold-map";
 	name = "pipe"
 	},
 /turf/unsimulated/floor{
@@ -439,7 +421,8 @@
 	},
 /obj/decal/fakeobjects/pipe{
 	dir = 9;
-	name = "pipe"
+	name = "pipe";
+	color = "b4b4b4"
 	},
 /turf/unsimulated/floor{
 	icon_state = "floor"
@@ -504,7 +487,8 @@
 	},
 /obj/decal/fakeobjects/pipe{
 	desc = "A pipe.";
-	name = "pipe"
+	name = "pipe";
+	color = "b4b4b4"
 	},
 /turf/unsimulated/floor{
 	icon_state = "floor"
@@ -513,7 +497,8 @@
 "pM" = (
 /obj/decal/fakeobjects/pipe{
 	dir = 4;
-	name = "pipe"
+	name = "pipe";
+	color = "b4b4b4"
 	},
 /turf/unsimulated/floor/shuttlebay,
 /area/centcom/outside)
@@ -597,13 +582,6 @@
 	},
 /turf/unsimulated/floor/black,
 /area/centcom/outside)
-"sU" = (
-/obj/critter/martian/warrior,
-/turf/unsimulated/floor{
-	icon = 'icons/turf/martian.dmi';
-	icon_state = "floor1"
-	},
-/area/shuttle/escape/centcom)
 "tL" = (
 /obj/decal/tile_edge/stripe/extra_big{
 	dir = 10;
@@ -612,8 +590,11 @@
 /obj/machinery/light/small/floor,
 /turf/unsimulated/floor/shuttlebay,
 /area/centcom/outside)
-"ub" = (
-/obj/critter/martian/soldier,
+"uq" = (
+/obj/stool/chair/comfy/shuttle/pilot{
+	dir = 1
+	},
+/mob/living/critter/martian/warrior,
 /turf/unsimulated/floor{
 	icon = 'icons/turf/martian.dmi';
 	icon_state = "floor1"
@@ -644,7 +625,8 @@
 "zn" = (
 /obj/decal/fakeobjects/pipe{
 	dir = 5;
-	name = "pipe"
+	name = "pipe";
+	color = "b4b4b4"
 	},
 /turf/unsimulated/floor/shuttlebay,
 /area/centcom/outside)
@@ -658,7 +640,7 @@
 /obj/decal/fakeobjects/pipe{
 	dir = 4;
 	icon = 'icons/obj/atmospherics/valve.dmi';
-	icon_state = "valve0";
+	icon_state = "valve0-map";
 	name = "valve"
 	},
 /turf/unsimulated/floor{
@@ -672,7 +654,7 @@
 "As" = (
 /obj/indestructible/shuttle_corner{
 	dir = 6;
-	icon = 'icons/turf/walls_martian.dmi';
+	icon = 'icons/turf/walls/martian.dmi';
 	icon_state = "diagonal"
 	},
 /turf/unsimulated/floor/shuttlebay,
@@ -680,6 +662,13 @@
 "AQ" = (
 /obj/table/reinforced/auto,
 /obj/item/storage/toolbox/emergency,
+/turf/unsimulated/floor{
+	icon = 'icons/turf/martian.dmi';
+	icon_state = "floor1"
+	},
+/area/shuttle/escape/centcom)
+"AS" = (
+/obj/mapping_helper/wingrille_spawn/auto/reinforced/crystal,
 /turf/unsimulated/floor{
 	icon = 'icons/turf/martian.dmi';
 	icon_state = "floor1"
@@ -693,7 +682,8 @@
 "Bw" = (
 /obj/decal/fakeobjects/pipe{
 	desc = "A pipe.";
-	name = "pipe"
+	name = "pipe";
+	color = "b4b4b4"
 	},
 /turf/unsimulated/floor/shuttlebay,
 /area/centcom/outside)
@@ -760,14 +750,6 @@
 /obj/machinery/light/small/floor,
 /turf/unsimulated/floor/shuttlebay,
 /area/centcom/outside)
-"FP" = (
-/obj/map/light/dimred,
-/obj/critter/martian/warrior,
-/turf/unsimulated/floor{
-	icon = 'icons/turf/martian.dmi';
-	icon_state = "floor1"
-	},
-/area/shuttle/escape/centcom)
 "Gq" = (
 /turf/unsimulated/wall/auto/lead/blue,
 /area/centcom)
@@ -792,7 +774,7 @@
 	},
 /area/centcom/outside)
 "HA" = (
-/turf/unsimulated/wall{
+/turf/unsimulated/wall/generic{
 	dir = 4;
 	icon = 'icons/misc/worlds.dmi';
 	icon_state = "leadwindow_1";
@@ -849,6 +831,13 @@
 /obj/machinery/light/small/floor,
 /turf/unsimulated/floor/shuttlebay,
 /area/centcom/outside)
+"Mo" = (
+/mob/living/critter/martian/soldier,
+/turf/unsimulated/floor{
+	icon = 'icons/turf/martian.dmi';
+	icon_state = "floor1"
+	},
+/area/shuttle/escape/centcom)
 "Mw" = (
 /obj/decal/tile_edge/stripe/extra_big{
 	dir = 6
@@ -957,7 +946,7 @@
 	desc = "It's a pipe manifold.";
 	dir = 4;
 	icon = 'icons/obj/atmospherics/pipes/manifold_pipe.dmi';
-	icon_state = "manifold";
+	icon_state = "manifold-map";
 	name = "pipe"
 	},
 /turf/unsimulated/floor{
@@ -994,7 +983,7 @@
 	},
 /area/shuttle/escape/centcom)
 "QN" = (
-/obj/machinery/atmospherics/portables_connector{
+/obj/machinery/atmospherics/unary/portables_connector{
 	dir = 1
 	},
 /obj/decal/fakeobjects{
@@ -1008,7 +997,7 @@
 	},
 /area/centcom/outside)
 "Rs" = (
-/turf/unsimulated/wall{
+/turf/unsimulated/wall/generic{
 	icon = 'icons/misc/worlds.dmi';
 	icon_state = "leadwindow_1";
 	name = "window";
@@ -1036,7 +1025,7 @@
 "RB" = (
 /obj/indestructible/shuttle_corner{
 	dir = 5;
-	icon = 'icons/turf/walls_martian.dmi';
+	icon = 'icons/turf/walls/martian.dmi';
 	icon_state = "diagonal"
 	},
 /turf/unsimulated/floor/shuttlebay,
@@ -1055,7 +1044,7 @@
 /turf/unsimulated/floor/black,
 /area/centcom/outside)
 "SW" = (
-/obj/machinery/atmospherics/portables_connector,
+/obj/machinery/atmospherics/unary/portables_connector,
 /obj/decal/fakeobjects{
 	density = 1;
 	icon = 'icons/obj/atmospherics/atmos.dmi';
@@ -1074,6 +1063,14 @@
 	icon_state = "floor"
 	},
 /area/centcom)
+"Tf" = (
+/obj/map/light/dimred,
+/mob/living/critter/martian/warrior,
+/turf/unsimulated/floor{
+	icon = 'icons/turf/martian.dmi';
+	icon_state = "floor1"
+	},
+/area/shuttle/escape/centcom)
 "Tl" = (
 /obj/stool/chair/comfy/shuttle/red{
 	dir = 8
@@ -1083,8 +1080,18 @@
 	icon_state = "floor1"
 	},
 /area/shuttle/escape/centcom)
-"TB" = (
-/obj/wingrille_spawn/auto/crystal/reinforced,
+"TT" = (
+/obj/stool/chair/comfy/shuttle/brown{
+	dir = 1
+	},
+/mob/living/critter/martian/warrior,
+/turf/unsimulated/floor{
+	icon = 'icons/turf/martian.dmi';
+	icon_state = "floor1"
+	},
+/area/shuttle/escape/centcom)
+"Uo" = (
+/mob/living/critter/martian/warrior,
 /turf/unsimulated/floor{
 	icon = 'icons/turf/martian.dmi';
 	icon_state = "floor1"
@@ -1149,7 +1156,7 @@
 "Zb" = (
 /obj/indestructible/shuttle_corner{
 	dir = 9;
-	icon = 'icons/turf/walls_martian.dmi';
+	icon = 'icons/turf/walls/martian.dmi';
 	icon_state = "diagonal"
 	},
 /turf/unsimulated/floor/shuttlebay,
@@ -1333,12 +1340,12 @@ Pb
 kX
 Mw
 As
-TB
+AS
 Vg
-TB
-TB
+AS
+AS
 Vg
-TB
+AS
 or
 or
 or
@@ -1397,7 +1404,7 @@ ML
 DA
 DA
 or
-ub
+Mo
 ML
 du
 bQ
@@ -1413,20 +1420,20 @@ RL
 RF
 Mw
 As
-TB
-TB
+AS
+AS
 or
 DA
 DA
-sU
+Uo
 mx
 ML
-ub
-FP
+Mo
+Tf
 ML
 DE
 ML
-sU
+Uo
 ML
 dv
 eF
@@ -1467,7 +1474,7 @@ HA
 Gq
 pW
 Qp
-TB
+AS
 nH
 ML
 ML
@@ -1495,22 +1502,22 @@ Gq
 Gq
 RL
 Qp
-TB
+AS
 QD
-dD
+uq
 ML
 or
 DA
 DA
 ML
-sU
+Uo
 ML
 ML
 ML
 ML
 DE
 dv
-sU
+Uo
 gy
 or
 oQ
@@ -1523,16 +1530,16 @@ Gq
 HA
 RL
 Qp
-TB
+AS
 ru
 dy
-ub
+Mo
 or
 DA
 DA
 ML
 ML
-ub
+Mo
 ML
 ML
 ML
@@ -1551,7 +1558,7 @@ HA
 Gq
 pW
 Qp
-TB
+AS
 nH
 ML
 ML
@@ -1609,12 +1616,12 @@ RL
 Fa
 HE
 eZ
-TB
-TB
+AS
+AS
 or
 DA
 DA
-sU
+Uo
 mx
 ML
 ML
@@ -1623,7 +1630,7 @@ ML
 DE
 ML
 ML
-sU
+Uo
 dv
 eF
 Hm
@@ -1646,11 +1653,11 @@ ML
 DA
 DA
 ML
-lQ
+TT
 DA
 or
 ML
-ub
+Mo
 pP
 ib
 Od
@@ -1697,12 +1704,12 @@ Pb
 tL
 HE
 eZ
-TB
+AS
 Vg
-TB
-TB
+AS
+AS
 Vg
-TB
+AS
 or
 or
 or

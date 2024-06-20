@@ -28,14 +28,23 @@ TYPEINFO(/datum/component/power_cell)
 	src.can_be_recharged = rechargable
 	if(charge < max_charge && recharge_rate)
 		processing_items |= parent
-	RegisterSignal(parent, COMSIG_ATTACKBY, .proc/attackby)
-	RegisterSignal(parent, COMSIG_CELL_CHARGE, .proc/charge)
-	RegisterSignal(parent, COMSIG_CELL_CAN_CHARGE, .proc/can_charge)
-	RegisterSignal(parent, COMSIG_CELL_USE, .proc/use)
-	RegisterSignal(parent, COMSIG_CELL_CHECK_CHARGE, .proc/check_charge)
-	RegisterSignal(parent, COMSIG_CELL_IS_CELL, .proc/is_cell)
-	RegisterSignal(parent, COMSIG_ITEM_PROCESS, .proc/process)
+	RegisterSignal(parent, COMSIG_ATTACKBY, PROC_REF(attackby))
+	RegisterSignal(parent, COMSIG_CELL_CHARGE, PROC_REF(charge))
+	RegisterSignal(parent, COMSIG_CELL_CAN_CHARGE, PROC_REF(can_charge))
+	RegisterSignal(parent, COMSIG_CELL_USE, PROC_REF(use))
+	RegisterSignal(parent, COMSIG_CELL_CHECK_CHARGE, PROC_REF(check_charge))
+	RegisterSignal(parent, COMSIG_CELL_IS_CELL, PROC_REF(is_cell))
+	RegisterSignal(parent, COMSIG_ITEM_PROCESS, PROC_REF(process))
 
+/datum/component/power_cell/UnregisterFromParent()
+	UnregisterSignal(parent, COMSIG_ATTACKBY)
+	UnregisterSignal(parent, COMSIG_CELL_CHARGE)
+	UnregisterSignal(parent, COMSIG_CELL_CAN_CHARGE)
+	UnregisterSignal(parent, COMSIG_CELL_USE)
+	UnregisterSignal(parent, COMSIG_CELL_CHECK_CHARGE)
+	UnregisterSignal(parent, COMSIG_CELL_IS_CELL)
+	UnregisterSignal(parent, COMSIG_ITEM_PROCESS)
+	. = ..()
 
 /datum/component/power_cell/InheritComponent(datum/component/power_cell/C, i_am_original, max, start_charge, recharge, delay, rechargable)
 	if(C)
@@ -92,13 +101,13 @@ TYPEINFO(/datum/component/power_cell)
 
 /datum/component/power_cell/proc/check_charge(source, list/amount)
 	if(islist(amount))
-		amount["charge"] = charge
-		amount["max_charge"] = max_charge
+		amount["charge"] = src.charge
+		amount["max_charge"] = src.max_charge
 		. = CELL_RETURNED_LIST
 	else if(isnum_safe(amount))
-		. = (charge >= amount) ? CELL_SUFFICIENT_CHARGE : CELL_INSUFFICIENT_CHARGE
+		. = (src.charge >= amount) ? CELL_SUFFICIENT_CHARGE : CELL_INSUFFICIENT_CHARGE
 	else
-		. = charge > 0 ? CELL_SUFFICIENT_CHARGE : CELL_INSUFFICIENT_CHARGE
+		. = src.charge > 0 ? CELL_SUFFICIENT_CHARGE : CELL_INSUFFICIENT_CHARGE
 
 /datum/component/power_cell/proc/is_cell()
 	return TRUE
@@ -130,26 +139,26 @@ TYPEINFO(/datum/component/power_cell)
 
 /datum/component/power_cell/redirect/Initialize(max, start_charge, recharge, delay, rechargable)
 	. = ..( )
-	RegisterSignal(parent, COMSIG_MOVABLE_SET_LOC, .proc/update_redirect)
+	RegisterSignal(parent, COMSIG_MOVABLE_SET_LOC, PROC_REF(update_redirect))
 	processing_items |= parent
 
 /datum/component/power_cell/redirect/can_charge(parent)
-	if(BOUNDS_DIST(src.parent, src.redirect_object) < 1)
+	if(src.distance_check())
 		. = SEND_SIGNAL(redirect_object, COMSIG_CELL_CAN_CHARGE)
 
 /datum/component/power_cell/redirect/use(parent, amount)
-	if(BOUNDS_DIST(src.parent, src.redirect_object) < 1)
+	if(src.distance_check())
 		. = SEND_SIGNAL(redirect_object, COMSIG_CELL_USE, amount)
 
 /datum/component/power_cell/redirect/check_charge(source, amount)
-	if(BOUNDS_DIST(src.parent, src.redirect_object) < 1)
+	if(src.distance_check())
 		. = SEND_SIGNAL(redirect_object, COMSIG_CELL_CHECK_CHARGE, amount)
 
 /datum/component/power_cell/redirect/proc/connect(obj/item/parent, atom/target, mob/user, reach, params)
 	if(istype(target, target_type))
 		redirect_object = target
-		RegisterSignal(redirect_object, list(COMSIG_MOVABLE_MOVED, COMSIG_MOVABLE_SET_LOC), .proc/check_redirect)
-		boutput(user,"You connect [parent] to [target].")
+		RegisterSignal(redirect_object, list(COMSIG_MOVABLE_MOVED, COMSIG_MOVABLE_SET_LOC), PROC_REF(check_redirect))
+		boutput(user,SPAN_SUCCESS("You connect [parent] to [target]."))
 
 /datum/component/power_cell/redirect/proc/update_redirect(atom/movable/target, previous_loc, direction)
 	if(istype(parent, /obj/item/ammo/power_cell/redirect))
@@ -158,8 +167,8 @@ TYPEINFO(/datum/component/power_cell)
 
 		if(!cell.internal && !parent_locked)
 			parent_locked = TRUE
-			RegisterSignal(cell.loc, list(COMSIG_MOVABLE_MOVED, COMSIG_MOVABLE_SET_LOC), .proc/check_redirect)
-			RegisterSignal(cell.loc, COMSIG_ITEM_AFTERATTACK, .proc/connect)
+			RegisterSignal(cell.loc, list(COMSIG_MOVABLE_MOVED, COMSIG_MOVABLE_SET_LOC), PROC_REF(check_redirect))
+			RegisterSignal(cell.loc, COMSIG_ITEM_AFTERATTACK, PROC_REF(connect))
 
 		var/obj/O = parent
 		while(istype(O) && !istype(O, target_type))
@@ -172,8 +181,13 @@ TYPEINFO(/datum/component/power_cell)
 		CRASH("[parent] is not /obj/item/ammo/power_cell/redirect")
 
 /datum/component/power_cell/redirect/proc/check_redirect(atom/movable/target, previous_loc, direction)
-	if(redirect_object && (BOUNDS_DIST(parent, src.redirect_object) >= 1))
+	src.distance_check()
+
+/datum/component/power_cell/redirect/proc/distance_check()
+	if(src.redirect_object && (BOUNDS_DIST(src.parent, src.redirect_object) >= 1))
 		var/obj/item/ammo/power_cell/redirect/cell = parent
-		target.visible_message("[cell.loc]'s connection to [src.redirect_object] reaches the end of the cable... and pops free.")
+		var/obj/target = cell.loc
+		target.tri_message(target.loc, "[target]'s connection to [src.redirect_object] pops free.", second_message=SPAN_ALERT("[target]'s connection to [src.redirect_object] reaches the end of the cable... and pops free."), blind_message="You hear a faint popping sound as if something were unplugged.")
 		UnregisterSignal(redirect_object, list(COMSIG_MOVABLE_MOVED, COMSIG_MOVABLE_SET_LOC))
 		redirect_object = null
+	. = !isnull(redirect_object)

@@ -1,5 +1,5 @@
 import { useBackend } from '../backend';
-import { Section, Button, BlockQuote } from '../components';
+import { BlockQuote, Button, Section } from '../components';
 import { Window } from '../layouts';
 
 export const ConstructShuttle = (props, context) => {

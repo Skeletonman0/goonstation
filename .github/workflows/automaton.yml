@@ -11,7 +11,6 @@ on:
       - "master"
 
 jobs:
-
   runtime:
     name: Runtime Checker
     runs-on: ubuntu-22.04
@@ -19,25 +18,35 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        map: ["COGMAP", "COGMAP2", "CLARION", "DONUT3", "DONUT2", "OSHAN", "KONDARU", "NADIR", "ATLAS", "SPACE_PREFAB", "UNDERWATER_PREFAB", "FULL"]
+        map:
+          [
+            "COGMAP",
+            "COGMAP2",
+            "CLARION",
+            "DONUT3",
+            "DONUT2",
+            "OSHAN",
+            "KONDARU",
+            "NADIR",
+            "ATLAS",
+            "SPACE_PREFAB",
+            "UNDERWATER_PREFAB",
+            "RANDOM_ROOMS",
+            "FULL",
+          ]
         compiletype: ["default"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: |
           sudo dpkg --add-architecture i386
           sudo sed -i'' -E 's/^(deb|deb-src) http:\/\/(azure.archive|security).ubuntu.com/\1 [arch=amd64,i386] http:\/\/\2.ubuntu.com/' /etc/apt/sources.list
           sudo apt-get update
-
-      - name: Fetch cached i386 packages
-        uses: awalsh128/cache-apt-pkgs-action@v1
-        with:
-          packages: libstdc++6:i386 libssl-dev:i386
-          version: automaton
+          sudo apt install -o APT::Immediate-Configure=false libssl-dev:i386 libgcc-s1:i386
 
       - name: Cache BYOND
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/BYOND
           key: ${{ runner.os }}-byond-${{ hashFiles('buildByond.conf')}}
@@ -52,7 +61,6 @@ jobs:
           echo "/home/runner/BYOND/byond/bin" >> $GITHUB_PATH
           echo "LD_LIBRARY_PATH=/home/runner/BYOND/byond/bin:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "MANPATH=/home/runner/BYOND/byond/man:$MANPATH" >> $GITHUB_ENV
-          touch +secret/__secret.dme
 
       - name: Setup for assjam
         if: "matrix.compiletype == 'ass'"
@@ -66,7 +74,7 @@ jobs:
       - name: Compile map
         if: "matrix.map != 'SPACE_PREFAB' && matrix.map != 'UNDERWATER_PREFAB' && matrix.map != 'FULL'"
         run: |
-          tools/ci/dm.sh -DCIBUILD -DMAP_OVERRIDE_${{ matrix.map}} -DRUNTIME_CHECKING -DIM_REALLY_IN_A_FUCKING_HURRY_HERE goonstation.dme
+          tools/ci/dm.sh -DCIBUILD -DMAP_OVERRIDE_${{ matrix.map}} -DCI_RUNTIME_CHECKING -DIM_REALLY_IN_A_FUCKING_HURRY_HERE goonstation.dme
 
       - name: Compile space prefabs
         if: "matrix.map == 'SPACE_PREFAB'"
@@ -78,10 +86,15 @@ jobs:
         run: |
           tools/ci/dm.sh -DCIBUILD -DUNDERWATER_PREFAB_RUNTIME_CHECKING  -DIM_REALLY_IN_A_FUCKING_HURRY_HERE goonstation.dme
 
+      - name: Compile random rooms
+        if: "matrix.map == 'RANDOM_ROOMS'"
+        run: |
+          tools/ci/dm.sh -DCIBUILD -DRANDOM_ROOM_RUNTIME_CHECKING  -DIM_REALLY_IN_A_FUCKING_HURRY_HERE goonstation.dme
+
       - name: Compile with full pre-round setup
         if: "matrix.map == 'FULL'"
         run: |
-          tools/ci/dm.sh -DCIBUILD -DRUNTIME_CHECKING goonstation.dme
+          tools/ci/dm.sh -DCIBUILD -DCI_RUNTIME_CHECKING goonstation.dme
 
       - name: Run map and check for runtime errors
         run: |
@@ -95,29 +108,38 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        map: ["COGMAP", "COGMAP2", "CLARION", "DONUT3", "DONUT2", "OSHAN", "KONDARU", "NADIR", "ATLAS", "SPACE_PREFAB", "UNDERWATER_PREFAB", "FULL"]
+        map:
+          [
+            "COGMAP",
+            "COGMAP2",
+            "CLARION",
+            "DONUT3",
+            "DONUT2",
+            "OSHAN",
+            "KONDARU",
+            "NADIR",
+            "ATLAS",
+            "SPACE_PREFAB",
+            "UNDERWATER_PREFAB",
+            "FULL",
+          ]
         compiletype: ["default"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
-          token: '${{ secrets.ROBUDDYBOT_PAT }}'
+          token: "${{ secrets.ROBUDDYBOT_PAT }}"
 
       - name: Install Dependencies
         run: |
           sudo dpkg --add-architecture i386
           sudo sed -i'' -E 's/^(deb|deb-src) http:\/\/(azure.archive|security).ubuntu.com/\1 [arch=amd64,i386] http:\/\/\2.ubuntu.com/' /etc/apt/sources.list
           sudo apt-get update
-
-      - name: Fetch cached i386 packages
-        uses: awalsh128/cache-apt-pkgs-action@v1
-        with:
-          packages: libstdc++6:i386 libssl-dev:i386
-          version: automaton
+          sudo apt install -o APT::Immediate-Configure=false libssl-dev:i386 libgcc-s1:i386
 
       - name: Cache BYOND
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/BYOND
           key: ${{ runner.os }}-byond-${{ hashFiles('buildByond.conf')}}
@@ -132,7 +154,6 @@ jobs:
           echo "/home/runner/BYOND/byond/bin" >> $GITHUB_PATH
           echo "LD_LIBRARY_PATH=/home/runner/BYOND/byond/bin:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "MANPATH=/home/runner/BYOND/byond/man:$MANPATH" >> $GITHUB_ENV
-          touch +secret/__secret.dme
 
       - name: Setup for assjam
         if: "matrix.compiletype == 'ass'"
@@ -146,7 +167,7 @@ jobs:
       - name: Compile map
         if: "matrix.map != 'SPACE_PREFAB' && matrix.map != 'UNDERWATER_PREFAB' && matrix.map != 'FULL'"
         run: |
-          tools/ci/dm.sh -DCIBUILD -DMAP_OVERRIDE_${{ matrix.map}} -DRUNTIME_CHECKING -DIM_REALLY_IN_A_FUCKING_HURRY_HERE goonstation.dme
+          tools/ci/dm.sh -DCIBUILD -DMAP_OVERRIDE_${{ matrix.map}} -DCI_RUNTIME_CHECKING -DIM_REALLY_IN_A_FUCKING_HURRY_HERE goonstation.dme
 
       - name: Compile space prefabs
         if: "matrix.map == 'SPACE_PREFAB'"
@@ -161,7 +182,7 @@ jobs:
       - name: Compile with full pre-round setup
         if: "matrix.map == 'FULL'"
         run: |
-          tools/ci/dm.sh -DCIBUILD -DRUNTIME_CHECKING goonstation.dme
+          tools/ci/dm.sh -DCIBUILD -DCI_RUNTIME_CHECKING goonstation.dme
 
       - name: Run map and check for runtime errors
         run: |
@@ -172,22 +193,17 @@ jobs:
     runs-on: ubuntu-22.04
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: |
           sudo dpkg --add-architecture i386
-          sudo sed -i 's/azure\.//' /etc/apt/sources.list
+          sudo sed -i'' -E 's/^(deb|deb-src) http:\/\/(azure.archive|security).ubuntu.com/\1 [arch=amd64,i386] http:\/\/\2.ubuntu.com/' /etc/apt/sources.list
           sudo apt-get update
-
-      - name: Fetch cached i386 packages
-        uses: awalsh128/cache-apt-pkgs-action@v1
-        with:
-          packages: libstdc++6:i386 libssl-dev:i386
-          version: automaton
+          sudo apt install -o APT::Immediate-Configure=false libssl-dev:i386 libgcc-s1:i386
 
       - name: Cache BYOND
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/BYOND
           key: ${{ runner.os }}-byond-${{ hashFiles('buildByond.conf')}}
@@ -202,7 +218,6 @@ jobs:
           echo "/home/runner/BYOND/byond/bin" >> $GITHUB_PATH
           echo "LD_LIBRARY_PATH=/home/runner/BYOND/byond/bin:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "MANPATH=/home/runner/BYOND/byond/man:$MANPATH" >> $GITHUB_ENV
-          touch +secret/__secret.dme
 
       - name: Setup rust-g
         run: |

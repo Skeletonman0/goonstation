@@ -15,21 +15,23 @@
 	var/scoopable = 1
 	burn_type = 1
 	var/wiggle = 6 // how much we want the sprite to be deviated fron center
-	max_stack = INFINITY
+	max_stack = 50
 	event_handler_flags = USE_FLUID_ENTER
-	///Does the raw material item get its name set by setMaterial()?
-	var/set_name = FALSE
+	/// Does the raw material item get its name set?
+	mat_changename = FALSE
+	uses_default_material_appearance = TRUE
+	default_material = null
 
 	New()
 		..()
 		src.pixel_x = rand(0 - wiggle, wiggle)
 		src.pixel_y = rand(0 - wiggle, wiggle)
 		setup_material()
-		if(src.material?.name)
-			initial_material_name = src.material.name
+		if(src.material?.getName())
+			initial_material_name = src.material.getName()
 
-	proc/setup_material()
-		src.setMaterial(getMaterial(lowertext(src.material_name)), appearance = TRUE, setname = src.set_name)
+	proc/setup_material() // Overwrite for ore specific setup
+		return
 
 	_update_stack_appearance()
 		if(material)
@@ -42,25 +44,40 @@
 			stack_item(W)
 			if(!user.is_in_hands(src))
 				user.put_in_hand(src)
-			boutput(user, "<span class='notice'>You add the ores to the stack. It now has [src.amount] ores.</span>")
+			boutput(user, SPAN_NOTICE("You add the ores to the stack. It now has [src.amount] ores."))
 			return
 		if (istype(W, /obj/item/satchel/mining/))
-			if (W.contents.len < W:maxitems)
-				src.set_loc(W)
-				var/oreamt = length(W.contents)
-				boutput(user, "<span class='notice'>You put [src] in [W].</span>")
-				src.desc = "A leather bag. It holds [oreamt]/[W:maxitems] [W:itemstring]."
-				if (oreamt == W:maxitems) boutput(user, "<span class='notice'>[W] is now full!</span>")
-				W:UpdateIcon()
+			var/obj/item/satchel/mining/manipulated_satchel = W
+			if (!manipulated_satchel.check_valid_content(src))
+				boutput(user, SPAN_ALERT("[manipulated_satchel] cannot hold that kind of item!"))
+				return
+			if (length(manipulated_satchel.contents) < manipulated_satchel.maxitems)
+				var/max_stack_reached = FALSE
+				if (src.amount > 1)
+					boutput(user, SPAN_NOTICE("You begin to fill [manipulated_satchel] with [src]."))
+					var/amount_of_stack_splits = manipulated_satchel.split_stack_into_satchel(src, user)
+					if (amount_of_stack_splits == manipulated_satchel.max_stack_scoop)
+						max_stack_reached = TRUE
+				else
+					boutput(user, SPAN_NOTICE("You put [src] in [manipulated_satchel]."))
+				if (!max_stack_reached && (length(manipulated_satchel.contents) < manipulated_satchel.maxitems)) // if we split up the item and it was more than the satchel can find we should not add the rest
+					user.u_equip(src)
+					src.set_loc(manipulated_satchel)
+					src.dropped(user)
+				if (length(manipulated_satchel.contents) == manipulated_satchel.maxitems)
+					boutput(user, SPAN_NOTICE("[W] is now full!"))
+				manipulated_satchel.tooltip_rebuild = 1
+				manipulated_satchel.UpdateIcon()
 			else
-				boutput(user, "<span class='alert'>[W] is full!</span>")
-		else ..()
+				boutput(user, SPAN_ALERT("[manipulated_satchel] is full!"))
+			return
+		..()
 
 	attack_hand(mob/user)
 		if(user.is_in_hands(src) && src.amount > 1)
 			var/splitnum = round(input("How many ores do you want to take from the stack?","Stack of [src.amount]",1) as num)
 			if (splitnum >= amount || splitnum < 1 || !isnum_safe(splitnum))
-				boutput(user, "<span class='alert'>Invalid entry, try again.</span>")
+				boutput(user, SPAN_ALERT("Invalid entry, try again."))
 				return
 			var/obj/item/raw_material/new_stack = split_stack(splitnum)
 			user.put_in_hand_or_drop(new_stack)
@@ -75,21 +92,43 @@
 		else if (isliving(AM))
 			var/mob/living/H = AM
 			var/obj/item/ore_scoop/S = H.get_equipped_ore_scoop()
-			if (S?.satchel && length(S.satchel.contents) < S.satchel.maxitems && src.scoopable)
-				src.set_loc(S.satchel)
+			if (S?.satchel && length(S.satchel.contents) < S.satchel.maxitems && (src.scoopable || S.collect_junk) && S.satchel.check_valid_content(src))
+				var/max_stack_reached = FALSE
+				if (src.amount > 1)
+					var/increment = 0
+					//since we need to add additional manipulation to the item in hand, we won't touch the last item here
+					var/amount_of_stack_splits = min(S.satchel.maxitems - length(S.satchel.contents), src.amount - 1, S.satchel.max_stack_scoop)
+					if (amount_of_stack_splits == S.satchel.max_stack_scoop)
+						max_stack_reached = TRUE
+					for (increment = 0, increment < amount_of_stack_splits, increment++)
+						var/obj/item/splitted_stack = src.split_stack(1)
+						splitted_stack.set_loc(S.satchel)
+				if (!max_stack_reached && (length(S.satchel.contents) < S.satchel.maxitems))
+					src.set_loc(S.satchel)  // if we split up the item and it was more than the satchel can find we should not add the rest
 				S.satchel.UpdateIcon()
-				if (S.satchel.contents.len >= S.satchel.maxitems)
-					boutput(H, "<span class='alert'>Your ore scoop's satchel is full!</span>")
-					playsound(H, 'sound/machines/chime.ogg', 20, 1)
+				if (length(S.satchel.contents) >= S.satchel.maxitems)
+					boutput(H, SPAN_ALERT("Your ore scoop's satchel is full!"))
+					playsound(H, 'sound/machines/chime.ogg', 20, TRUE)
 		else if (istype(AM,/obj/machinery/vehicle/))
 			var/obj/machinery/vehicle/V = AM
 			if (istype(V.sec_system,/obj/item/shipcomponent/secondary_system/orescoop))
 				var/obj/item/shipcomponent/secondary_system/orescoop/SCOOP = V.sec_system
-				if (SCOOP.contents.len >= SCOOP.capacity || !src.scoopable)
+				if (length(SCOOP.contents) >= SCOOP.capacity || !src.scoopable)
 					return
-				src.set_loc(SCOOP)
-				if (SCOOP.contents.len >= SCOOP.capacity)
-					boutput(V.pilot, "<span class='alert'>Your pod's ore scoop hold is full!</span>")
+				var/max_stack_reached = FALSE
+				if (src.amount > 1)
+					var/increment = 0
+					//since we need to add additional manipulation to the item in hand, we won't touch the last item here
+					var/amount_of_stack_splits = min(SCOOP.capacity - length(SCOOP.contents), src.amount - 1, SCOOP.max_stack_scoop)
+					if (amount_of_stack_splits == SCOOP.max_stack_scoop)
+						max_stack_reached = TRUE
+					for (increment = 0, increment < amount_of_stack_splits, increment++)
+						var/obj/item/splitted_stack = src.split_stack(1)
+						splitted_stack.set_loc(SCOOP)
+				if (!max_stack_reached && (length(SCOOP.contents) < SCOOP.capacity)) // if we split up the item and it was more than the satchel can find we should not add the rest
+					src.set_loc(SCOOP)
+				if (length(SCOOP.contents) >= SCOOP.capacity)
+					boutput(V.pilot, SPAN_ALERT("Your pod's ore scoop hold is full!"))
 					playsound(V.loc, 'sound/machines/chime.ogg', 20, 1)
 			return
 		else
@@ -97,15 +136,15 @@
 
 	mouse_drop(atom/over_object, src_location, over_location) //src dragged onto over_object
 		if (isobserver(usr))
-			boutput(usr, "<span class='alert'>Quit that! You're dead!</span>")
+			boutput(usr, SPAN_ALERT("Quit that! You're dead!"))
 			return
 
 		if(!istype(over_object, /atom/movable/screen/hud))
 			if (BOUNDS_DIST(usr, src) > 0)
-				boutput(usr, "<span class='alert'>You're too far away from it to do that.</span>")
+				boutput(usr, SPAN_ALERT("You're too far away from it to do that."))
 				return
 			if (BOUNDS_DIST(usr, over_object) > 0)
-				boutput(usr, "<span class='alert'>You're too far away from it to do that.</span>")
+				boutput(usr, SPAN_ALERT("You're too far away from it to do that."))
 				return
 
 		if(istype(over_object, /obj/machinery/power/furnace))
@@ -117,10 +156,10 @@
 		if (istype(over_object,/obj/item/material_piece) && isturf(over_object.loc)) //piece to piece only if on ground
 			var/obj/item/targetObject = over_object
 			if(targetObject.stack_item(src))
-				usr.visible_message("<span class='notice'>[usr.name] stacks \the [src]!</span>")
+				usr.visible_message(SPAN_NOTICE("[usr.name] stacks \the [src]!"))
 		else if(isturf(over_object)) //piece to turf. piece loc doesnt matter.
 			if(src.amount > 1) //split stack.
-				usr.visible_message("<span class='notice'>[usr.name] splits the stack of [src]!</span>")
+				usr.visible_message(SPAN_NOTICE("[usr.name] splits the stack of [src]!"))
 				var/toSplit = round(amount / 2)
 				var/atom/movable/splitStack = split_stack(toSplit)
 				if(splitStack)
@@ -134,7 +173,7 @@
 					if (!src.check_valid_stack(I))
 						continue
 					src.stack_item(I)
-				usr.visible_message("<span class='notice'>[usr.name] stacks \the [src]!</span>")
+				usr.visible_message(SPAN_NOTICE("[usr.name] stacks \the [src]!"))
 		else if(istype(over_object, /atom/movable/screen/hud))
 			var/atom/movable/screen/hud/H = over_object
 			var/mob/living/carbon/human/dude = usr
@@ -145,12 +184,12 @@
 						else if (istype(dude.l_hand, /obj/item/raw_material))
 							var/obj/item/raw_material/DP = dude.l_hand
 							DP.stack_item(src)
-							usr.visible_message("<span class='notice'>[usr.name] stacks \the [DP]!</span>")
+							usr.visible_message(SPAN_NOTICE("[usr.name] stacks \the [DP]!"))
 					else if(amount > 1)
 						var/toSplit = round(amount / 2)
 						var/atom/movable/splitStack = split_stack(toSplit)
 						if(splitStack)
-							usr.visible_message("<span class='notice'>[usr.name] splits the stack of [src]!</span>")
+							usr.visible_message(SPAN_NOTICE("[usr.name] splits the stack of [src]!"))
 							splitStack.set_loc(dude)
 							dude.put_in_hand(splitStack, 1)
 				if("rhand")
@@ -159,12 +198,12 @@
 						else if (istype(dude.r_hand, /obj/item/raw_material))
 							var/obj/item/raw_material/DP = dude.r_hand
 							DP.stack_item(src)
-							usr.visible_message("<span class='notice'>[usr.name] stacks \the [DP]!</span>")
+							usr.visible_message(SPAN_NOTICE("[usr.name] stacks \the [DP]!"))
 					else if(amount > 1)
 						var/toSplit = round(amount / 2)
 						var/atom/movable/splitStack = split_stack(toSplit)
 						if(splitStack)
-							usr.visible_message("<span class='notice'>[usr.name] splits the stack of [src]!</span>")
+							usr.visible_message(SPAN_NOTICE("[usr.name] splits the stack of [src]!"))
 							splitStack.set_loc(dude)
 							dude.put_in_hand(splitStack, 0)
 		else
@@ -178,6 +217,7 @@
 	throwforce = 10
 	scoopable = 0
 	material_name = "Rock"
+	default_material = "rock"
 
 	setup_material()
 		..()
@@ -187,96 +227,66 @@
 	name = "mauxite ore"
 	desc = "A chunk of Mauxite, a sturdy common metal."
 	material_name = "Mauxite"
+	default_material = "mauxite"
 	metal = 2
 
 /obj/item/raw_material/molitz
 	name = "molitz crystal"
 	desc = "A crystal of Molitz, a common crystalline substance."
 	material_name = "Molitz"
+	default_material = "molitz"
 	crystal = 1
-
-	get_desc()
-		if(!istype(src.material, /datum/material/crystal/molitz))
-			return
-		var/datum/material/crystal/molitz/molitz = src.material
-		if(molitz.iterations == 2 && molitz.unexploded == 0)
-			. += " Fracture lines dash to the small bubbles of gas, getting close to them but not quite reaching them. You fail to spot any large bubbles of gas that havent imploded on themselves."
-		else if(molitz.iterations == 1 && molitz.unexploded == 0)
-			. += " All of the large bubbles of gas and a chunk of the small bubbles of gas are imploded, with fracture lines getting close to the small bubbles that remain."
-		else if(molitz.iterations == 0 && molitz.unexploded == 0)
-			. += " You fail to notice any non collapsed bubbles of gas in the structure."
-		else if(molitz.iterations >= 3)
-			. += " Both large and small bubbles of gas are highly prevalent throughout the crystal."
-		else if(molitz.iterations >= 1)
-			. += " Nearly all of the large bubbles of gas have collapsed, however small bubbles of gas remain embeded in the structure."
-		else if(molitz.iterations == 0)
-			. += " You fail to spot any large bubbles of gas that havent imploded on themselves, the crystal is lodged full with small bubbles of gas."
 
 /obj/item/raw_material/molitz_beta
 	name = "molitz crystal"
 	desc = "An unusual crystal of Molitz."
 	icon_state = "ore$$molitz_b"
 	material_name = "Molitz Beta"
+	default_material = "molitz_b"
 	crystal = 1
 
 	setup_material()
 		. = ..()
-		src.setMaterial(getMaterial("molitz_b"), appearance = TRUE, setname = FALSE)
 		src.pressure_resistance = INFINITY //has to be after material setup. REASONS
-
-	get_desc()
-		if(!istype(src.material, /datum/material/crystal/molitz))
-			return
-		var/datum/material/crystal/molitz/molitz = src.material
-		if(molitz.iterations == 2 && molitz.unexploded == 0)
-			. += " Fracture lines dash to the small bubbles of gas, getting close to them but not quite reaching them. You fail to spot any large bubbles of gas that havent imploded on themselves."
-		else if(molitz.iterations == 1 && molitz.unexploded == 0)
-			. += " All of the large bubbles of gas and a chunk of the small bubbles of gas are imploded, with fracture lines getting close to the small bubbles that remain."
-		else if(molitz.iterations == 0 && molitz.unexploded == 0)
-			. += " You fail to notice any non collapsed bubbles of gas in the structure."
-		else if(molitz.iterations >= 3)
-			. += " Both large and small bubbles of gas are highly prevalent throughout the crystal."
-		else if(molitz.iterations >= 1)
-			. += " Nearly all of the large bubbles of gas have collapsed, however small bubbles of gas remain embeded in the structure."
-		else if(molitz.iterations == 0)
-			. += " You fail to spot any large bubbles of gas that havent imploded on themselves, the crystal is lodged full with small bubbles of gas."
 
 /obj/item/raw_material/pharosium
 	name = "pharosium ore"
 	desc = "A chunk of Pharosium, a conductive metal."
 	material_name = "Pharosium"
+	default_material = "pharosium"
 	metal = 1
 	conductor = 1
-
 
 /obj/item/raw_material/cobryl // relate this to precursors
 	name = "cobryl ore"
 	desc = "A chunk of Cobryl, a somewhat valuable metal."
 	material_name = "Cobryl"
+	default_material = "cobryl"
 	metal = 1
 
 /obj/item/raw_material/char
 	name = "char ore"
 	desc = "A heap of Char, a fossil energy source similar to coal."
 	material_name = "Char"
+	default_material = "char"
 	//cogwerks - burn vars
 	burn_point = 450
 	burn_output = 1600
-	burn_possible = 2
+	burn_possible = TRUE
 	health = 20
-
 
 /obj/item/raw_material/claretine // relate this to wizardry somehow
 	name = "claretine ore"
 	desc = "A heap of Claretine, a highly conductive salt."
 	material_name = "Claretine"
+	default_material = "claretine"
 	conductor = 2
-
 
 /obj/item/raw_material/bohrum
 	name = "bohrum ore"
 	desc = "A chunk of Bohrum, a heavy and highly durable metal."
 	material_name = "Bohrum"
+	default_material = "bohrum"
 	metal = 3
 	dense = 1
 
@@ -284,16 +294,16 @@
 	name = "syreline ore"
 	desc = "A chunk of Syreline, an extremely valuable and coveted metal."
 	material_name = "Syreline"
+	default_material = "syreline"
 	metal = 1
-
 
 /obj/item/raw_material/erebite
 	name = "erebite ore"
 	desc = "A chunk of Erebite, an extremely volatile high-energy mineral."
 	var/exploded = 0
 	material_name = "Erebite"
+	default_material = "erebite"
 	powersource = 2
-
 
 	ex_act(severity)
 		if(exploded)
@@ -309,11 +319,11 @@
 
 		switch(severity)
 			if(1)
-				explosion(src, src.loc, 1, 2, 3, 4, 1)
+				explosion(src, src.loc, 1, 2, 3, 4)
 			if(2)
-				explosion(src, src.loc, 0, 1, 2, 3, 1)
+				explosion(src, src.loc, 0, 1, 2, 3)
 			if(3)
-				explosion(src, src.loc, 0, 0, 1, 2, 1)
+				explosion(src, src.loc, 0, 0, 1, 2)
 			else
 				return
 		// if not on mining z level
@@ -329,7 +339,7 @@
 
 	temperature_expose(null, temp, volume)
 
-		explosion(src, src.loc, 1, 2, 3, 4, 1)
+		explosion(src, src.loc, 1, 2, 3, 4)
 
 		// if not on mining z level
 		if (src.z != MINING_Z)
@@ -346,18 +356,19 @@
 	name = "cerenkite ore"
 	desc = "A chunk of Cerenkite, a highly radioactive mineral."
 	material_name = "Cerenkite"
+	default_material = "cerenkite"
 	metal = 1
 	powersource = 1
-
 
 /obj/item/raw_material/plasmastone
 	name = "plasmastone"
 	desc = "A piece of plasma in its solid state."
 	material_name = "Plasmastone"
+	default_material = "plasmastone"
 	//cogwerks - burn vars
 	burn_point = 1000
 	burn_output = 10000
-	burn_possible = 2
+	burn_possible = TRUE
 	health = 40
 	powersource = 1
 	crystal = 1
@@ -368,6 +379,8 @@
 	desc = "A gemstone. It's probably pretty valuable!"
 	icon_state = "gem1"
 	material_name = "Gem"
+	default_material = null
+	mat_changename = TRUE
 	force = 1
 	throwforce = 3
 	crystal = 1
@@ -393,29 +406,32 @@
 	name = "uqill nugget"
 	desc = "A nugget of Uqill, a rare and very dense stone."
 	material_name = "Uqill"
+	default_material = "uqill"
 	dense = 2
 
 /obj/item/raw_material/fibrilith
 	name = "fibrilith chunk"
 	desc = "A compressed chunk of Fibrilith, an odd mineral known for its high tensile strength."
 	material_name = "Fibrilith"
+	default_material = "fibrilith"
 
 /obj/item/raw_material/telecrystal
 	name = "telecrystal"
 	desc = "A large unprocessed telecrystal, a gemstone with space-warping properties."
 	material_name = "Telecrystal"
+	default_material = "telecrystal"
 	crystal = 1
 	powersource = 2
 
-	attack(mob/M, mob/user, def_zone)//spyguy apologizes in advance -- not somepotato i promise
-		if(M == user)
-			boutput(M, "<b class='alert'>You eat the [html_encode(src)]!</b>")
-			boutput(M, "Nothing happens, though.")
+	attack(mob/target, mob/user, def_zone, is_special = FALSE, params = null)
+		if(target == user)
+			boutput(target, "<b class='alert'>You eat the [html_encode(src)]!</b>")
+			boutput(target, "Nothing happens, though.")
 			qdel(src)
-		else if(istype(M))
-			boutput(user, "<b class='alert'>You feed [html_encode(M)] the [html_encode(src)]!</b>")
-			boutput(M, "<b class='alert'>[html_encode(user)] feeds you the [html_encode(src)]!</b>")
-			boutput(M, "Nothing happens, though.")
+		else if(istype(target))
+			boutput(user, "<b class='alert'>You feed [html_encode(target)] the [html_encode(src)]!</b>")
+			boutput(target, "<b class='alert'>[html_encode(user)] feeds you the [html_encode(src)]!</b>")
+			boutput(target, "Nothing happens, though.")
 			boutput(user, "Nothing happens, though.")
 			qdel(src)
 		else return ..()
@@ -430,30 +446,32 @@
 		desc = "[desc] It's all shiny and blue now."
 		return TRUE
 
-
 /obj/item/raw_material/miracle
 	name = "miracle matter"
 	desc = "Miracle Matter is a bizarre substance known to metamorphosise into other minerals when processed."
 	material_name = "Miracle"
+	default_material = "miracle"
 
 /obj/item/raw_material/starstone
 	name = "starstone"
 	desc = "An extremely rare jewel. Highly prized by collectors and lithovores."
 	material_name = "Starstone"
+	default_material = "starstone"
 	crystal = 1
 
 /obj/item/raw_material/eldritch
 	name = "koshmarite ore"
 	desc = "An unusual dense pulsating stone. You feel uneasy just looking at it."
 	material_name = "Koshmarite"
+	default_material = "koshmarite"
 	crystal = 1
 	dense = 2
-
 
 /obj/item/raw_material/martian
 	name = "viscerite lump"
 	desc = "A disgusting flesh-like material. Ugh. What the hell is this?"
 	material_name = "Viscerite"
+	default_material = "viscerite"
 	dense = 2
 
 	setup_material()
@@ -465,11 +483,12 @@
 	name = "gold nugget"
 	desc = "A chunk of pure gold. Damn son."
 	material_name = "Gold"
+	default_material = "gold"
 	dense = 2
-
 
 // Misc building material
 
+/// This has no material, why does it exist???? Someone replace it
 /obj/item/raw_material/fabric
 	name = "fabric sheet"
 	desc = "Some spun cloth. Useful if you want to make clothing."
@@ -477,16 +496,18 @@
 	material_name = "Fabric"
 	scoopable = 0
 
-/obj/item/raw_material/cotton/
+/obj/item/raw_material/cotton
 	name = "cotton wad"
 	desc = "It's a big puffy white thing. Most likely not a cloud though."
 	icon_state = "cotton"
 	material_name = "Cotton"
+	default_material = "cotton"
 
 /obj/item/raw_material/ice
 	name = "ice chunk"
 	desc = "A chunk of ice. It's pretty cold."
 	material_name = "Ice"
+	default_material = "ice"
 	crystal = 1
 	scoopable = 0
 
@@ -496,16 +517,14 @@
 	desc = "Some twisted and ruined metal. It could probably be smelted down into something more useful."
 	icon_state = "scrap"
 	stack_type = /obj/item/raw_material/scrap_metal
-	burn_possible = 0
-	set_name = TRUE
+	burn_possible = FALSE
+	mat_changename = TRUE
 	material_name = "Steel"
+	default_material = "steel"
 
 	New()
 		..()
 		icon_state += "[rand(1,5)]"
-
-/obj/item/raw_material/scrap_metal/steel
-	material_name = "Steel"
 
 /obj/item/raw_material/shard
 	// same deal here
@@ -528,11 +547,12 @@
 	stamina_damage = 5
 	stamina_cost = 5
 	stamina_crit_chance = 35
-	burn_possible = 0
+	burn_possible = FALSE
 	event_handler_flags = USE_FLUID_ENTER
 	material_amt = 0.1
 	material_name = "Glass"
-	set_name = TRUE
+	default_material = "glass"
+	mat_changename = TRUE
 	var/sound_stepped = 'sound/impact_sounds/Glass_Shards_Hit_1.ogg'
 
 	New()
@@ -540,8 +560,8 @@
 		icon_state += "[rand(1,3)]"
 		src.setItemSpecial(/datum/item_special/double)
 
-	attack(mob/living/carbon/M, mob/living/carbon/user)
-		if(!scalpel_surgery(M,user)) return ..()
+	attack(mob/target, mob/user, def_zone, is_special = FALSE, params = null)
+		if(!scalpel_surgery(target,user)) return ..()
 		else return
 
 	Crossed(atom/movable/AM as mob|obj)
@@ -553,7 +573,7 @@
 	suicide(var/mob/user as mob)
 		if (!src.user_can_suicide(user))
 			return 0
-		user.visible_message("<span class='alert'><b>[user] slashes [his_or_her(user)] own throat with [src]!</b></span>")
+		user.visible_message(SPAN_ALERT("<b>[user] slashes [his_or_her(user)] own throat with [src]!</b>"))
 		blood_slash(user, 25)
 		user.TakeDamage("head", 150, 0)
 		SPAWN(50 SECONDS)
@@ -561,19 +581,21 @@
 				user.suiciding = 0
 		return 1
 
-
 	glass
 		material_name = "Glass"
+		default_material = "glass"
+
 	plasmacrystal
 		material_name = "Plasmaglass"
+		default_material = "plasmaglass"
 
 /obj/item/raw_material/shard/proc/walked_over(mob/living/carbon/human/H as mob)
-	if(ON_COOLDOWN(H, "shard_Crossed", 7 SECONDS) || H.getStatusDuration("stunned") || H.getStatusDuration("weakened")) // nerf for dragging a person and a shard to damage them absurdly fast - drsingh
+	if(ON_COOLDOWN(H, "shard_Crossed", 7 SECONDS) || H.getStatusDuration("stunned") || H.getStatusDuration("knockdown")) // nerf for dragging a person and a shard to damage them absurdly fast - drsingh
 		return
 	if(isabomination(H))
 		return
 	if(H.lying)
-		boutput(H, "<span class='alert'><B>You crawl on [src]! Ouch!</B></span>")
+		boutput(H, SPAN_ALERT("<B>You crawl on [src]! Ouch!</B>"))
 		step_on(H)
 	else
 		//Can't step on stuff if you have no legs, and it can't hurt if they're protected or not human parts.
@@ -582,12 +604,12 @@
 		if (!istype(H.limbs?.l_leg, /obj/item/parts/human_parts) && !istype(H.limbs?.r_leg, /obj/item/parts/human_parts))
 			return
 		if(!H.shoes || (src.material && src.material.hasProperty("hard") && src.material.getProperty("hard") >= 7))
-			boutput(H, "<span class='alert'><B>You step on [src]! Ouch!</B></span>")
+			boutput(H, SPAN_ALERT("<B>You step on [src]! Ouch!</B>"))
 			step_on(H)
 
 /obj/item/raw_material/shard/proc/step_on(mob/living/carbon/human/H as mob)
 	playsound(src.loc, src.sound_stepped, 50, 1)
-	H.changeStatus("weakened", 3 SECONDS)
+	H.changeStatus("knockdown", 3 SECONDS)
 	H.force_laydown_standup()
 	var/zone = pick("l_leg", "r_leg")
 	H.TakeDamage(zone, force, 0, 0, DAMAGE_CUT)
@@ -596,6 +618,7 @@
 	name = "chitin chunk"
 	desc = "A chunk of chitin."
 	material_name = "Chitin"
+	default_material = "chitin"
 	metal = 3
 	dense = 1
 
@@ -703,16 +726,15 @@
 	var/sound/sound_process = sound('sound/effects/pop.ogg')
 	var/sound/sound_grump = sound('sound/machines/buzz-two.ogg')
 	var/atom/output_location = null
-	var/list/atom/leftovers = null
+	var/list/atom/leftovers = list()
 
 	attack_hand(var/mob/user)
 		if (active)
-			boutput(user, "<span class='alert'>It's already working! Give it a moment!</span>")
+			boutput(user, SPAN_ALERT("It's already working! Give it a moment!"))
 			return
-		if (src.contents.len < 1)
-			boutput(user, "<span class='alert'>There's nothing inside to reclaim.</span>")
+		if (length(src.contents) < 1)
+			boutput(user, SPAN_ALERT("There's nothing inside to reclaim."))
 			return
-		leftovers = list()
 		user.visible_message("<b>[user.name]</b> switches on [src].")
 		active = 1
 		anchored = ANCHORED
@@ -730,7 +752,7 @@
 
 			else if (istype(M, /obj/item/cable_coil))
 				var/obj/item/cable_coil/C = M
-				output_bar_from_item(M, 1 / M.material_amt, C.conductor.mat_id)
+				output_bar_from_item(M, 1 / M.material_amt, C.conductor.getID())
 				qdel(C)
 
 			else
@@ -742,14 +764,6 @@
 		if (reject)
 			src.reject = 0
 			src.visible_message("<b>[src]</b> emits an angry buzz and rejects some unsuitable materials!")
-			playsound(src.loc, sound_grump, 40, 1)
-
-		var/waste = 0
-		for(var/matID in leftovers)
-			if(leftovers[matID] > 0)
-				waste = 1
-		if (waste)
-			src.visible_message("<b>[src]</b> emits a grumpy buzz and disintegrates some leftovers.")
 			playsound(src.loc, sound_grump, 40, 1)
 
 		active = 0
@@ -764,12 +778,12 @@
 		var/output_amount = O.amount
 
 		if (amount_per_bar)
-			var/bonus = leftovers[O.material.mat_id]
+			var/bonus = leftovers[O.material.getID()]
 			var/num_bars = O.amount / amount_per_bar + bonus
 
 			output_amount = round(num_bars)
 			if (output_amount != num_bars)
-				leftovers[O.material.mat_id] = num_bars - output_amount
+				leftovers[O.material.getID()] = num_bars - output_amount
 
 		output_bar(O.material, output_amount, O.quality)
 
@@ -797,7 +811,7 @@
 			if (!MAT)
 				return
 
-		var/output_location = src.get_output_location()
+		var/atom/output_location = src.get_output_location()
 
 		var/bar_type = getProcessedMaterialForm(MAT)
 		var/obj/item/material_piece/BAR = new bar_type
@@ -808,17 +822,26 @@
 
 		if (istype(output_location, /obj/machinery/manufacturer))
 			var/obj/machinery/manufacturer/M = output_location
-			M.load_item(BAR)
+			M.change_contents(mat_piece = BAR)
 		else
 			BAR.set_loc(output_location)
+			for (var/obj/item/material_piece/other_bar in output_location.contents)
+				if (other_bar == BAR)
+					continue
+				if (BAR.material.isSameMaterial(other_bar.material))
+					if (other_bar.stack_item(BAR))
+						break
 
 		playsound(src.loc, sound_process, 40, 1)
 
 	proc/load_reclaim(obj/item/W as obj, mob/user as mob)
 		. = FALSE
-		if (src.is_valid(W))
-			W.set_loc(src)
-			if (user) user.u_equip(W)
+		if (src.is_valid(W) && brain_check(W, user, TRUE))
+			if (W.stored)
+				W.stored.transfer_stored_item(W, src, user = user)
+			else
+				W.set_loc(src)
+				if (user) user.u_equip(W)
 			W.dropped(user)
 			. = TRUE
 
@@ -827,86 +850,84 @@
 		if (istype(W, /obj/item/ore_scoop))
 			var/obj/item/ore_scoop/scoop = W
 			W = scoop.satchel
-		if (istype(W,/obj/item/storage/) || istype(W,/obj/item/satchel/))
-			var/obj/item/storage/S = W
-			var/obj/item/satchel/B = W
+		if (W.storage || istype(W, /obj/item/satchel))
 			var/items = W
-			if(istype(S))
-				items = S.get_contents()
+			if (W.storage)
+				items = W.storage.get_contents()
 			for(var/obj/item/O in items)
 				if (load_reclaim(O))
 					. = TRUE
-					if (istype(S))
-						S.hud.remove_object(O)
-			if (istype(B) && .)
-				B.UpdateIcon()
+			if (istype(W, /obj/item/satchel) && .)
+				W.UpdateIcon()
 			//Users loading individual items would make an annoying amount of messages
 			//But loading a container is more noticable and there should be less
 			if (.)
 				user.visible_message("<b>[user.name]</b> loads [W] into [src].")
-				playsound(src, sound_load, 40, 1)
+				playsound(src, sound_load, 40, TRUE)
+				logTheThing(LOG_STATION, user, "loads [W] into \the [src] at [log_loc(src)].")
 		else if (W?.cant_drop)
-			boutput(user, "<span class='alert'>You can't put that in [src] when it's attached to you!</span>")
+			boutput(user, SPAN_ALERT("You can't put that in [src] when it's attached to you!"))
 			return ..()
 		else if (load_reclaim(W, user))
 			boutput(user, "You load [W] into [src].")
-			playsound(src, sound_load, 40, 1)
+			playsound(src, sound_load, 40, TRUE)
+			logTheThing(LOG_STATION, user, "loads [W] into \the [src] at [log_loc(src)].")
 		else
 			. = ..()
 
 	mouse_drop(over_object, src_location, over_location)
 		if(!isliving(usr))
-			boutput(usr, "<span class='alert'>Get your filthy dead fingers off that!</span>")
+			boutput(usr, SPAN_ALERT("Get your filthy dead fingers off that!"))
 			return
 
 		if(over_object == src)
 			output_location = null
-			boutput(usr, "<span class='notice'>You reset the reclaimer's output target.</span>")
+			boutput(usr, SPAN_NOTICE("You reset the reclaimer's output target."))
 			return
 
 		if(BOUNDS_DIST(over_object, src) > 0)
-			boutput(usr, "<span class='alert'>The reclaimer is too far away from the target!</span>")
+			boutput(usr, SPAN_ALERT("The reclaimer is too far away from the target!"))
 			return
 
 		if(BOUNDS_DIST(over_object, usr) > 0)
-			boutput(usr, "<span class='alert'>You are too far away from the target!</span>")
+			boutput(usr, SPAN_ALERT("You are too far away from the target!"))
 			return
 
 		if (istype(over_object,/obj/storage/crate/))
 			var/obj/storage/crate/C = over_object
 			if (C.locked || C.welded)
-				boutput(usr, "<span class='alert'>You can't use a currently unopenable crate as an output target.</span>")
+				boutput(usr, SPAN_ALERT("You can't use a currently unopenable crate as an output target."))
 			else
 				src.output_location = over_object
-				boutput(usr, "<span class='notice'>You set the reclaimer to output to [over_object]!</span>")
+				boutput(usr, SPAN_NOTICE("You set the reclaimer to output to [over_object]!"))
 
 		else if (istype(over_object,/obj/storage/cart/))
 			var/obj/storage/cart/C = over_object
 			if (C.locked || C.welded)
-				boutput(usr, "<span class='alert'>You can't use a currently unopenable cart as an output target.</span>")
+				boutput(usr, SPAN_ALERT("You can't use a currently unopenable cart as an output target."))
 			else
 				src.output_location = over_object
-				boutput(usr, "<span class='notice'>You set the reclaimer to output to [over_object]!</span>")
+				boutput(usr, SPAN_NOTICE("You set the reclaimer to output to [over_object]!"))
 
 		else if (istype(over_object,/obj/machinery/manufacturer/))
 			var/obj/machinery/manufacturer/M = over_object
 			if (M.status & BROKEN || M.status & NOPOWER || M.dismantle_stage > 0)
-				boutput(usr, "<span class='alert'>You can't use a non-functioning manufacturer as an output target.</span>")
+				boutput(usr, SPAN_ALERT("You can't use a non-functioning manufacturer as an output target."))
 			else
 				src.output_location = M
-				boutput(usr, "<span class='notice'>You set the reclaimer to output to [over_object]!</span>")
+				boutput(usr, SPAN_NOTICE("You set the reclaimer to output to [over_object]!"))
 
 		else if (istype(over_object,/obj/table/) && istype(over_object,/obj/rack/))
 			var/obj/O = over_object
 			src.output_location = O.loc
-			boutput(usr, "<span class='notice'>You set the reclaimer to output on top of [O]!</span>")
+			boutput(usr, SPAN_NOTICE("You set the reclaimer to output on top of [O]!"))
 
 		else if (istype(over_object,/turf/simulated/floor/))
 			src.output_location = over_object
-			boutput(usr, "<span class='notice'>You set the reclaimer to output to [over_object]!</span>")
+			boutput(usr, SPAN_NOTICE("You set the reclaimer to output to [over_object]!"))
 
 		else
-			boutput(usr, "<span class='alert'>You can't use that as an output target.</span>")
+			boutput(usr, SPAN_ALERT("You can't use that as an output target."))
 		return
 
 	MouseDrop_T(atom/movable/O as mob|obj, mob/user as mob)
@@ -914,25 +935,25 @@
 			return
 
 		if(!isliving(user))
-			boutput(user, "<span class='alert'>Only living mobs are able to use the reclaimer's quick-load feature.</span>")
+			boutput(user, SPAN_ALERT("Only living mobs are able to use the reclaimer's quick-load feature."))
 			return
 
 		if (!isobj(O))
-			boutput(user, "<span class='alert'>You can't quick-load that.</span>")
+			boutput(user, SPAN_ALERT("You can't quick-load that."))
 			return
 
 		if(BOUNDS_DIST(O, user) > 0)
-			boutput(user, "<span class='alert'>You are too far away!</span>")
+			boutput(user, SPAN_ALERT("You are too far away!"))
 			return
 
 		if (istype(O, /obj/storage/crate/) || istype(O, /obj/storage/cart/))
-			user.visible_message("<span class='notice'>[user] uses [src]'s automatic loader on [O]!</span>", "<span class='notice'>You use [src]'s automatic loader on [O].</span>")
+			user.visible_message(SPAN_NOTICE("[user] uses [src]'s automatic loader on [O]!"), SPAN_NOTICE("You use [src]'s automatic loader on [O]."))
 			var/amtload = 0
 			for (var/obj/item/raw_material/M in O.contents)
 				M.set_loc(src)
 				amtload++
-			if (amtload) boutput(user, "<span class='notice'>[amtload] materials loaded from [O]!</span>")
-			else boutput(user, "<span class='alert'>No material loaded!</span>")
+			if (amtload) boutput(user, SPAN_NOTICE("[amtload] materials loaded from [O]!"))
+			else boutput(user, SPAN_ALERT("No material loaded!"))
 
 		else if (is_valid(O))
 			quickload(user,O)
@@ -942,20 +963,20 @@
 	proc/quickload(var/mob/living/user,var/obj/item/O)
 		if (!user || !O)
 			return
-		user.visible_message("<span class='notice'>[user] begins quickly stuffing [O] into [src]!</span>")
+		user.visible_message(SPAN_NOTICE("[user] begins quickly stuffing [O] into [src]!"))
 		var/staystill = user.loc
 		for(var/obj/item/M in view(1,user))
 			if (!M || M.loc == user)
 				continue
 			if (M.name != O.name)
 				continue
-			if(!src.is_valid(M))
+			if(!(src.is_valid(M) && brain_check(M, user, FALSE)))
 				continue
 			M.set_loc(src)
-			playsound(src, sound_load, 40, 1)
+			playsound(src, sound_load, 40, TRUE)
 			sleep(0.5)
 			if (user.loc != staystill) break
-		boutput(user, "<span class='notice'>You finish stuffing [O] into [src]!</span>")
+		boutput(user, SPAN_NOTICE("You finish stuffing [O] into [src]!"))
 		return
 
 	proc/get_output_location()
@@ -984,3 +1005,23 @@
 		if (!istype(I))
 			return
 		return (I.material && !istype(I,/obj/item/material_piece) && !istype(I,/obj/item/nuclear_waste)) || istype(I,/obj/item/wizard_crystal)
+
+	proc/brain_check(var/obj/item/I, var/mob/user, var/ask)
+		if (!istype(I))
+			return
+		var/obj/item/organ/brain/brain = null
+		if (istype(I, /obj/item/parts/robot_parts/head))
+			var/obj/item/parts/robot_parts/head/head = I
+			brain = head.brain
+		else if (istype(I, /obj/item/organ/brain))
+			brain = I
+
+		if (brain)
+			if (!ask)
+				boutput(user, SPAN_ALERT("[I] turned the intelligence detection light on! You decide to not load it for now."))
+				return FALSE
+			var/accept = tgui_alert(user, "Possible intelligence detected. Are you sure you want to reclaim [I]?", "Incinerate brain?", list("Yes", "No")) == "Yes" && can_reach(user, src) && user.equipped() == I
+			if (accept)
+				logTheThing(LOG_COMBAT, user, "loads [brain] (owner's ckey [brain.owner ? brain.owner.ckey : null]) into a portable reclaimer.")
+			return accept
+		return TRUE

@@ -1,6 +1,7 @@
 /datum/antagonist/arcfiend
 	id = ROLE_ARCFIEND
 	display_name = "arcfiend"
+	antagonist_icon = "arcfiend"
 
 	/// The ability holder of this arcfiend, containing their respective abilities. We also use this for tracking power, at the moment.
 	var/datum/abilityHolder/arcfiend/ability_holder
@@ -41,11 +42,20 @@
 	assign_objectives()
 		new /datum/objective_set/arcfiend(src.owner, src)
 
-	handle_round_end(log_data)
-		var/list/dat = ..()
-		if (length(dat) && src.ability_holder)
-			dat.Insert(2, {"They consumed a total of [ability_holder.lifetime_energy] units of energy during this shift.
-							<br>Hearts stopped: [ability_holder.hearts_stopped]"})
+	handle_round_end()
+		. = ..()
+
 		if (src.ability_holder.hearts_stopped >= 6)
 			src.owner.current.unlock_medal("A shocking demise", TRUE)
-		return dat
+
+	get_statistics()
+		return list(
+			list(
+				"name" = "Energy Consumed",
+				"value" = "[src.ability_holder.lifetime_energy] units",
+			),
+			list(
+				"name" = "Hearts Stopped",
+				"value" = "[src.ability_holder.hearts_stopped] hearts",
+			),
+		)

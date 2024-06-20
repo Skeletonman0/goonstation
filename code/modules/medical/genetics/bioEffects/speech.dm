@@ -24,7 +24,7 @@
 
 /datum/bioEffect/speech/smile
 	name = "Frontal Gyrus Alteration Type-S"
-	desc = "Causes the speech center of the subject's brain to produce large amounts of seratonin when engaged."
+	desc = "Causes the speech center of the subject's brain to produce large amounts of serotonin when engaged."
 	id = "accent_smiling"
 	effectType = EFFECT_TYPE_DISABILITY
 	isBad = TRUE
@@ -149,6 +149,29 @@
 			return ""
 		message = finnishify(message)
 		return message
+
+/datum/bioEffect/speech/german
+	name = "Frontal Gyrus Alteration Type-DE"
+	desc = "Forces the language center of the subject's brain to construct sentences in a German manner."
+	id = "accent_german"
+	effectType =  EFFECT_TYPE_DISABILITY
+	isBad = TRUE
+	msgGain = "You can no longer pronounce th for ze life of you!"
+	msgLose = "You can now pronounce thoughtful, and thatch, and that!"
+	reclaim_fail = 10
+	lockProb = 25
+	lockedGaps = 2
+	lockedDiff = 2
+	lockedChars = list("G","C")
+	lockedTries = 3
+
+	OnSpeak(var/message)
+		if (!istext(message))
+			return ""
+		message = germify(message)
+		return message
+
+
 
 /datum/bioEffect/speech/tommy // DO NOT MAKE THIS APPEAR IN GENEPOOLS OR INTO A TRAIT OR ANY OF THAT, PLEASE, THANK YOU IN ADVANCE - with love, haine
 	name = "Frontal Gyrus Alteration Type-T"
@@ -545,7 +568,15 @@
 		var/mob/living/L = owner
 		L.speech_void = FALSE
 
-
+	OnSpeak(var/message)
+		SPAWN(0)
+			var/image/chat_maptext/line = src.owner.chat_text.lines[length(src.owner.chat_text.lines)]
+			for (var/i in 1 to 22)
+				if (QDELETED(line))
+					break
+				line.transform = matrix(rand()/5 + 0.9, MATRIX_SCALE)
+				sleep(2)
+		return message
 
 /datum/bioEffect/speech/yee // DO NOT MAKE THIS APPEAR IN GENEPOOLS OR INTO A TRAIT OR ANY OF THAT, PLEASE, THANK YOU IN ADVANCE - with love, haine
 	name = "yee"
@@ -907,3 +938,121 @@
 			return ""
 		message = lolcat(message)
 		return message
+
+/datum/bioEffect/speech/pirate
+	name = "Frontal Gyrus Alteration Type-AR"
+	desc = "Forces the language center of the subject's brain to construct sentences as sailing on the Seven Seas."
+	id = "accent_pirate"
+	effectType = EFFECT_TYPE_DISABILITY
+	isBad = TRUE
+	msgGain = "Ye feel like a swashbucklin' pirate!"
+	msgLose = "You stop feeling like sailing the Seven Seas."
+
+	OnSpeak(var/message)
+		if (!istext(message))
+			return ""
+		message = pirateify(message)
+		return message
+
+
+/datum/bioEffect/speech/scrambled
+	name = "Fonratl Guyrs Alrtateion Tpye-SC"
+	desc = "Mkaes the lgnauage cnetre of the sbuejct's vicoe to eimt cuirous sntecenes."
+	id = "accent_scrambled"
+	effectType = EFFECT_TYPE_DISABILITY
+	isBad = TRUE
+	msgGain = "Yuo feel lkie yuor vicoe is sramlcbing."
+	msgLose = "Yuo feel yuor vicoe is no lnoger sramlcbing."
+
+	OnSpeak(var/message)
+		if (!istext(message))
+			return ""
+		message = accent_scramble(message)
+		return message
+
+
+/datum/bioEffect/speech/word_scrambled
+	name = "Alteration Type Frontal Gyrus-WSC"
+	desc = "The to subject's emit the sentences brain language center curious of makes."
+	id = "accent_word_scrambled"
+	effectType = EFFECT_TYPE_DISABILITY
+	isBad = TRUE
+	msgGain = "Words your scrambled out come."
+	msgLose = "Scrambled no longer are your words."
+
+	OnSpeak(var/message)
+		if (!istext(message))
+			return ""
+		message = accent_shuffle_words(message)
+		return message
+
+
+/datum/bioEffect/speech/mocking
+	name = "FrOnTaL gYrUs AlTeRaTiOn TyPe-Mc"
+	desc = "mAkEs ThE lAnGuAgE cEnTeR oF tHe SuBjEcT's BrAiN tO cOnStRuCt SeNtEnCeS aS mOcKiNg ThE sUbJeCt."
+	id = "accent_mocking"
+	effectType = EFFECT_TYPE_DISABILITY
+	isBad = TRUE
+	occur_in_genepools = FALSE
+	probability = 0
+	msgGain = "YoU fEeL lIkE mOcKiNg pEoPlE."
+	msgLose = "YoU dOn'T fEeL lIkE mOcKiNg pEoPlE aNyMoRe."
+
+	OnSpeak(var/message)
+		if (!istext(message))
+			return ""
+		message = accent_mocking(message)
+		return message
+
+
+/datum/bioEffect/speech/leetspeak
+	name = "Fr0nT4l Gyrus 4lt3r4t10n TYP3-1337"
+	desc = "Makes you speak the secret language of hackers."
+	id = "accent_hacker"
+	effectType = EFFECT_TYPE_DISABILITY
+	isBad = TRUE
+	msgGain = "Y0u f33l l1k3 4 h4ck3r."
+	msgLose = "You don't feel like a hacker anymore."
+	probability = 15
+	var/leet_chance = 35
+
+	// TODO: maybe apply to PDA messages and robospeak too?
+
+	OnSpeak(var/message)
+		if (!istext(message))
+			return ""
+		var/leet_chance = src.leet_chance
+		leet_chance *= (src.power - 1) * 2 + 1
+		message = accent_hacker(message, leet_chance)
+		return message
+
+/datum/bioEffect/speech/piglatin
+	name = "Frontal Gyrus Alteration Type-Igpay-Atinlay"
+	desc = "Makes you speak like an 8-year-old with something to hide."
+	id = "accent_piglatin"
+	effectType = EFFECT_TYPE_DISABILITY
+	isBad = TRUE
+	msgGain = "ouYay artstay eakingspay inay igpay atinlay."
+	msgLose = "You stop speaking in pig latin."
+	probability = 15
+
+	OnSpeak(var/message)
+		if (!istext(message))
+			return ""
+		message = accent_piglatin(message)
+		return message
+
+/datum/bioEffect/speech/bingus
+	name = "Frontal Gyrus Alteration Type-bingus"
+	desc = "Reconstructs the language center of the subject's brain to love bingus."
+	id = "accent_bingus"
+	effectType = EFFECT_TYPE_DISABILITY
+	msgGain = "Bingus my beloved :)"
+	msgLose = "Bingus my beloved :("
+	occur_in_genepools = FALSE
+	probability = 0 // Should not be player accessible
+
+	OnSpeak(var/message)
+		if (!istext(message))
+			return ""
+		return bingus_parse(message)

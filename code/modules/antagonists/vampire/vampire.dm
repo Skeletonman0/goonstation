@@ -1,6 +1,7 @@
 /datum/antagonist/vampire
 	id = ROLE_VAMPIRE
 	display_name = "vampire"
+	antagonist_icon = "vampire"
 
 	/// The ability holder of this vampire, containing their respective abilities. This is also used for tracking blood, at the moment.
 	var/datum/abilityHolder/vampire/ability_holder
@@ -38,15 +39,25 @@
 		SPAWN(2.5 SECONDS)
 			src.owner.current.assign_gimmick_skull()
 
+	add_to_image_groups()
+		. = ..()
+		var/datum/client_image_group/image_group = get_image_group(src.ability_holder)
+		image_group.add_mind_mob_overlay(src.owner, get_antag_icon_image(), FALSE)
+		image_group.add_mind(src.owner)
+
+	remove_from_image_groups()
+		. = ..()
+		var/datum/client_image_group/image_group = get_image_group(src.ability_holder)
+		image_group.remove_mind_mob_overlay(src.owner)
+		image_group.remove_mind(src.owner)
+
 	assign_objectives()
 		new /datum/objective_set/vampire(src.owner, src)
 
-	handle_round_end(log_data)
-		var/list/dat = ..()
-		if (length(dat) && src.ability_holder)
-			dat.Insert(2, {"They drank a total of [src.ability_holder.get_vampire_blood(TRUE)] units of blood during this shift."})
-
-			if (!isvampire(src.owner.current))
-				dat.Insert(3, {"Their body was destroyed."})
-
-		return dat
+	get_statistics()
+		return list(
+			list(
+				"name" = "Blood Drank",
+				"value" = "[src.ability_holder.get_vampire_blood(TRUE)] units",
+			)
+		)

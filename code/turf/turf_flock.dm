@@ -1,16 +1,17 @@
 // -----
 // FLOOR
 // -----
+TYPEINFO(/turf/simulated/floor/feather)
+	mat_appearances_to_ignore = list("steel","gnesis")
 /turf/simulated/floor/feather
 	name = "weird floor"
 	desc = "I don't like the looks of that whatever-it-is."
 	var/flock_id = "Conduit"
 	icon = 'icons/misc/featherzone.dmi'
 	icon_state = "floor"
-	flags = USEDELAY
-	mat_appearances_to_ignore = list("steel","gnesis")
 	mat_changename = FALSE
 	mat_changedesc = FALSE
+	default_material = "gnesis"
 	broken = FALSE
 	step_material = "step_plating"
 	step_priority = STEP_PRIORITY_MED
@@ -23,26 +24,26 @@
 	var/brightness = 0.5
 	var/on = FALSE
 	var/connected = FALSE //used for collector
-	var/datum/flock/flock = null
+	var/tmp/datum/flock/flock = null
 
 
 /turf/simulated/floor/feather/New()
 	..()
-	setMaterial(getMaterial("gnesis"), copy = FALSE)
 	light = new /datum/light/point
 	light.set_brightness(src.brightness)
 	light.set_color(col_r, col_g, col_b)
 	light.attach(src)
 	APPLY_ATOM_PROPERTY(src, PROP_ATOM_FLOCK_THING, src)
 	src.AddComponent(/datum/component/flock_protection, report_unarmed=FALSE, report_thrown=FALSE, report_proj=FALSE)
+	flags |= USEDELAY
 
 /turf/simulated/floor/feather/special_desc(dist, mob/user)
 	if (!isflockmob(user))
 		return
-	return {"<span class='flocksay'><span class='bold'>###=-</span> Ident confirmed, data packet received.
-		<br><span class='bold'>ID:</span> [src.flock_id]
-		<br><span class='bold'>System Integrity:</span> [round((src.health/50)*100)]%
-		<br><span class='bold'>###=-</span></span>"}
+	return {"[SPAN_FLOCKSAY("[SPAN_BOLD("###=- Ident confirmed, data packet received.")]<br>\
+		[SPAN_BOLD("ID:")] [src.flock_id]<br>\
+		[SPAN_BOLD("System Integrity:")] [round((src.health/50)*100)]%<br>\
+		[SPAN_BOLD("###=-")]")]"}
 
 /turf/simulated/floor/feather/attackby(obj/item/C, mob/user, params)
 	// do not call parent, this is not an ordinary floor
@@ -52,22 +53,22 @@
 		grab_smash(C, user)
 		return
 	if(ispryingtool(C) && src.broken)
-		playsound(src, 'sound/items/Crowbar.ogg', 80, 1)
+		playsound(src, 'sound/items/Crowbar.ogg', 80, TRUE)
 		src.break_tile_to_plating()
 		return
 	if(src.broken)
-		boutput(user, "<span class='hint'>It's already broken, you need to pry it out with a crowbar.</span>")
+		boutput(user, SPAN_HINT("It's already broken, you need to pry it out with a crowbar."))
 		return
 	src.health -= C.force
 	if(src.health <= 0)
-		src.visible_message("<span class='alert'><span class='bold'>[user]</span> smacks [src] with [C], shattering it!</span>")
+		src.visible_message(SPAN_ALERT("[SPAN_BOLD("[user]")] smacks [src] with [C], shattering it!"))
 		src.name = "weird broken floor"
 		src.desc = "It's broken. You could probably use a crowbar to pull the remnants out."
-		playsound(src, 'sound/impact_sounds/Crystal_Shatter_1.ogg', 25, 1)
+		playsound(src, 'sound/impact_sounds/Crystal_Shatter_1.ogg', 25, TRUE)
 		break_tile()
 	else
-		src.visible_message("<span class='alert'><span class='bold'>[user]</span> smacks [src] with [C]!</span>")
-		playsound(src, 'sound/impact_sounds/Crystal_Hit_1.ogg', 25, 1)
+		src.visible_message(SPAN_ALERT("[SPAN_BOLD("[user]")] smacks [src] with [C]!"))
+		playsound(src, 'sound/impact_sounds/Crystal_Hit_1.ogg', 25, TRUE)
 	user.lastattacked = src
 
 /turf/simulated/floor/feather/break_tile_to_plating()
@@ -178,21 +179,23 @@ TYPEINFO_NEW(/turf/simulated/wall/auto/feather)
 	connect_diagonal = TRUE
 	connects_to = typecacheof(list(/turf/simulated/wall/auto/feather, /obj/machinery/door, /obj/window))
 	connects_with_overlay = typecacheof(list(/obj/machinery/door, /obj/window))
+TYPEINFO(/turf/simulated/wall/auto/feather)
+	mat_appearances_to_ignore = list("steel", "gnesis")
 /turf/simulated/wall/auto/feather
 	name = "weird glowing wall"
 	desc = "You can feel it thrumming and pulsing."
 	var/flock_id = "Nanite block"
-	icon = 'icons/turf/walls_flock.dmi'
+	icon = 'icons/turf/walls/flock.dmi'
 	icon_state = "flock0"
 	mod = "flock"
 	health = 250
 	var/max_health = 250
 	var/repair_per_resource = 5
 	flags = USEDELAY | ALWAYS_SOLID_FLUID | IS_PERSPECTIVE_FLUID
-	mat_appearances_to_ignore = list("steel", "gnesis")
 	mat_changename = FALSE
 	mat_changedesc = FALSE
-	var/broken = FALSE
+	default_material = "gnesis"
+	broken = FALSE
 	var/on = FALSE
 
 	// update_icon()
@@ -208,7 +211,6 @@ TYPEINFO_NEW(/turf/simulated/wall/auto/feather)
 
 /turf/simulated/wall/auto/feather/New()
 	..()
-	setMaterial(getMaterial("gnesis"), copy = FALSE)
 	src.health = src.max_health
 	APPLY_ATOM_PROPERTY(src, PROP_ATOM_FLOCK_THING, src)
 	src.AddComponent(/datum/component/flock_protection)
@@ -216,40 +218,35 @@ TYPEINFO_NEW(/turf/simulated/wall/auto/feather)
 /turf/simulated/wall/auto/feather/special_desc(dist, mob/user)
 	if (!isflockmob(user))
 		return
-	return {"<span class='flocksay'><span class='bold'>###=-</span> Ident confirmed, data packet received.
-		<br><span class='bold'>ID:</span> [src.flock_id]
-		<br><span class='bold'>System Integrity:</span> [round((src.health/src.max_health)*100)]%
-		<br><span class='bold'>###=-</span></span>"}
+	return {"[SPAN_FLOCKSAY("[SPAN_BOLD("###=- Ident confirmed, data packet received.")]<br>\
+		[SPAN_BOLD("ID:")] [src.flock_id]<br>\
+		[SPAN_BOLD("System Integrity:")] [round((src.health/src.max_health)*100)]%<br>\
+		[SPAN_BOLD("###=-")]")]"}
 
 /turf/simulated/wall/auto/feather/attack_hand(mob/user)
 	if (user.a_intent == INTENT_HARM)
 		if(src.broken)
-			boutput(user, "<span class='hint'>It's already broken, you need to take the pieces apart with a crowbar.</span>")
+			boutput(user, SPAN_HINT("It's already broken, you need to take the pieces apart with a crowbar."))
 		else
 			src.takeDamage("brute", 1)
 			if (src.broken)
-				user.visible_message("<span class='alert'><b>[user]</b> punches the [initial(src.name)], shattering it!</span>")
+				user.visible_message(SPAN_ALERT("<b>[user]</b> punches the [initial(src.name)], shattering it!"))
 			else
-				user.visible_message("<span class='alert'><b>[user]</b> punches [src]! Ouch!</span>")
+				user.visible_message(SPAN_ALERT("<b>[user]</b> punches [src]! Ouch!"))
 			user.lastattacked = src
 			attack_particle(user, src)
 
 /turf/simulated/wall/auto/feather/attackby(obj/item/C, mob/user)
 	if(!C || !user)
 		return
-	if(ispryingtool(C) && src.broken)
-		playsound(src, 'sound/items/Crowbar.ogg', 80, 1)
-		src.destroy()
-		return
-	if(src.broken)
-		boutput(user, "<span class='hint'>It's already broken, you need to take the pieces apart with a crowbar.</span>")
-		return
 	if (src.health > 0)
 		src.takeDamage("brute", C.force)
 	if(src.health <= 0)
-		src.visible_message("<span class='alert'><span class='bold'>[user]</span> smacks the [initial(src.name)] with [C], shattering it!</span>")
+		src.visible_message(SPAN_ALERT("[SPAN_BOLD("[user]")] smacks the [initial(src.name)] with [C], shattering it!"))
+		playsound(src, 'sound/impact_sounds/Crystal_Shatter_1.ogg', 50, 1)
+		src.destroy()
 	else
-		src.visible_message("<span class='alert'><span class='bold'>[user]</span> smacks [src] with [C]!</span>")
+		src.visible_message(SPAN_ALERT("[SPAN_BOLD("[user]")] smacks [src] with [C]!"))
 	user.lastattacked = src
 	attack_particle(user, src)
 
@@ -282,7 +279,7 @@ TYPEINFO_NEW(/turf/simulated/wall/auto/feather)
 	var/damage = rand(modifier, 12 + 8 * modifier)
 
 	src.takeDamage("mixed", damage, FALSE)
-	src.visible_message("<span class='alert'>[initial(src.name)] is hit by the blob!/span>")
+	src.visible_message(SPAN_ALERT("[initial(src.name)] is hit by the blob!"))
 
 	if (src.health <= 0)
 		src.destroy()
@@ -290,16 +287,15 @@ TYPEINFO_NEW(/turf/simulated/wall/auto/feather)
 /turf/simulated/wall/auto/feather/proc/takeDamage(damageType, amount, playAttackSound = TRUE)
 	src.health = max(src.health - amount, 0)
 	if (src.health > 0 && playAttackSound)
-		playsound(src, 'sound/impact_sounds/Crystal_Hit_1.ogg', 80, 1)
+		playsound(src, 'sound/impact_sounds/Crystal_Hit_1.ogg', 80, TRUE)
 
 	if (!src.broken && src.health <= 0)
 		src.name = "weird broken wall"
 		src.desc = "It's broken. You could probably use a crowbar to break the pieces apart."
 		src.broken = TRUE
 		src.UpdateIcon()
-		src.material.setProperty("reflective", 3)
 		if (playAttackSound)
-			playsound(src, 'sound/impact_sounds/Crystal_Shatter_1.ogg', 25, 1)
+			playsound(src, 'sound/impact_sounds/Crystal_Shatter_1.ogg', 25, TRUE)
 
 		for (var/mob/living/critter/flock/drone/flockdrone in src.contents)
 			if (flockdrone.floorrunning)
@@ -312,10 +308,10 @@ TYPEINFO_NEW(/turf/simulated/wall/auto/feather)
 	for (var/i = 1 to rand(3, 6))
 		if (prob(70))
 			B = new /obj/item/raw_material/scrap_metal(T)
-			B.setMaterial(getMaterial("gnesis"), copy = FALSE)
+			B.setMaterial(getMaterial("gnesis"))
 		else
 			B = new /obj/item/raw_material/shard(T)
-			B.setMaterial(getMaterial("gnesisglass"), copy = FALSE)
+			B.setMaterial(getMaterial("gnesisglass"))
 
 	src.ReplaceWith("/turf/simulated/floor/feather", FALSE)
 
@@ -337,7 +333,7 @@ TYPEINFO_NEW(/turf/simulated/wall/auto/feather)
 		src.desc = initial(src.desc)
 		src.broken = FALSE
 		src.UpdateIcon()
-		src.setMaterial(getMaterial("gnesis"), copy = FALSE)
+		src.setMaterial(getMaterial("gnesis"))
 	var/health_given = min(min(resources_available, FLOCK_REPAIR_COST) * src.repair_per_resource, src.max_health - src.health)
 	src.health += health_given
 	return ceil(health_given / src.repair_per_resource)

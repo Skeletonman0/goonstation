@@ -33,8 +33,8 @@ TYPEINFO(/datum/component/bullet_holes)
 	src.impact_image_base = image('icons/obj/projectiles.dmi', "blank")
 	src.impact_image_base.blend_mode = BLEND_INSET_OVERLAY // so the holes don't go over the edge of things
 
-	RegisterSignal(parent, COMSIG_ATOM_HITBY_PROJ, .proc/handle_impact)
-	RegisterSignal(parent, COMSIG_UPDATE_ICON, .proc/redraw_impacts) // just in case
+	RegisterSignal(parent, COMSIG_ATOM_HITBY_PROJ, PROC_REF(handle_impact))
+	RegisterSignal(parent, COMSIG_UPDATE_ICON, PROC_REF(redraw_impacts)) // just in case
 
 /datum/component/bullet_holes/UnregisterFromParent()
 	impact_image_base = null
@@ -75,6 +75,6 @@ TYPEINFO(/datum/component/bullet_holes)
 	src.impact_image_base.overlays = null
 	for (var/image/impact_image in src.impact_images)
 		src.impact_image_base.overlays += impact_image
-	A.UpdateOverlays(src.impact_image_base, "projectiles")
+	A.AddOverlays(src.impact_image_base, "projectiles")
 
 #undef MAX_OFFSET

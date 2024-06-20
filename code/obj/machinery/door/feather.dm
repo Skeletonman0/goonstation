@@ -1,22 +1,24 @@
 // flockdrone door
+TYPEINFO(/obj/machinery/door/feather)
+	mat_appearances_to_ignore = list("steel","gnesis")
 /obj/machinery/door/feather
 	icon = 'icons/misc/featherzone.dmi'
 	icon_state = "door1"
 	name = "weird imposing wall"
 	desc = "It sounds like it's hollow."
 	var/flock_id = "Solid seal aperture"
-	mat_appearances_to_ignore = list("steel","gnesis")
 	mat_changename = FALSE
 	mat_changedesc = FALSE
+	default_material = "gnesis"
 	autoclose = TRUE
 	var/broken = FALSE
-	health = 200
-	health_max = 200
+	health = 250
+	health_max = 250
 	var/repair_per_resource = 2
+	autoclose_delay = 5 SECONDS
 
 /obj/machinery/door/feather/New()
 	..()
-	setMaterial(getMaterial("gnesis"), appearance=FALSE, setname=FALSE)
 	APPLY_ATOM_PROPERTY(src, PROP_ATOM_FLOCK_THING, src)
 	src.AddComponent(/datum/component/flock_protection, report_unarmed=FALSE)
 	if (map_settings?.auto_walls)
@@ -28,23 +30,24 @@
 /obj/machinery/door/feather/special_desc(dist, mob/user)
 	if (!isflockmob(user))
 		return
-	var/special_desc = {"<span class='flocksay'><span class='bold'>###=-</span> Ident confirmed, data packet received.
-		<br><span class='bold'>ID:</span> [src.flock_id]
-		<br><span class='bold'>System Integrity:</span> [round((src.health/src.health_max)*100)]%"}
+	var/special_desc = {"[SPAN_FLOCKSAY("[SPAN_BOLD("###=- Ident confirmed, data packet received.")]<br>\
+		[SPAN_BOLD("ID:")] [src.flock_id]<br>\
+		[SPAN_BOLD("System Integrity:")] [round((src.health/src.health_max)*100)]%<br>\
+		[SPAN_BOLD("###=-")]")]"}
 	if(broken)
-		special_desc += {"<br><span class='bold'>FUNCTION CRITICALLY IMPAIRED, REPAIRS REQUIRED</span>
-			<br><span class='bold'>###=-</span></span>"}
+		special_desc += {"<br>[SPAN_BOLD("FUNCTION CRITICALLY IMPAIRED, REPAIRS REQUIRED")]
+			<br>[SPAN_BOLD("###=-")]</span>"}
 	return special_desc
 
 /obj/machinery/door/feather/emag_act(var/mob/user, var/obj/item/card/emag/E)
 	if (src.density)
-		boutput(user, "<span class='alert'>No reaction, apparently.</span>")
+		boutput(user, SPAN_ALERT("No reaction, apparently."))
 	return FALSE
 
 /obj/machinery/door/feather/take_damage(var/amount, var/mob/user = 0)
 	..()
 	if(src.health <= (src.health_max/2) && !broken)
-		playsound(src, 'sound/impact_sounds/Glass_Shatter_1.ogg', 25, 1)
+		playsound(src, 'sound/impact_sounds/Glass_Shatter_1.ogg', 25, TRUE)
 		src.name = "shattered wall door thing"
 		src.desc = "Well, no one's opening this thing anymore."
 		src.icon_state = "door-broke"
@@ -52,7 +55,7 @@
 
 /obj/machinery/door/feather/break_me_complitely()
 	var/turf/T = get_turf(src)
-	playsound(T, 'sound/impact_sounds/Glass_Shatter_3.ogg', 25, 1)
+	playsound(T, 'sound/impact_sounds/Glass_Shatter_3.ogg', 25, TRUE)
 	var/obj/item/raw_material/shard/S = new /obj/item/raw_material/shard
 	S.set_loc(T)
 	S.setMaterial(getMaterial("gnesisglass"))
@@ -80,7 +83,7 @@
 
 /obj/machinery/door/feather/proc/deconstruct()
 	var/turf/T = get_turf(src)
-	playsound(T, 'sound/impact_sounds/Glass_Shatter_3.ogg', 25, 1)
+	playsound(T, 'sound/impact_sounds/Glass_Shatter_3.ogg', 25, TRUE)
 	var/obj/item/raw_material/shard/S = new /obj/item/raw_material/shard(T)
 	S.setMaterial(getMaterial("gnesisglass"))
 	S = new /obj/item/raw_material/shard(T)
@@ -105,11 +108,11 @@
 			icon_state = "[icon_base]1"
 		if("deny")
 			flick("[icon_base]_deny", src)
-			playsound(src, 'sound/misc/flockmind/flockdrone_door_deny.ogg', 50, 1, -2)
+			playsound(src, 'sound/misc/flockmind/flockdrone_door_deny.ogg', 50, TRUE, -2)
 
 
 /obj/machinery/door/feather/attack_ai(mob/user as mob)
-	boutput(user, "<span class='alert'>No response. It doesn't seem compatible with your systems.</span>")
+	boutput(user, SPAN_ALERT("No response. It doesn't seem compatible with your systems."))
 	return
 
 /obj/machinery/door/feather/attack_hand(mob/user)
@@ -130,11 +133,11 @@
 	if (src.broken)
 		return FALSE
 	if (..())
-		playsound(src, 'sound/misc/flockmind/flockdrone_door.ogg', 30, 1, extrarange = -10)
+		playsound(src, 'sound/misc/flockmind/flockdrone_door.ogg', 30, TRUE, extrarange = -10)
 
 /obj/machinery/door/feather/close()
 	if(..())
-		playsound(src, 'sound/misc/flockmind/flockdrone_door.ogg', 30, 1, extrarange = -10)
+		playsound(src, 'sound/misc/flockmind/flockdrone_door.ogg', 30, TRUE, extrarange = -10)
 
 /obj/machinery/door/feather/isblocked()
 	return FALSE // this door will not lock or be inaccessible to flockdrones

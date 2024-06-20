@@ -90,7 +90,7 @@
 				sleep(30 SECONDS)
 			if(event_active)
 				command_alert("Onsite Engineers inform us a sympathetic connection exists between the furnaces and the engine. Considering burning something it might enjoy: food, people, weed. We're grasping at straws here. ", "Engine Suggestion")
-				sleep(rand(1 MINUTE, 2.5 MINUTES))
+				sleep(randfloat(1 MINUTE, 2.5 MINUTES))
 
 			if(event_active)
 				pda_msg("Unknown substance detected in Themo-Electric Generator Circulators. Please drain and replace lubricants.")
@@ -162,7 +162,7 @@
 							if(apc && apc.powered() && (apc.lighting || apc.equipment || apc.environ ) )
 								elecflash(apc, radius=1)
 								if(apc.cell)
-									apc.cell.charge -= 500
+									apc.cell.use(500)
 									if (apc.cell.charge < 0)
 										apc.cell.charge = 0
 								apc.lighting = 0
@@ -178,7 +178,7 @@
 						circulators_to_relube -= C
 						target_grump += 25
 
-				sleep(rand(5.8 SECONDS, 25 SECONDS))
+				sleep(randfloat(5.8 SECONDS, 25 SECONDS))
 
 	proc/pda_msg(event_string)
 		var/datum/signal/signal = get_free_signal()
@@ -216,10 +216,10 @@ datum/teg_transformation/vampire
 		abilityHolder.addAbility(/datum/targetable/vampire/enthrall/teg)
 		for(var/datum/targetable/vampire/A in abilityHolder.abilities)
 			abilities[A.name] = A
-		RegisterSignal(src.teg, COMSIG_ATOM_HITBY_PROJ, .proc/projectile_collide)
-		RegisterSignal(src.teg, COMSIG_ATTACKBY, .proc/attackby)
-		RegisterSignal(src.teg.circ1, COMSIG_ATTACKBY, .proc/attackby)
-		RegisterSignal(src.teg.circ2, COMSIG_ATTACKBY, .proc/attackby)
+		RegisterSignal(src.teg, COMSIG_ATOM_HITBY_PROJ, PROC_REF(projectile_collide))
+		RegisterSignal(src.teg, COMSIG_ATTACKBY, PROC_REF(attackby))
+		RegisterSignal(src.teg.circ1, COMSIG_ATTACKBY, PROC_REF(attackby))
+		RegisterSignal(src.teg.circ2, COMSIG_ATTACKBY, PROC_REF(attackby))
 
 		var/image/mask = image('icons/obj/clothing/item_masks.dmi', "death")
 		mask.appearance_flags = RESET_COLOR | RESET_ALPHA | PIXEL_SCALE
@@ -268,7 +268,7 @@ datum/teg_transformation/vampire
 		animate(src.teg.circ1)
 		animate(src.teg.circ2)
 		for(var/mob/M in abilityHolder.thralls)
-			remove_mindhack_status(M)
+			M.mind?.remove_antagonist(ROLE_VAMPTHRALL)
 		. = ..()
 
 	on_grump(mult)
@@ -350,8 +350,9 @@ datum/teg_transformation/vampire
 
 	// Implement attackby to handle objects and attacks to Generator and Circulators
 	proc/attackby(obj/T, obj/item/I, mob/user)
+		user.lastattacked = src
 		var/force = I.force
-		if(istype(I,/obj/item/storage/bible) && user.traitHolder.hasTrait("training_chaplain"))
+		if(istype(I,/obj/item/bible) && user.traitHolder.hasTrait("training_chaplain"))
 			force = 60
 
 		switch (force)
@@ -388,7 +389,7 @@ datum/teg_transformation/vampire
 		if (!message || !length(src.abilityHolder.thralls) )
 			return
 
-		var/rendered = "<span class='game thrallsay'><span class='prefix'>Thrall speak:</span> <span class='name vamp'>[name]<span class='text-normal'>[alt_name]</span></span> <span class='message'>[message]</span></span>"
+		var/rendered = SPAN_THRALLSAY("[SPAN_PREFIX("Thrall speak:")] <span class='name vamp'>[name]<span class='text-normal'>[alt_name]</span></span> [SPAN_MESSAGE("[message]")]")
 		for (var/mob/M in src.abilityHolder.thralls)
 			boutput(M, rendered)
 

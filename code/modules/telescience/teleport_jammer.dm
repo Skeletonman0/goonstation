@@ -62,7 +62,7 @@ TYPEINFO(/obj/machinery/telejam)
 			if(!PCEL)
 				turn_off()
 				return
-			PCEL.charge -= 5 * src.range
+			PCEL.use(5 * src.range)
 
 			var/charge_percentage = 0
 			var/current_battery_level = 0
@@ -81,7 +81,7 @@ TYPEINFO(/obj/machinery/telejam)
 				src.build_icon()
 				if (src.battery_level == 1)
 					playsound(src.loc, src.sound_battwarning, 50, 1)
-					src.visible_message("<span class='alert'><b>[src] emits a low battery alarm!</b></span>")
+					src.visible_message(SPAN_ALERT("<b>[src] emits a low battery alarm!</b>"))
 
 			if (PCEL.charge < 0)
 				src.visible_message("<b>[src]</b> runs out of power and shuts down.")

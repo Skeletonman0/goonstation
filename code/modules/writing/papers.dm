@@ -1,11 +1,11 @@
 // This file is for premade paper/pamphlet things
 
-/obj/item/paper/alchemy/
+/obj/item/paper/alchemy
 	name = "'Chemistry Information'"
 
 /// Cloning Manual -- A big ol' manual.
 /obj/item/paper/Cloning
-	name = "'H-87 Cloning Apparatus Manual"
+	name = "H-87 Cloning Apparatus Manual"
 	info = {"<h4>Getting Started</h4>
 	Congratulations, your station has purchased the H-87 industrial cloning device!<br>
 	Using the H-87 is almost as simple as brain surgery! Simply insert the target humanoid into the scanning chamber and select the scan option to create a new profile!<br>
@@ -47,7 +47,7 @@
 
 /obj/item/paper/Internal
 	name = "'Internal Atmosphere Operating Instructions'"
-	info = "Equipment:<BR>\n\t1+ Tank(s) with appropriate atmosphere<BR>\n\t1 Gas Mask w regulator (standard issue)<BR>\n<BR>\nProcedure:<BR>\n\t1. Wear mask<BR>\n\t2. Attach oxygen tank pipe to regulater (automatic))<BR>\n\t3. Set internal!<BR>\n<BR>\nNotes:<BR>\n\tDon't forget to stop internal when tank is low by<BR>\n\tremoving internal!<BR>\n<BR>\n\tDo not use a tank that has a high concentration of toxins.<BR>\n\tThe filters shut down on internal mode!<BR>\n<BR>\n\tWhen exiting a high danger environment it is advised<BR>\n\tthat you exit through a decontamination zone!<BR>\n<BR>\n\tRefill a tank at a oxygen canister by equiping the tank (Double Click)<BR>\n\tthen 'attacking' the canister (Double Click the canister)."
+	info = "Equipment:<BR>\n\t1+ Tank(s) with appropriate atmosphere<BR>\n\t1 Gas Mask w regulator (standard issue)<BR>\n<BR>\nProcedure:<BR>\n\t1. Wear mask<BR>\n\t2. Attach oxygen tank pipe to regulator (automatic))<BR>\n\t3. Set internal!<BR>\n<BR>\nNotes:<BR>\n\tDon't forget to stop internal when tank is low by<BR>\n\tremoving internal!<BR>\n<BR>\n\tDo not use a tank that has a high concentration of toxins.<BR>\n\tThe filters shut down on internal mode!<BR>\n<BR>\n\tWhen exiting a high danger environment it is advised<BR>\n\tthat you exit through a decontamination zone!<BR>\n<BR>\n\tRefill a tank at a oxygen canister by equiping the tank (Double Click)<BR>\n\tthen 'attacking' the canister (Double Click the canister)."
 
 /obj/item/paper/Court
 	name = "'Judgement'"
@@ -238,12 +238,17 @@ Only trained personnel should operate station systems. Follow all procedures car
 		<br><strong>SUBJ:</strong> Toxins Research Project #08-A
 		<br>
 		<p>
-		The enclosed samples are to be used in continued plasma research.  Our current understanding is that the gas released from "Molitz Beta" in the presence of
-		sufficient temperatures and plasma cause an unusual phenomenon. The gas, Oxygen Agent B, seems to disrupt the typical equilibrium formed in exothermic oxidation
-		allowing for temperatures we have been unable to fully realize. This only seems to occur when combustion is incomplete and can be observed visually as a gentle swirling of the flame.
+		The enclosed samples are to be used in continued plasma research.  Our current understanding is that the samples enclosed (dubbed molitz beta) in the presence of
+		sufficient temperatures and plasma causes an exotic reaction phenomenon. Utiliyzing a yet understood solid catalyst present in moiltz beta,
+		the sample undergoes an intense endothermic reaction between the surrounding FAAE and the sample's internal gas pockets.
 		</p>
 		<p>
-		Please exercise caution in your testing, the result can best be described as a hellfire.  Ensure adequate safety messures are in place to purge the fire.
+		This pressure build up results in significant offgassing.
+		The exotic component of the resultant gas, Oxygen Agent B, seems to disrupt the typical equilibrium formed in exothermic oxidation
+		allowing the potential for temperatures we have been unable to fully realize.
+		</p>
+		<p>
+		Please exercise caution in your testing, when properly utilized the result can best be described as a hellfire.  Ensure adequate safety messures are in place to purge the fire.
 		</p>
 		<p>All findings and documents related to Project #08-A are to be provided in triplicate to CentComm on physical documents only. <b>DO NOT</b> provide this data digitally
 		as it may become compromised.
@@ -467,25 +472,6 @@ Only trained personnel should operate station systems. Follow all procedures car
 	- B <br>
 	"}
 
-/obj/item/paper/cdc_pamphlet
-	name = "So you've contracted a pathogen!"
-	icon_state = "paper"
-	info = {"<center><h2>So you've contracted a pathogen!</h2></center>
-	Hello, dear customer!<hr>
-	Pathogens can be scary! But you can rest easy knowing that your health is in safe hands now that you have contacted the CDC. Simply place a pathogen
-	sample into the biohazard crate and send it back to us and we will have you cured in no time!<hr>
-	<h3>How to send a pathogen sample</h3><hr>
-	<ul style='list-style-type:disc'>
-		<li>1) Fill a reagent container with a blood sample from a person afflicted with the pathogen you are seeking to cure. (For instance, you could use the syringe we sent you!)</li>
-		<li>2) Deposit reagent container into the received biohazard crate and close it.</li>
-		<li>3) Send the biohazard crate back to us.</li>
-		<li>4) As soon as we receive your sample, you can contact us using your Quartermaster's Console to ask us to start analyzing it.</li>
-		<li>5) Once we are done analyzing your sample, we will offer to sell you cures. Buying a pack of multiple cures at a time will be cheaper for you!</li>
-	</ul>
-	We hope that you have found this pamphlet enlightening and we look forward to receiving your sample soon!<hr>
-	Remember, only you can prevent deadly pathogens!
-	"}
-
 /obj/item/paper/shipping_precautions
 	name = "Read this and check the cargo!"
 	icon_state = "paper_caution_bloody"
@@ -509,7 +495,7 @@ Only trained personnel should operate station systems. Follow all procedures car
 /obj/item/paper/dreamy_rhyme
 	name = "Space-Rhymes"
 	icon_state = "thermal_paper"
-	desc = "Scibbled rhymes...and thoughts."
+	desc = "Scribbled rhymes...and thoughts."
 	info = {" Space duck, I do not give a...I do not give anything about luck, shrug, puck, quack
 	<br>
 	<br>
@@ -769,21 +755,29 @@ Only trained personnel should operate station systems. Follow all procedures car
 	I mean, just making these telecrystals the right color is a pain in the ass, requiring this bulky machine I hardly know how to operate take HOURS per crystal!<br><br>
 	Well, here's to hoping infusing these things with black powder won't blow up in my face."}
 
-/obj/item/paper/recipe_tandoori
+//is this a bit extra? Yeess but I wanted it on a random table okay!
+proc/spawn_kitchen_note()
+	for_by_tcl(table, /obj/table)
+		if (istype(get_area(table), /area/station/crew_quarters/kitchen) && prob(50))
+			var/type = pick(concrete_typesof(/obj/item/paper/recipe) - /obj/item/paper/recipe)
+			new type(get_turf(table))
+			return
+
+/obj/item/paper/recipe/tandoori
 	name = "stained recipe clipping"
 	desc = "It's creased and worn, and smells a little like dried blood."
 	icon_state = "paper_caution_bloody"
 	info = {"<i>In just nine seconds, treat your family to a meal that tastes like it took hours to roast!</i><br><h3>Tandoori Chicken</h3><br><h4>Ingredients:</h4><br> -chicken meat <br> -a heaping helping of curry powder <br> -a nice, hot chili pepper <br> -a head of garlic <br><br><i>Don't even waste your time slashing the meat or slathering it in spices! Just toss it all in your standard-issue industrial oven and set it to high. Your dinner guests can't even tell the difference!</i>"}
 
-/obj/item/paper/recipe_potatocurry
+/obj/item/paper/recipe/potatocurry
 	name = "tattered recipe clipping"
 	desc = "It's very old, and nearly falls apart in your hand."
 	icon_state = "paper_burned"
 	info = {"<i>Rich and full of vegetables, this hearty curry will satisfy any palate!</i><br><h3>Potato Curry</h3><br><h4>Ingredients:</h4><br> -plenty of curry powder <br> -a fresh potato <br> -chopped carrots <br> -a handful of peas <br><br><i>Simply toss the ingredients into a standard-issue industrial oven and let them simmer on low. Treat anyone to the flavor of a home-cooked stew in a fraction of the time!</i>"}
 
-/obj/item/paper/recipe_coconutcurry
+/obj/item/paper/recipe/coconutcurry
 	name = "creased recipe clipping"
-	desc = "Irreperably creased from years of being folded-up. Luckily, you can still make out the text on it."
+	desc = "Irreparably creased from years of being folded-up. Luckily, you can still make out the text on it."
 	icon_state = "paper_caution_crumple"
 	info = {"
 	<i>In the mood for something spicy yet mild? Have extra coconuts to burn? Asking yourself why you grew so many coconuts in the first place?
@@ -793,7 +787,7 @@ Only trained personnel should operate station systems. Follow all procedures car
 	Tell the botanists that they can go back to growing weed now. Beg them to, really.</i>
 	"}
 
-/obj/item/paper/recipe_chickenpapplecurry
+/obj/item/paper/recipe/chickenpapplecurry
 	name = "worn recipe clipping"
 	desc = "An old recipe clipped from a lifestyle magazine for space station chefs. Aw, the color's faded from the layout..."
 	icon_state = "paper_caution"
@@ -1048,6 +1042,29 @@ Only trained personnel should operate station systems. Follow all procedures car
 	S.L.
 	"}
 
+#ifdef NIGHTSHADE
+/obj/item/paper/gallery
+	name = "Gallery submission guide"
+	info = {"
+		<span style="color:null;font-family:Georgia;">
+		<p>Thank you for your interest in making a submission to the Nanotrasen Applied Paints Art Gallery!</p>
+		<p>To make a submission:</p>
+		<ol>
+		<li>Use your completed canvas in hand on any gallery exhibit</li>
+		<li>Pay the fee (see pricing below)</li>
+		<li>(Optional) Title your submission and publicly display your BYOND key as the submitter</li>
+		</ol>
+		<p>Your artwork will remain on display indefinitely unless another artist decides to purchase your exhibit.</p>
+		<p>Pricing (in Spacebux):</p>
+		<ul>
+		<li>Lowend (6x available) - 500</li>
+		<li>Midrange (6x available) - 1,000</li>
+		<li>Highend (2x available) - 2,500 </li>
+		<li>Premium (1x available) - 5,000</li>
+		</ul>
+		</span>
+	"}
+#else
 /obj/item/paper/gallery
 	name = "Gallery submission guide"
 	info = {"
@@ -1069,6 +1086,7 @@ Only trained personnel should operate station systems. Follow all procedures car
 		</ul>
 		</span>
 	"}
+#endif
 
 /obj/item/paper/magnetconstruction
 	name = "How to set up a new mining magnet"
@@ -1101,4 +1119,55 @@ Only trained personnel should operate station systems. Follow all procedures car
 	NOTE: Must be the internal magnet area, not the border of the magnet area.<br><br>
 
 	Congrats! Your mineral magnet is now assembled and ready for use!
+	"}
+
+/obj/item/paper/employee_notice
+	name = "Employee reminder"
+	icon_state = "paper"
+	info = {"
+	The backroom is currently locked for renovations and is unsafe.<br>
+	DO NOT TRY AND ENTER! or ask questions, thats not what im paying you for.<br>
+	-Larry
+	"}
+
+/obj/item/paper/laundry_purchase
+	name = "Purchase confirmation"
+	icon_state = "paper"
+	info ={"
+	Dear Mr. Lard, <br>
+
+	Congratulations on being the proud owner of our new cutting edge portable laundry technology!<br>
+	perfect for those long space trips.<br><br>
+
+	<p>Purchase details:</p>
+	<ul>
+	<li>Port-A-Laundry - 50,000</li>
+	<li>Tax - 2,500</li>
+	<li>6 month warranty guarantee</li>
+	</ul>
+
+	<p>Consumer notice:</p>
+	Do not under ANY circimstances put people or money into the machine.<br>
+	your warranty will be void, you have been warned.
+	"}
+
+/obj/item/paper/final_notice
+	name = "PAY UP LARRY"
+	icon_state = "paper"
+	info ={"
+	You have been late on your payments one too many times... <br>
+	Flake out this time and you will regret it. <br>
+	You know where to find us larry, bring the money, 100,000 credits.
+	"}
+
+/obj/item/paper/labdrawertips
+	name = "stern lab safety warning"
+	icon_state = "paper"
+	info ={"
+	I've had it with you nincompoops taking shortcuts. For the last
+	time, <b> when you open the drawers under the lab counter,
+	USE AN EMPTY HAND!</b> There's no excuse for you to be
+	melting holes in the floor because you tried to grab a
+	handle with the same hand that holds your beloved
+	napalm-phlogiston-thermite """hell mix."""
 	"}

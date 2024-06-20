@@ -61,17 +61,16 @@ ABSTRACT_TYPE(/obj/item/parts)
 
 	/// set to TRUE if this limb has decomposition icons
 	var/decomp_affected = TRUE
-	var/current_decomp_stage_l = -1
 	var/current_decomp_stage_s = -1
 
 	var/mob/living/holder = null
 
 	/// Used by getMobIcon to pass off to update_body. Typically holds image(the_limb's_icon, "[src.slot]")
-	var/image/standImage
-	/// Appears to be unused, since we just rotate the sprite through animagic
-	var/image/lyingImage
+	var/image/bodyImage
 	/// The icon the mob sprite uses when attached, change if the limb's icon isnt in 'icons/mob/human.dmi'
 	var/partIcon = 'icons/mob/human.dmi'
+	/// The part of the icon state that differs per part, ie "brullbar" for brullbar arms
+	var/partIconModifier = null
 	var/partDecompIcon = 'icons/mob/human_decomp.dmi'
 	/// Used by getHandIconState to determine the attached-to-mob-sprite hand sprite
 	var/handlistPart
@@ -144,6 +143,13 @@ ABSTRACT_TYPE(/obj/item/parts)
 				if (H.r_hand == remove_object)
 					H.r_hand = null
 				src.remove_object = null
+
+			if (src.slot == "l_arm")
+				H.drop_from_slot(H.l_hand)
+				H.hud.update_hands()
+			else if (src.slot == "r_arm")
+				H.drop_from_slot(H.r_hand)
+				H.hud.update_hands()
 			H.update_clothing()
 			H.update_body()
 			H.set_body_icon_dirty()
@@ -175,7 +181,7 @@ ABSTRACT_TYPE(/obj/item/parts)
 		//object.name = "[src.holder.real_name]'s [initial(object.name)]"
 		object.add_fingerprint(src.holder)
 
-		if(show_message) holder.visible_message("<span class='alert'>[holder.name]'s [object.name] falls off!</span>")
+		if(show_message) holder.visible_message(SPAN_ALERT("[holder.name]'s [object.name] falls off!"))
 
 		if(ishuman(holder))
 			var/mob/living/carbon/human/H = holder
@@ -231,7 +237,7 @@ ABSTRACT_TYPE(/obj/item/parts)
 		//object.name = "[src.holder.real_name]'s [initial(object.name)]" //Luis Smith's Dr. Kay's Luis Smith's Sailor Dave's Left Arm
 		object.add_fingerprint(src.holder)
 
-		holder.visible_message("<span class='alert'>[holder.name]'s [object.name] flies off in a [src.streak_descriptor] arc!</span>")
+		holder.visible_message(SPAN_ALERT("[holder.name]'s [object.name] flies off in a [src.streak_descriptor] arc!"))
 
 		switch(direction)
 			if(NORTH)
@@ -250,7 +256,7 @@ ABSTRACT_TYPE(/obj/item/parts)
 			object.streak_object(direction, src.streak_decal)
 
 		if(prob(60))
-			INVOKE_ASYNC(holder, /mob.proc/emote, "scream")
+			INVOKE_ASYNC(holder, TYPE_PROC_REF(/mob, emote), "scream")
 
 		if(ishuman(holder))
 			var/mob/living/carbon/human/H = holder
@@ -284,7 +290,11 @@ ABSTRACT_TYPE(/obj/item/parts)
 	attach(var/mob/living/carbon/human/attachee,var/mob/attacher)
 		if(!ishuman(attachee) || attachee.limbs.vars[src.slot])
 			return ..()
+
+		var/can_secure = FALSE
 		if(attacher)
+			can_secure = ismob(attacher) && (attacher.find_type_in_hand(/obj/item/suture) || attacher?.find_type_in_hand(/obj/item/staple_gun))
+
 			if(!can_act(attacher))
 				return
 			if(!src.easy_attach)
@@ -295,15 +305,15 @@ ABSTRACT_TYPE(/obj/item/parts)
 
 			attacher.remove_item(src)
 
-			playsound(attachee, 'sound/effects/attach.ogg', 50, 1)
-			attacher.visible_message("<span class='alert'>[attacher] attaches [src] to [attacher == attachee ? his_or_her(attacher) : "[attachee]'s"] stump. It [src.easy_attach ? "fuses instantly" : "doesn't look very secure"]!</span>")
+			playsound(attachee, 'sound/effects/attach.ogg', 50, TRUE)
+			attacher.visible_message(SPAN_ALERT("[attacher] attaches [src] to [attacher == attachee ? his_or_her(attacher) : "[attachee]'s"] stump. It [src.easy_attach ? "fuses instantly" : can_secure ? "looks very secure" : "doesn't look very secure"]!"))
 
 		attachee.limbs.vars[src.slot] = src
 		src.holder = attachee
 		src.layer = initial(src.layer)
 		src.screen_loc = ""
 		src.set_loc(attachee)
-		src.remove_stage = src.easy_attach ? 0 : 2
+		src.remove_stage = (src.easy_attach || can_secure) ? 0 : 2
 
 		if (movement_modifier)
 			APPLY_MOVEMENT_MODIFIER(src.holder, movement_modifier, src.type)
@@ -322,35 +332,32 @@ ABSTRACT_TYPE(/obj/item/parts)
 	proc/surgery(var/obj/item/I) //placeholder
 		return
 
-	proc/getMobIcon(var/lying, var/decomp_stage = DECOMP_STAGE_NO_ROT)
-		if(no_icon) return 0
+	proc/getMobIcon(var/decomp_stage = DECOMP_STAGE_NO_ROT, icon/mutantrace_override, force = FALSE)
+		if(no_icon)
+			return 0
+		if (force)
+			qdel(src.bodyImage)
+			src.bodyImage = null
+		var/used_icon = mutantrace_override || getAttachmentIcon(decomp_stage)
+		if (src.bodyImage && ((src.decomp_affected && src.current_decomp_stage_s == decomp_stage) || !src.decomp_affected))
+			return src.bodyImage
+		current_decomp_stage_s = decomp_stage
+		var/icon_state = src.getMobIconState(decomp_stage)
+		src.bodyImage = image(used_icon, icon_state)
+		return bodyImage
+
+	proc/getMobIconState(var/decomp_stage = DECOMP_STAGE_NO_ROT)
 		var/decomp = ""
 		if (src.decomp_affected && decomp_stage)
 			decomp = "_decomp[decomp_stage]"
-		var/used_icon = getAttachmentIcon(decomp_stage)
-
-		if (lying)
-			if (src.lyingImage && ((src.decomp_affected && src.current_decomp_stage_l == decomp_stage) || !src.decomp_affected))
-				return src.lyingImage
-			//boutput(world, "Attaching lying limb [src.slot][decomp]_l on decomp stage [decomp_stage].")
-			current_decomp_stage_l = decomp_stage
-			src.lyingImage = image(used_icon, "[src.slot][decomp]_l")
-			return lyingImage
-
-		else
-			if (src.standImage && ((src.decomp_affected && src.current_decomp_stage_s == decomp_stage) || !src.decomp_affected))
-				return src.standImage
-			//boutput(world, "Attaching standing limb [src.slot][decomp]_s on decomp stage [decomp_stage].")
-			current_decomp_stage_s = decomp_stage
-			src.standImage = image(used_icon, "[src.slot][decomp]")
-			return standImage
+		return "[src.slot][src.partIconModifier ? "_[src.partIconModifier]" : ""][decomp]"
 
 	proc/getAttachmentIcon(var/decomp_stage = DECOMP_STAGE_NO_ROT)
 		if (src.decomp_affected && decomp_stage)
 			return src.partDecompIcon
 		return src.partIcon
 
-	proc/getHandIconState(var/lying, var/decomp_stage = DECOMP_STAGE_NO_ROT)
+	proc/getHandIconState(var/decomp_stage = DECOMP_STAGE_NO_ROT)
 		var/decomp = ""
 		if (src.decomp_affected && decomp_stage)
 			decomp = "_decomp[decomp_stage]"
@@ -358,7 +365,7 @@ ABSTRACT_TYPE(/obj/item/parts)
 		//boutput(world, "Attaching standing hand [src.slot][decomp]_s on decomp stage [decomp_stage].")
 		return "[src.handlistPart][decomp]"
 
-	proc/getPartIconState(var/lying, var/decomp_stage = DECOMP_STAGE_NO_ROT)
+	proc/getPartIconState(var/decomp_stage = DECOMP_STAGE_NO_ROT)
 		var/decomp = ""
 		if (src.decomp_affected && decomp_stage)
 			decomp = "_decomp[decomp_stage]"
@@ -367,6 +374,10 @@ ABSTRACT_TYPE(/obj/item/parts)
 		return "[src.partlistPart][decomp]"
 
 	proc/on_holder_examine()
+		return
+
+	///Called every life tick when attached to a mob
+	proc/on_life(datum/controller/process/mobs/parent)
 		return
 
 /obj/item/proc/streak_object(var/list/directions, var/streak_splatter) //stolen from gibs
@@ -388,7 +399,7 @@ ABSTRACT_TYPE(/obj/item/parts)
 
 	SPAWN(0)
 		/// Number of tiles where it should try to make a splatter
-		var/num_splats = rand(round(dist * 0.2), dist) + 1
+		var/num_splats = randfloat(round(dist * 0.2), dist) + 1
 		for (var/turf/T in linepath)
 			if(step_to(src, T, 0, 300) || num_splats-- >= 1)
 				if (ispath(streak_splatter))

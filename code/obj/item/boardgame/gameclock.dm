@@ -22,15 +22,6 @@
 		else
 			icon_state = "chessclock_L"
 
-	proc/formatTimeText(var/timeValue as num)
-		var/seconds = round((timeValue / 10) % 60)
-		var/minutes = round(((timeValue / 10) - seconds) / 60)
-		if (minutes < 10)
-			minutes = "0[minutes]"
-		if (seconds < 10)
-			seconds = "0[seconds]"
-		return "[minutes]:[seconds]"
-
 	proc/setTime(var/newWhiteTime as num, var/newBlackTime as num)
 		src.whiteTime = clamp(newWhiteTime, src.minTime, src.maxTime)
 		src.blackTime = clamp(newBlackTime, src.minTime, src.maxTime)
@@ -156,7 +147,7 @@
 		src.ui_interact(user)
 
 	attack_ai(var/mob/user)
-		return src.attack_hand(user)
+		return src.Attackhand(user)
 
 	attack_self(var/mob/user)
-		return src.attack_hand(user)
+		return src.Attackhand(user)

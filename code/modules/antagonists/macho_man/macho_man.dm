@@ -1,6 +1,8 @@
-/datum/antagonist/macho_man
+/datum/antagonist/mob/macho_man
 	id = ROLE_MACHO_MAN
 	display_name = "macho man"
+	antagonist_icon = "wrestler"
+	mob_path = /mob/living/carbon/human/machoman
 
 	give_equipment()
 		var/mob/current_mob = src.owner.current
@@ -14,16 +16,13 @@
 			src.owner.current.name = src.owner.current.real_name
 			src.owner.current.traitHolder.addTrait("deathwish")
 			src.owner.current.traitHolder.addTrait("glasscannon")
-			boutput(src.owner.current, "<span class='notice'>You weren't able to absorb all the macho waves you were bombarded with! You have been left an incomplete macho man, with a frail body, and only one macho power. However, you inflict double damage with most melee weapons. Use your newfound form wisely to prove your worth as a macho champion of justice. Do not kill innocent crewmembers.</span>")
+			boutput(src.owner.current, SPAN_NOTICE("You weren't able to absorb all the macho waves you were bombarded with! You have been left an incomplete macho man, with a frail body, and only one macho power. However, you inflict double damage with most melee weapons. Use your newfound form wisely to prove your worth as a macho champion of justice. Do not kill innocent crewmembers."))
 
 		else
 			src.owner.current.assign_gimmick_skull()
 
 	remove_equipment()
-		var/mob/current_mob = src.owner.current
-		src.owner.current.ghostize()
-		qdel(current_mob)
-
+		. = ..()
 		src.owner.current.traitHolder.removeTrait("deathwish")
 		src.owner.current.traitHolder.removeTrait("glasscannon")
 

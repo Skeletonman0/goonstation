@@ -21,6 +21,8 @@
 	var/mob/living/intangible/wraith/master = null
 	var/cloaked = FALSE
 
+	faction = list(FACTION_WRAITH)
+
 	New(var/turf/T, var/mob/living/intangible/wraith/M = null)
 		..(T)
 		if(M != null)
@@ -50,14 +52,14 @@
 		if(cloaked)
 			animate(src, alpha=255, time=1 SECONDS)
 			cloaked = FALSE
-			boutput(src, "<span class='alert'>We are under attack, our disguise fails.</span>")
+			boutput(src, SPAN_ALERT("We are under attack, our disguise fails."))
 		..()
 
 	attack_hand(mob/user)
 		if(cloaked)
 			animate(src, alpha=255, time=1 SECONDS)
 			cloaked = FALSE
-			boutput(src, "<span class='alert'>We reappear</span>")
+			boutput(src, SPAN_ALERT("We reappear"))
 		..()
 
 	Life()

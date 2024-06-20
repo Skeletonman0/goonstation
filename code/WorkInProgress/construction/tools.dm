@@ -39,7 +39,7 @@
 					if(B.owner.current.client)
 						valid = 1
 			if (!valid)
-				boutput(user, "<span class='alert'>This brain doesn't look any good to use!</span>")
+				boutput(user, SPAN_ALERT("This brain doesn't look any good to use!"))
 				processing = 0
 				return
 			var/mob/M = B.owner.current
@@ -82,7 +82,7 @@
 			for (var/obj/critter/C in view(5, src))
 				if (C.alive)
 					targets += C
-		if (targets.len > 0)
+		if (length(targets) > 0)
 			if (!isPopping())
 				if (isDown())
 					popUp()
@@ -185,20 +185,20 @@ TYPEINFO(/obj/item/room_marker)
 		if (!isturf(target))
 			return
 		if(!istype(A,/area/built_zone))
-			boutput(user, "<span class='alert'>This tool will only work on built zones!</span>")
+			boutput(user, SPAN_ALERT("This tool will only work on built zones!"))
 			return
 		if (using)
-			boutput(user, "<span class='alert'>Already validating a room. Please wait.</span>")
+			boutput(user, SPAN_ALERT("Already validating a room. Please wait."))
 			return
 		using = 1
-		boutput(user, "<span class='notice'>Validating room...</span>")
+		boutput(user, SPAN_NOTICE("Validating room..."))
 		SPAWN(0)
 			var/list/tiles = identify_room(target)
 			if (tiles)
 				combine_areas(tiles)
-				boutput(user, "<span class='notice'>Validation successful! Room designated.</span>")
+				boutput(user, SPAN_NOTICE("Validation successful! Room designated."))
 			else
-				boutput(user, "<span class='alert'>Validation failed!</span>")
+				boutput(user, SPAN_ALERT("Validation failed!"))
 			using = 0
 
 	proc/combine_areas(var/list/room)
@@ -325,16 +325,16 @@ TYPEINFO(/obj/item/material_shaper)
 	proc/determine_material(var/obj/item/material_piece/D, mob/user as mob)
 		var/datum/material/DM = D.material
 		var/which = null
-		if ((DM.material_flags & MATERIAL_METAL) && (DM.material_flags & MATERIAL_CRYSTAL))
+		if ((DM.getMaterialFlags() & MATERIAL_METAL) && (DM.getMaterialFlags() & MATERIAL_CRYSTAL))
 			var/be_metal = 0
 			var/be_glass = 0
 			if (!metal)
 				be_metal = 1
-			else if (isSameMaterial(metal, DM))
+			else if (metal.isSameMaterial(DM))
 				be_metal = 1
 			if (!glass)
 				be_glass = 1
-			else if (isSameMaterial(glass, DM))
+			else if (glass.isSameMaterial(DM))
 				be_glass = 1
 			if (be_metal && be_glass)
 				which = input("Use [D] as?", "Pick", null) in list("metal", "glass")
@@ -344,32 +344,32 @@ TYPEINFO(/obj/item/material_shaper)
 				which = "glass"
 			else
 				playsound(src.loc, sound_grump, 40, 1)
-				boutput(user, "<span class='alert'>[D] incompatible with current metal or glass.</span>")
+				boutput(user, SPAN_ALERT("[D] incompatible with current metal or glass."))
 				return null
-		else if (DM.material_flags & MATERIAL_METAL)
+		else if (DM.getMaterialFlags() & MATERIAL_METAL)
 			if (!metal)
 				which = "metal"
-			else if (isSameMaterial(metal, DM))
+			else if (metal.isSameMaterial(DM))
 				which = "metal"
 			else
 				playsound(src.loc, sound_grump, 40, 1)
-				boutput(user, "<span class='alert'>[D] incompatible with current metal.</span>")
+				boutput(user, SPAN_ALERT("[D] incompatible with current metal."))
 				return null
-		else if (DM.material_flags & MATERIAL_CRYSTAL)
+		else if (DM.getMaterialFlags() & MATERIAL_CRYSTAL)
 			if (!glass)
 				which = "glass"
-			else if (isSameMaterial(glass, DM))
+			else if (glass.isSameMaterial(DM))
 				which = "glass"
 			else
 				playsound(src.loc, sound_grump, 40, 1)
-				boutput(user, "<span class='alert'>[D] incompatible with current glass.</span>")
+				boutput(user, SPAN_ALERT("[D] incompatible with current glass."))
 				return null
 		else
 			playsound(src.loc, sound_grump, 40, 1)
-			boutput(user, "<span class='alert'>[D] is not a metal or glass material.</span>")
+			boutput(user, SPAN_ALERT("[D] is not a metal or glass material."))
 		if (!which)
 			playsound(src.loc, sound_grump, 40, 1)
-			boutput(user, "<span class='alert'>[D] is not a metal or glass material.</span>")
+			boutput(user, SPAN_ALERT("[D] is not a metal or glass material."))
 
 		if (which == "metal" && !metal)
 			metal = DM
@@ -390,26 +390,26 @@ TYPEINFO(/obj/item/material_shaper)
 			metal = null
 		if (glass_count <= 0)
 			glass = null
-		boutput(usr, "<span class='notice'>The shaper has [metal_count] units of metal and [glass_count] units of glass left.</span>")
+		boutput(usr, SPAN_NOTICE("The shaper has [metal_count] units of metal and [glass_count] units of glass left."))
 
 	examine()
 		. = ..()
 		if (metal)
-			. += "<span class='notice'>Metal: [metal_count] units of [metal.name].</span>"
+			. += SPAN_NOTICE("Metal: [metal_count] units of [metal.getName()].")
 		else
-			. += "<span class='alert'>Metal: 0 units.</span>"
+			. += SPAN_ALERT("Metal: 0 units.")
 
 		if (glass)
-			. += "<span class='notice'>Glass: [glass_count] units of [glass.name].</span>"
+			. += SPAN_NOTICE("Glass: [glass_count] units of [glass.getName()].")
 		else
-			. += "<span class='alert'>Glass: 0 units</span>"
+			. += SPAN_ALERT("Glass: 0 units")
 
 	attack_self(mob/user as mob)
 		mode = !mode
 		if (!mode)
-			boutput(user, "<span class='notice'>Mode: marking/unmarking plans for grille and glass structures.</span>")
+			boutput(user, SPAN_NOTICE("Mode: marking/unmarking plans for grille and glass structures."))
 		else
-			boutput(user, "<span class='notice'>Mode: constructing planned grille and glass structures.</span>")
+			boutput(user, SPAN_NOTICE("Mode: constructing planned grille and glass structures."))
 
 	attackby(var/obj/item/W, mob/user as mob)
 		if (W.disposed)
@@ -441,7 +441,7 @@ TYPEINFO(/obj/item/material_shaper)
 		else
 			new /obj/plan_marker/glass_shaper(T)
 
-		boutput(user, "<span class='notice'>Done.</span>")
+		boutput(user, SPAN_NOTICE("Done."))
 		return 1
 
 	MouseDrop_T(var/obj/over_object, mob/user as mob)
@@ -459,7 +459,7 @@ TYPEINFO(/obj/item/material_shaper)
 			var/obj/item/material_piece/D = over_object
 			if (!D.material)
 				playsound(src.loc, sound_grump, 40, 1)
-				boutput(user, "<span class='alert'>That does not have a usable material.</span>")
+				boutput(user, SPAN_ALERT("That does not have a usable material."))
 				return
 
 			var/which = determine_material(D, user)
@@ -475,7 +475,7 @@ TYPEINFO(/obj/item/material_shaper)
 				processing = 0
 				return
 
-			user.visible_message("<span class='notice'>[user] begins stuffing materials into [src].</span>")
+			user.visible_message(SPAN_NOTICE("[user] begins stuffing materials into [src]."))
 
 			for (var/obj/item/material_piece/M in over_object.loc)
 				if (user.loc != procloc)
@@ -483,7 +483,7 @@ TYPEINFO(/obj/item/material_shaper)
 				var/datum/material/MT = M.material
 				if (!MT)
 					continue
-				if (isSameMaterial(MT, DM))
+				if (MT.isSameMaterial(DM))
 					playsound(src.loc, sound_process, 40, 1)
 					if (which == "metal")
 						metal_count += 10
@@ -492,7 +492,7 @@ TYPEINFO(/obj/item/material_shaper)
 					qdel(M)
 					sleep(0.1 SECONDS)
 			processing = 0
-			user.visible_message("<span class='notice'>[user] finishes stuffing materials into [src].</span>")
+			user.visible_message(SPAN_NOTICE("[user] finishes stuffing materials into [src]."))
 
 TYPEINFO(/obj/item/room_planner)
 	mats = 6
@@ -520,19 +520,19 @@ TYPEINFO(/obj/item/room_planner)
 	var/turf_op = 0
 
 	var/list/wallicons = list(
-		"diner" = 'icons/turf/walls_derelict.dmi',
-		"martian" = 'icons/turf/walls_martian.dmi',
-		"shuttle blue" = 'icons/turf/walls_shuttle.dmi',
-		"shuttle white" = 'icons/turf/walls_shuttle-debris.dmi',
-		"shuttle dark" = 'icons/turf/walls_shuttle-debris.dmi',
-		"overgrown" = 'icons/turf/walls_overgrown.dmi',
-		"meat" = 'icons/turf/walls_meat.dmi',
-		"ancient" = 'icons/turf/walls_ancient.dmi',
-		"cave" = 'icons/turf/walls_cave.dmi',
-		"lead blue" = 'icons/turf/walls_lead.dmi',
-		"lead gray" = 'icons/turf/walls_lead.dmi',
-		"lead white" = 'icons/turf/walls_lead.dmi',
-		"ancient smooth" = 'icons/turf/walls_iomoon.dmi',
+		"diner" = 'icons/turf/walls/derelict.dmi',
+		"martian" = 'icons/turf/walls/martian.dmi',
+		"shuttle blue" = 'icons/turf/walls/shuttle/blue.dmi',
+		"shuttle white" = 'icons/turf/walls/shuttle/white.dmi',
+		"shuttle dark" = 'icons/turf/walls/shuttle/dark.dmi',
+		"overgrown" = 'icons/turf/walls/overgrown.dmi',
+		"meat" = 'icons/turf/walls/meat/meatier.dmi',
+		"ancient" = 'icons/turf/walls/ancient.dmi',
+		"cave" = 'icons/turf/walls/cave.dmi',
+		"lead blue" = 'icons/turf/walls/lead/blue.dmi',
+		"lead gray" = 'icons/turf/walls/lead/gray.dmi',
+		"lead white" = 'icons/turf/walls/lead/white.dmi',
+		"ancient smooth" = 'icons/turf/walls/ancient_smooth.dmi',
 	)
 	var/list/wallmods = list(
 		"diner" = "oldr-",
@@ -553,7 +553,7 @@ TYPEINFO(/obj/item/room_planner)
 	attack_self(mob/user as mob)
 		// This seems to not actually stop anything from working so just axing it.
 		//if (!(ticker?.mode && istype(ticker.mode, /datum/game_mode/construction)))
-		//	boutput(user, "<span class='alert'>You can only use this tool in construction mode.</span>")
+		//	boutput(user, SPAN_ALERT("You can only use this tool in construction mode."))
 
 		if (selecting)
 			return
@@ -566,7 +566,7 @@ TYPEINFO(/obj/item/room_planner)
 			mode = "floors"
 		var/states = list()
 		if (mode == "restore original")
-			boutput(user, "<span class='notice'>Now set for restoring appearance.</span>")
+			boutput(user, SPAN_NOTICE("Now set for restoring appearance."))
 			selecting = 0
 			return
 
@@ -574,27 +574,34 @@ TYPEINFO(/obj/item/room_planner)
 		// selectedicon is the file we selected
 		// selectedtype gets used as our iconstate for floors or the key to the lists for walls
 		if (mode == "floors")
-			states += icon_states('icons/turf/construction_floors.dmi')
-			selectedtype = tgui_input_list(message="What kind?", title="Marking", items=states)
-			if(!selectedtype)
-				selectedtype = states[1]
+			selectedtype = null
+			states += (icon_states('icons/turf/construction_floors.dmi') - list("engine", "catwalk", "catwalk_narrow", "catwalk_cross"))
 			selectedicon = 'icons/turf/construction_floors.dmi'
+			var/newtype = tgui_input_list(message="What kind?", title="Marking", items=states)
+			if(newtype)
+				selectedtype = newtype
+
 		if (mode == "walls")
+			selectedtype = null
+			selectedicon = null
+			selectedmod = null
 			states += wallicons
-			selectedtype = tgui_input_list(message="What kind?", title="Marking", items=states)
-			if(!selectedtype)
-				selectedtype = states[1]
-			selectedicon = wallicons[selectedtype]
-			selectedmod = wallmods[selectedtype]
+			var/newtype = tgui_input_list(message="What kind?", title="Marking", items=states)
+			if(newtype)
+				selectedtype = newtype
+				selectedicon = wallicons[selectedtype]
+				selectedmod = wallmods[selectedtype]
 
-
+		if (isnull(selectedtype))
+			selecting = 0
+			return
 
 		if (mode == "floors" || (mode == "walls" && findtext(selectedtype, "window") != 0))
 			turf_op = 0
 		else
 			turf_op = 1
 
-		boutput(user, "<span class='notice'>Now marking plan for [mode] of type '[selectedtype]'.</span>")
+		boutput(user, SPAN_NOTICE("Now marking plan for [mode] of type '[selectedtype]'."))
 		selecting = 0
 
 	pixelaction(atom/target, params, mob/user)
@@ -602,6 +609,8 @@ TYPEINFO(/obj/item/room_planner)
 		if (!istype(T))
 			T = get_turf(T)
 		if (!T || !mode)
+			return 0
+		if (GET_DIST(T, user) > 3)
 			return 0
 
 		if (mode == "restore original") //For those who want to undo the carnage
@@ -627,7 +636,7 @@ TYPEINFO(/obj/item/room_planner)
 				break
 		if (old)
 			old.Attackby(src, user)
-		else
+		else if (!isnull(selectedtype))
 			var/class = marker_class[mode]
 			old = new class(T, selectedicon, selectedtype, mode)
 
@@ -636,7 +645,10 @@ TYPEINFO(/obj/item/room_planner)
 			// 	old:allows_vehicles = 1
 			old.turf_op = turf_op
 			old:check(selectedmod)
-		boutput(user, "<span class='notice'>Done.</span>")
+		else
+			boutput(user, SPAN_ALERT("No type selected for current mode!"))
+			return 0
+		boutput(user, SPAN_NOTICE("Done."))
 
 		return 1
 
@@ -783,13 +795,13 @@ TYPEINFO(/obj/item/room_planner)
 			return
 		var/turf/T = src.loc
 		if (T.density)
-			boutput(usr, "<span class='alert'>Cannot complete material shaping: plan inside dense turf.</span>")
+			boutput(usr, SPAN_ALERT("Cannot complete material shaping: plan inside dense turf."))
 			filling = 0
 			return
 		else
 			for (var/atom/movable/O in T)
 				if ((istype(O, /obj) && O.density) || isliving(O))
-					boutput(usr, "<span class='alert'>Cannot complete material shaping: [O] blocking construction.</span>")
+					boutput(usr, SPAN_ALERT("Cannot complete material shaping: [O] blocking construction."))
 					filling = 0
 					return
 		var/datum/material/metal = origin.metal
@@ -806,24 +818,24 @@ TYPEINFO(/obj/item/room_planner)
 		G.setMaterial(metal)
 
 		var/mask = bmask
-		if (mask & 1)
+		if (mask & NORTH)
 			var/obj/window/reinforced/W = new /obj/window/reinforced(L)
-			W.set_dir(1)
+			W.set_dir(NORTH)
 			W.setMaterial(glass)
 
-		if (mask & 2)
+		if (mask & SOUTH)
 			var/obj/window/reinforced/W = new /obj/window/reinforced(L)
-			W.set_dir(2)
+			W.set_dir(SOUTH)
 			W.setMaterial(glass)
 
-		if (mask & 4)
+		if (mask & EAST)
 			var/obj/window/reinforced/W = new /obj/window/reinforced(L)
-			W.set_dir(4)
+			W.set_dir(EAST)
 			W.setMaterial(glass)
 
-		if (mask & 8)
+		if (mask & WEST)
 			var/obj/window/reinforced/W = new /obj/window/reinforced(L)
-			W.set_dir(8)
+			W.set_dir(WEST)
 			W.setMaterial(glass)
 		qdel(src)
 
@@ -858,7 +870,7 @@ TYPEINFO(/obj/item/room_planner)
 			if (W:has_materials(2, borders))
 				spawn_in(W)
 			else
-				boutput(usr, "<span class='alert'>Insufficient materials -- requires 2 metal and [borders] glass.</span>")
+				boutput(usr, SPAN_ALERT("Insufficient materials -- requires 2 metal and [borders] glass."))
 
 	attackby(obj/item/W, mob/user)
 		if (istype(W, /obj/item/material_shaper))

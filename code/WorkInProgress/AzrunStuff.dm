@@ -2,10 +2,7 @@
 	// do not put this anywhere anyone can get it. it is for crime.
 	name = "(de/re)-construction device"
 	desc = "A magical saw-like device for unmaking things. Is that a soldering iron on the back?"
-
-	New()
-		..()
-		setMaterial(getMaterial("miracle"))
+	default_material = "miracle"
 
 	afterattack(atom/target as mob|obj|turf|area, mob/user as mob)
 		if (!isobj(target))
@@ -31,21 +28,13 @@
 	item_state = "sheet";
 	name = "Strange Blueprint"
 	interesting = "There is additional detail regarding the creation of flora and fauna."
-
-/obj/item/storage/desk_drawer/azrun/
-	spawn_contents = list(	/obj/item/raw_material/molitz_beta,\
-	/obj/item/raw_material/molitz_beta,\
-	/obj/item/raw_material/plasmastone,\
-	/obj/item/organ/lung/plasmatoid/left,\
-	/obj/item/pen/crayon/red,\
-
-)
 /obj/table/wood/auto/desk/azrun
-	New()
-		..()
-		var/obj/item/storage/desk_drawer/azrun/L = new(src)
-		src.desk_drawer = L
-
+	has_drawer = TRUE
+	drawer_contents = list(/obj/item/raw_material/molitz_beta,
+							/obj/item/raw_material/molitz_beta,
+							/obj/item/raw_material/plasmastone,
+							/obj/item/organ/lung/plasmatoid/left,
+							/obj/item/pen/crayon/red)
 
 /obj/item/storage/toilet/goldentoilet/azrun
 	name = "thinking throne"
@@ -54,20 +43,20 @@
 
 /datum/manufacture/sub/treads
 	name = "Vehicle Treads"
-	item_paths = list("MET-2","CON-1")
-	item_amounts = list(5,2)
+	item_requirements = list("metal_dense" = 5,
+							 "conductive" = 2)
 	item_outputs = list(/obj/item/shipcomponent/locomotion/treads)
-	time = 5 SECONDS
 	create = 1
+	time = 5 SECONDS
 	category = "Component"
 
 /datum/manufacture/sub/wheels
 	name = "Vehicle Wheels"
-	item_paths = list("MET-2","CON-1")
-	item_amounts = list(5,2)
+	item_requirements = list("metal_dense" = 5,
+							 "conductive" = 2)
 	item_outputs = list(/obj/item/shipcomponent/locomotion/wheels)
-	time = 5 SECONDS
 	create = 1
+	time = 5 SECONDS
 	category = "Component"
 
 
@@ -102,7 +91,7 @@
 		var/datum/plant/P = POT.current
 		var/datum/plantgenes/DNA = POT.plantgenes
 
-		if (POT.growth > (P.harvtime + DNA?.get_effective_value("harvtime") + 10))
+		if (POT.growth > (P.HYPget_growth_to_harvestable(DNA) + 10))
 			for (var/mob/living/X in view(1,POT.loc))
 				if(isalive(X) && !iskudzuman(X))
 					poof(X, POT)
@@ -112,24 +101,25 @@
 		var/datum/plant/P = POT.current
 		var/datum/plantgenes/DNA = POT.plantgenes
 
-		if (POT.growth > (P.harvtime + DNA?.get_effective_value("harvtime") + 10))
+		if (POT.growth > (P.HYPget_growth_to_harvestable(DNA) + 10))
 			if(!iskudzuman(user))
 				poof(user, POT)
 
 	proc/poof(atom/movable/AM, obj/machinery/plantpot/POT)
 		if(!ON_COOLDOWN(src,"spore_poof", 2 SECONDS))
+			var/datum/plant/P = POT.current
 			var/datum/plantgenes/DNA = POT.plantgenes
 			var/datum/reagents/reagents_temp = new/datum/reagents(max(1,(50 + DNA.cropsize))) // Creating a temporary chem holder
 			reagents_temp.my_atom = POT
-
-			for (var/plantReagent in assoc_reagents)
-				reagents_temp.add_reagent(plantReagent, 2 * round(max(1,(1 + DNA?.get_effective_value("potency") / (10 * length(assoc_reagents))))))
+			var/list/plant_complete_reagents = HYPget_assoc_reagents(src, DNA)
+			for (var/plantReagent in plant_complete_reagents)
+				reagents_temp.add_reagent(plantReagent, 2 * max(1, HYPfull_potency_calculation(DNA, 0.1 / length(plant_complete_reagents))))
 
 			SPAWN(0) // spawning to kick fluid processing out of machine loop
 				reagents_temp.smoke_start()
 				qdel(reagents_temp)
 
-			POT.growth = clamp(POT.growth/2, src.growtime, src.harvtime-10)
+			POT.growth = clamp(POT.growth/2, P.HYPget_growth_to_matured(DNA), P.HYPget_growth_to_harvestable(DNA)-10)
 			POT.UpdateIcon()
 
 	getIconState(grow_level, datum/plantmutation/MUT)
@@ -166,11 +156,12 @@
 		..()
 		projectile = new
 
-	proc/alter_projectile(var/obj/projectile/P)
+	proc/alter_projectile(var/datum/plantgenes/DNA, var/obj/projectile/P)
 		if (!P.reagents)
 			P.reagents = new /datum/reagents(P.proj_data.cost)
 			P.reagents.my_atom = P
-		for (var/plantReagent in assoc_reagents)
+		var/list/plant_complete_reagents = HYPget_assoc_reagents(src, DNA)
+		for (var/plantReagent in plant_complete_reagents)
 			P.reagents.add_reagent(plantReagent, 2)
 
 	HYPspecial_proc(var/obj/machinery/plantpot/POT)
@@ -185,18 +176,18 @@
 			if(prob(20))
 				return
 
-		if (POT.growth > (P.harvtime + DNA?.get_effective_value("harvtime") + 5))
+		if (POT.growth > (P.HYPget_growth_to_harvestable(DNA) + 5))
 			var/list/stuffnearby = list()
 			for (var/mob/living/X in view(7,POT.loc))
 				if(isalive(X) && (X != POT.loc) && !iskudzuman(X))
 					stuffnearby += X
 			if(length(stuffnearby))
 				var/mob/living/target = pick(stuffnearby)
-				var/datum/callback/C = new(src, .proc/alter_projectile)
+				var/datum/callback/C = new(src, PROC_REF(alter_projectile), DNA)
 				if(prob(10))
-					shoot_projectile_ST(POT, projectile, get_step(target, pick(ordinal)), alter_proj=C)
+					shoot_projectile_ST_pixel_spread(POT, projectile, get_step(target, pick(ordinal)), alter_proj=C)
 				else
-					shoot_projectile_ST(POT, projectile, target, alter_proj=C)
+					shoot_projectile_ST_pixel_spread(POT, projectile, target, alter_proj=C)
 				POT.growth -= rand(1,5)
 			return
 
@@ -209,7 +200,40 @@
 	name = "strange seed"
 	icon = 'icons/obj/hydroponics/items_hydroponics.dmi'
 	icon_state = "seedproj"
-	implanted = /obj/item/implant/projectile/spitter_pod
+	implanted = /obj/item/implant/projectile/body_visible/seed/spitter_pod
+
+/obj/item/implant/projectile/body_visible/seed/spitter_pod
+	name = "strange seed pod"
+	pull_out_name = "strange seed pod"
+	icon = 'icons/obj/hydroponics/items_hydroponics.dmi'
+	desc = "A small hollow pod."
+	icon_state = "seedproj"
+	var/dig_ticker = 25
+
+	New()
+		..()
+		implant_overlay = image(icon = 'icons/mob/human.dmi', icon_state = "dart_stick_[rand(0, 4)]", layer = MOB_EFFECT_LAYER)
+
+	do_process()
+		src.dig_ticker = max(src.dig_ticker-1, 0)
+		if(!src.dig_ticker)
+			online = FALSE
+			if(prob(80))
+				var/mob/living/carbon/human/H = src.owner
+				var/obj/item/implant/projectile/spitter_pod/implant = new
+				implant.implanted(H)
+				boutput(src.owner,SPAN_ALERT("You feel something work its way into your body from \the [src]."))
+
+	on_death()
+		if(!online)
+			return
+		if(prob(80))
+			var/mob/living/carbon/human/H = src.owner
+			var/obj/item/implant/projectile/spitter_pod/implant = new
+			implant.implanted(H)
+			SPAWN(rand(5 SECONDS, 30 SECONDS))
+				if(!QDELETED(H) && !QDELETED(implant))
+					implant.on_death()
 
 /obj/item/implant/projectile/spitter_pod
 	name = "strange seed pod"
@@ -217,7 +241,7 @@
 	desc = "A small hollow pod."
 	icon_state = "seedproj"
 
-	var/heart_ticker = 10
+	var/heart_ticker = 35
 	online = TRUE
 
 	implanted(mob/M, mob/Implanter)
@@ -243,25 +267,29 @@
 				animate(P, alpha=255, time=2 SECONDS)
 
 	do_process()
-		heart_ticker = max(heart_ticker--,0)
-		if(heart_ticker & prob(50))
+		heart_ticker = max(heart_ticker-1, 0)
+		if(!isalive(src.owner))
+			online = FALSE
+			return
+		if(heart_ticker & prob(60) && !ON_COOLDOWN(src,"[src] spam", 5 SECONDS) )
 			if(prob(30))
-				boutput(src.owner,"<span class='alert'>You feel as though something moving towards your heart... That can't be good.</span>")
+				boutput(src.owner,SPAN_ALERT("You feel as though something moving towards your heart... That can't be good."))
 			else
-				boutput(src.owner,"<span class='alert'>You feel as though something is working its way through your chest.</span>")
+				boutput(src.owner,SPAN_ALERT("You feel as though something is working its way through your chest."))
 		else if(!heart_ticker)
-			var/mob/living/carbon/human/H = src.owner
-			if(istype(H))
-				H.organHolder.damage_organs(2, 0, 1, "heart")
-			else
-				src.owner.TakeDamage("All", 2, 0)
+			if(!ON_COOLDOWN(src,"[src] spam", 8 SECONDS))
+				var/mob/living/carbon/human/H = src.owner
+				if(istype(H))
+					H.organHolder.damage_organs(rand(1,5)/2, 0, 1, list("heart"))
+				else
+					src.owner.TakeDamage("All", 1, 0)
 
-			if(prob(5))
-				boutput(src.owner,"<span class='alert'>AAHRRRGGGG something is trying to dig your heart out from the inside?!?!</span>")
-				src.owner.emote("scream")
-				src.owner.changeStatus("stunned", 2 SECONDS)
-			else if(prob(10))
-				boutput(src.owner,"<span class='alert'>You feel a sharp pain in your chest.</span>")
+				if(prob(5))
+					boutput(src.owner,SPAN_ALERT("AAHRRRGGGG something is trying to dig your heart out from the inside?!?!"))
+					src.owner.emote("scream")
+					src.owner.changeStatus("stunned", rand(1 SECOND, 2 SECONDS))
+				else if(prob(40))
+					boutput(src.owner,SPAN_ALERT("You feel a sharp pain in your chest."))
 
 /datum/gimmick_event
 	var/interaction = 0
@@ -305,7 +333,7 @@
 		if(!AE)
 			..()
 		else if(AE.interaction == 0)
-			SETUP_GENERIC_ACTIONBAR(user, src, AE.duration, .proc/complete_stage, list(user, null), null, null, null, null)
+			SETUP_GENERIC_ACTIONBAR(user, src, AE.duration, PROC_REF(complete_stage), list(user, null), null, null, null, null)
 		else
 			..()
 
@@ -336,7 +364,7 @@
 				attempt = TRUE
 
 		if(attempt)
-			SETUP_GENERIC_ACTIONBAR(user, src, AE.duration, .proc/complete_stage, list(user, W), W.icon, W.icon_state, null, null)
+			SETUP_GENERIC_ACTIONBAR(user, src, AE.duration, PROC_REF(complete_stage), list(user, W), W.icon, W.icon_state, null, null)
 
 	proc/complete_stage(mob/user as mob, obj/item/W as obj)
 		var/datum/gimmick_event/AE = get_active_event()
@@ -481,7 +509,7 @@
 /datum/targetable/ai/module/turret/deploy
 	name = "Deploy Turret"
 	desc = "Conviently place a turret for fun and compliance."
-	icon_state = "ai_template"
+	icon_state = "turret_deploy"
 	targeted = TRUE
 	target_anything = TRUE
 
@@ -534,10 +562,12 @@
 
 		if(get_turf(target) == get_turf(expansion.turret))
 			expansion.turret.target = null
+			icon_state = "turret_deploy"
 			return
 
 		expansion.turret.set_loc(floorturf)
 		expansion.turret.cover.set_loc(floorturf)
+		icon_state = "turret_undeploy"
 		if (floorturf.intact)
 			animate_slide(floorturf, x_coeff * -slide_amount, y_coeff * -slide_amount, 4)
 			sleep(0.4 SECONDS)
@@ -557,8 +587,8 @@
 
 /datum/targetable/ai/module/turret/target
 	name = "Assign Target"
-	desc = "Assign a target for the target"
-	icon_state = "ai_template"
+	desc = "Assign a target for the turret"
+	icon_state = "target"
 	targeted = TRUE
 	cooldown = 2 SECONDS
 
@@ -585,18 +615,18 @@
 /datum/targetable/ai/module/turret/swap_bullets
 	name = "Change Lethality"
 	desc = "Lethal to Non-Lethal and Non-Lethal to Lethal!"
-	icon_state = "ai_template"
+	icon_state = "stun_turret"
 	cooldown = 2 SECONDS
 
 	cast(atom/target)
+		. = ..()
 		var/obj/item/aiModule/ability_expansion/friend_turret/expansion = get_law_module()
 		expansion.turret.lasers = !expansion.turret.lasers
 		var/mode = expansion.turret.lasers ? "LETHAL" : "STUN"
 		logTheThing(LOG_COMBAT, holder.owner, "[key_name(holder.owner)] set deployable turret to [mode].")
 		boutput(holder.owner, "Turret now set to [mode].")
+		icon_state = expansion.turret.lasers ? "lethal_turret" : "stun_turret"
 		expansion.turret.power_change()
-
-
 /obj/machinery/turret/friend
 	var/mob/target
 
@@ -611,6 +641,58 @@
 		power_change()
 	..()
 	return
+
+/obj/item/aiModule/ability_expansion/assisted_guidance
+	name = "GPS Expansion Module"
+	desc = "A prototype GPS path module.  This module provides for the direct crew members."
+	lawText = "GPS EXPANSION MODULE"
+	highlight_color = rgb(110, 110, 110, 255)
+	ai_abilities = list(/datum/targetable/ai/module/gps_select)
+
+/datum/abilityHolder/silicon/ai
+	var/mob/assisted_target = null
+
+/datum/targetable/ai/module/gps_select
+	name = "Assisted Guidance"
+	desc = "Provide a target a GPS path to a target location. Herd the cats."
+	targeted = TRUE
+	target_anything = FALSE
+	icon_state = "gps"
+
+	var/datum/targetable/ai/module/gps_direct
+	var/mob/assisted
+
+	New()
+		. = ..()
+
+	cast(atom/target)
+		if (..())
+			return 1
+
+		var/datum/abilityHolder/silicon/ai/ai_holder = holder
+
+		if(assisted)
+			assisted.gpsToTurf(target, TRUE)
+			target_anything = FALSE
+			assisted = null
+		else
+			var/mob/possible_target = target
+			if(possible_target.client)
+				if (!locate(/obj/item/device/pda2) in possible_target)
+					boutput(ai_holder.owner, SPAN_ALERT("Target does not have a PDA to use to assist!"))
+					return 1
+
+				assisted = target
+				target_anything = TRUE
+
+				ai_holder.owner.targeting_ability = src
+				ai_holder.owner.set_cursor('icons/cursors/point.dmi')
+				ai_holder.updateButtons()
+				boutput(ai_holder.owner, SPAN_NOTICE("Select a destination for your target!"))
+				return 1
+			else
+				boutput(ai_holder.owner, SPAN_ALERT("Not a valid target to assist!"))
+				return 1
 
 
 /turf/unsimulated/floor
@@ -658,7 +740,12 @@
 	proc/sunrise()
 		color_shift_lights(list("#222", "#444","#ca2929", "#c4b91f", "#AAA", ), list(0, 10 SECONDS, 20 SECONDS, 15 SECONDS, 25 SECONDS))
 
-ADMIN_INTERACT_PROCS(/turf/unsimulated/floor, proc/sunset, proc/sunrise)
+	proc/set_color()
+		var/color = input(usr, "Please select ambient light color.", "Color Menu") as color
+		color_shift_lights(list(color), list(3 SECONDS))
+
+
+ADMIN_INTERACT_PROCS(/turf/unsimulated/floor, proc/sunset, proc/sunrise, proc/set_color)
 
 /proc/get_cone(turf/epicenter, radius, angle, width, heuristic, heuristic_args)
 	var/list/nodes = list()
@@ -775,7 +862,7 @@ ADMIN_INTERACT_PROCS(/turf/unsimulated/floor, proc/sunset, proc/sunrise)
 	implanted = null
 	damage_type = D_KINETIC
 	hit_type = DAMAGE_BLUNT
-	impact_image_state = "bhole"
+	impact_image_state = "bullethole"
 	casing = /obj/item/casing/shotgun/pipe
 
 	on_hit(atom/hit, dirflag, obj/projectile/proj)
@@ -889,7 +976,7 @@ ADMIN_INTERACT_PROCS(/turf/unsimulated/floor, proc/sunset, proc/sunrise)
 			thingsneeded -= 1
 
 			if (thingsneeded > 0)//craft successful, but they'll need more
-				boutput(user, "<span class='notice'>You carefully pour some of [craftingitem] into \the [frame]. You feel like you'll need more to fill all the shells. </span>")
+				boutput(user, SPAN_NOTICE("You carefully pour some of [craftingitem] into \the [frame]. You feel like you'll need more to fill all the shells. "))
 
 			if (thingsneeded <= 0) //check completion and produce shells as needed
 				var/obj/item/ammo/bullets/shot = new src.result(get_turf(frame))
@@ -901,13 +988,13 @@ ADMIN_INTERACT_PROCS(/turf/unsimulated/floor, proc/sunset, proc/sunrise)
 /obj/item/power_pack
 	name = "battery pack"
 	desc = "A portable battery that can be worn on the back, or hooked up to a compatible receptacle."
-	icon = 'icons/obj/items/tank.dmi'
-	icon_state = "plasma"
-	inhand_image_icon = 'icons/mob/inhand/hand_tools.dmi'
+	icon = 'icons/obj/items/items.dmi'
+	icon_state = "power_pack"
+	inhand_image_icon = 'icons/mob/inhand/hand_storage.dmi'
+	item_state = "bp_security"
 	wear_image_icon = 'icons/mob/clothing/back.dmi'
 	flags = FPRINT | TABLEPASS | CONDUCT
 	c_flags = ONBACK
-	color = "#0000ff"
 	inventory_counter_enabled = 1
 
 	New()
@@ -926,6 +1013,11 @@ ADMIN_INTERACT_PROCS(/turf/unsimulated/floor, proc/sunset, proc/sunrise)
 		. = ..()
 		if (src.inventory_counter)
 			src.inventory_counter.show_count()
+
+/obj/item/power_pack/makeshift
+	name = "makeshift battery pack"
+	desc = "An array of cell batteries that can be worn on the back, or hooked up to a compatible receptacle."
+	icon_state = "power_pack_a"
 
 /obj/item/power_pack/test
 	New()
@@ -1075,3 +1167,47 @@ ADMIN_INTERACT_PROCS(/turf/unsimulated/floor, proc/sunset, proc/sunrise)
 				target.client.jumptoturf(get_turf(M))
 #endif
 
+
+
+/obj/storage/crate/exosuit
+	name = "experimental crate"
+	desc = "A protective equipment case."
+
+	qm
+	medic
+	janitor
+	atmos
+	clown
+	runner
+	defender
+	flippers
+	space
+
+/obj/item/clothing/shoes/dress_shoes/dance
+	desc = "A worn pair of suide soled shoes."
+
+	equipped(var/mob/user, var/slot)
+		if (slot == SLOT_SHOES)
+			var/datum/abilityHolder/dancing/AH = user.get_ability_holder(/datum/abilityHolder/dancing)
+			if(!AH)
+				user.add_ability_holder(/datum/abilityHolder/dancing)
+			SPAWN(0) // cargo culted
+				if (ishuman(user))
+					var/mob/living/carbon/human/H = user
+					if (H.hud)
+						H.hud.update_ability_hotbar()
+		..()
+
+	unequipped(var/mob/user)
+		if (ishuman(user))
+			var/mob/living/carbon/human/H = user
+			if (H.hud)
+				H.hud.update_ability_hotbar()
+		..()
+
+/obj/item/clothing/shoes/dress_shoes/dance/test
+	desc = "A worn pair of suide soled shoes."
+
+	New(newLoc)
+		..()
+		new /mob/living/carbon/human/normal/assistant(newLoc)

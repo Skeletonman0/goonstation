@@ -15,8 +15,8 @@ TYPEINFO(/datum/component/gear_corrosion)
 	. = ..()
 	if(!istype(parent, /obj/item))
 		return COMPONENT_INCOMPATIBLE
-	RegisterSignal(parent, COMSIG_ITEM_PICKUP, .proc/show_pip)
-	RegisterSignal(parent, COMSIG_ITEM_DROPPED, .proc/hide_pip)
+	RegisterSignal(parent, COMSIG_ITEM_PICKUP, PROC_REF(show_pip))
+	RegisterSignal(parent, COMSIG_ITEM_DROPPED, PROC_REF(hide_pip))
 
 /datum/component/gear_corrosion/RegisterWithParent()
 	. = ..()
@@ -30,7 +30,7 @@ TYPEINFO(/datum/component/gear_corrosion)
 	src.initial_spacewear = object.c_flags & SPACEWEAR
 	if(istype(object.loc, /mob/living))
 		var/mob/living/to_notify = object.loc
-		boutput(to_notify,"<span class='alert'>Your [object.name] begins deteriorating in contact with the acid.</span>")
+		boutput(to_notify,SPAN_ALERT("Your [object.name] begins deteriorating in contact with the acid."))
 		show_pip()
 
 /datum/component/gear_corrosion/UnregisterFromParent()

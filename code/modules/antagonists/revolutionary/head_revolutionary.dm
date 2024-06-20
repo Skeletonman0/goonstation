@@ -1,26 +1,20 @@
 /datum/antagonist/head_revolutionary
 	id = ROLE_HEAD_REVOLUTIONARY
 	display_name = "head revolutionary"
+	antagonist_icon = "rev_head"
+	antagonist_panel_tab_type = /datum/antagonist_panel_tab/bundled/revolution
 
 	var/static/list/datum/mind/heads_of_staff
+	/// A list of items that this head revolutionary has purchased using their uplink.
+	var/list/datum/syndicate_buylist/purchased_items = list()
 
 	New()
 		if (!src.heads_of_staff)
 			src.heads_of_staff = list()
 
 			for(var/mob/living/carbon/human/player in mobs)
-				if(player.mind)
-					var/role = player.mind.assigned_role
-					if(role in list(
-							"Captain",
-							"Head of Security",
-							"Head of Personnel",
-							"Chief Engineer",
-							"Research Director",
-							"Medical Director",
-							"Communications Officer"
-							))
-						src.heads_of_staff += player.mind
+				if(player.mind?.is_head_of_staff())
+					src.heads_of_staff += player.mind
 
 		. = ..()
 
@@ -28,7 +22,6 @@
 			var/datum/game_mode/revolution/gamemode = ticker.mode
 			if (!(src.owner in gamemode.head_revolutionaries))
 				gamemode.head_revolutionaries += src.owner
-			gamemode.update_rev_icons_added(src.owner)
 
 	disposing()
 		if (ticker?.mode && istype(ticker.mode, /datum/game_mode/revolution))
@@ -43,7 +36,7 @@
 
 	give_equipment()
 		if (!ishuman(src.owner.current))
-			boutput(src.owner.current, "<span class='alert'>Due to your lack of opposable thumbs, the Syndicate was unable to provide you with an uplink. That's biology for you.</span>")
+			boutput(src.owner.current, SPAN_ALERT("Due to your lack of opposable thumbs, the Syndicate was unable to provide you with an uplink. That's biology for you."))
 			return FALSE
 
 		var/mob/living/carbon/human/H = src.owner.current
@@ -82,7 +75,7 @@
 			uplink = S
 			uplink_source = S
 			S.lock_code_autogenerate = TRUE
-			if (!(H.equip_if_possible(S, H.slot_in_backpack)))
+			if (!(H.equip_if_possible(S, SLOT_IN_BACKPACK)))
 				loc_string = "on the ground beneath you"
 			else
 				loc_string = "in [H.back] on your back"
@@ -103,7 +96,50 @@
 			logTheThing(LOG_DEBUG, H, "Head revolutionary standalone uplink created: [uplink_source.name]. Location given: [loc_string]. Frequency: [uplink.lock_code]")
 			src.owner.store_memory("<b>Uplink frequency:</b> [uplink.lock_code].")
 
+	add_to_image_groups()
+		. = ..()
+		var/datum/client_image_group/image_group = get_image_group(ROLE_REVOLUTIONARY)
+		image_group.add_mind_mob_overlay(src.owner, get_antag_icon_image())
+		image_group.add_mind(src.owner)
+
+		get_image_group(CLIENT_IMAGE_GROUP_HEADS_OF_STAFF).add_mind(src.owner)
+
+	remove_from_image_groups()
+		. = ..()
+		var/datum/client_image_group/image_group = get_image_group(ROLE_REVOLUTIONARY)
+		image_group.remove_mind_mob_overlay(src.owner)
+		image_group.remove_mind(src.owner)
+		var/datum/client_image_group/heads_group = get_image_group(CLIENT_IMAGE_GROUP_HEADS_OF_STAFF)
+		heads_group.remove_mind(src.owner)
+
 	assign_objectives()
 		for(var/datum/mind/head_mind in src.heads_of_staff)
 			var/datum/objective/regular/assassinate/objective = new(null, src.owner, src)
 			objective.find_target_by_role(head_mind.assigned_role)
+
+	borged()
+		SPAWN(0) //the transfer signals are sent in a funny order so we have to do this in order to prevent borgs being left with orphaned images
+			src.remove_from_image_groups()
+
+	unborged()
+		SPAWN(0) //see above
+			src.add_to_image_groups()
+
+	get_statistics()
+		var/list/purchased_items = list()
+		for (var/datum/syndicate_buylist/purchased_item as anything in src.purchased_items)
+			var/obj/item_type = initial(purchased_item.item)
+			purchased_items += list(
+				list(
+					"iconBase64" = "[icon2base64(icon(initial(item_type.icon), initial(item_type.icon_state), frame = 1, dir = initial(item_type.dir)))]",
+					"name" = "[purchased_item.name] ([purchased_item.cost] TC)",
+				)
+			)
+
+		return list(
+			list(
+				"name" = "Purchased Items",
+				"type" = "itemList",
+				"value" = purchased_items,
+			)
+		)

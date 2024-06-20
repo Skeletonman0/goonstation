@@ -5,6 +5,7 @@
 	icon_state = "grille0-0"
 	density = 1
 	stops_space_move = 1
+	uses_default_material_appearance = TRUE
 	var/health = 30
 	var/health_max = 30
 	var/ruined = 0
@@ -56,13 +57,8 @@
 			O?.UpdateIcon() //now that we are in nullspace tell them to update
 
 	steel
-#ifdef IN_MAP_EDITOR
-		icon_state = "grille0-0"
-#endif
-		New()
-			..()
-			var/datum/material/M = getMaterial("steel")
-			src.setMaterial(M, copy=FALSE)
+		icon_state = "grille1-0"
+		default_material = "steel"
 
 	steel/broken
 		desc = "Looks like its been in this sorry state for quite some time."
@@ -78,21 +74,24 @@
 	catwalk
 		name = "catwalk surface"
 		icon = 'icons/obj/catwalk.dmi'
-		icon_state = "catwalk"
-		density = 0
+		icon_state = "C15-0"
+		density = FALSE
 		desc = "This doesn't look very safe at all!"
 		layer = CATWALK_LAYER
-		shock_when_entered = 0
+		shock_when_entered = FALSE
+		auto = TRUE
 		plane = PLANE_FLOOR
 		amount_of_rods_when_destroyed = 1
 		var/catwalk_type = "C" // Short for "Catwalk"
 		var/connects_to = list(/obj/grille/catwalk, /obj/machinery/door) // We're working differently from grilles. We don't check a list and then another, we check all possible atoms to connect to.
 		event_handler_flags = 0
+		default_material = "steel"
+		uses_default_material_appearance = FALSE
+		mat_changename = FALSE
 
 		New()
-			..()
-			var/datum/material/M = getMaterial("steel")
-			src.setMaterial(M, appearance = FALSE, setname = FALSE, copy = FALSE)
+			. = ..()
+			APPLY_ATOM_PROPERTY(src, PROP_ATOM_DO_LIQUID_CLICKS, src) // fuck this object
 
 		update_icon(special_icon_state, override_parent = TRUE)
 			if (ruined)
@@ -126,13 +125,10 @@
 					src.icon_state += "-1"
 				if(76 to INFINITY)
 					src.icon_state += "-0"
-		cross //HEY YOU! YEAH, YOU LOOKING AT THIS. Use these for the corners of your catwalks!
-			name = "catwalk surface" //Or I'll murder you since you are making things ugly on purpose.
-			icon_state = "catwalk_cross" //(Statement does not apply when you actually want to use the other ones.)
 
 		jen // ^^ no i made my own because i am epic
 			name = "maintenance catwalk"
-			icon_state = "catwalk_jen"
+			icon_state = "M0-0"
 			desc = "This looks marginally more safe than the ones outside, at least..."
 			catwalk_type = "M" // Short for "Maintenance"
 			layer = PIPE_LAYER + 0.01
@@ -148,18 +144,6 @@
 
 			reagent_act(var/reagent_id,var/volume)
 				..()
-
-			side
-				icon_state = "catwalk_jen_side"
-
-			inner
-				icon_state = "catwalk_jen_inner"
-
-			fourcorners
-				icon_state = "catwalk_jen_4corner"
-
-			twosides
-				icon_state = "catwalk_jen_2sides"
 
 		dubious
 			name = "rusty catwalk"
@@ -343,7 +327,7 @@
 
 	hitby(atom/movable/AM, datum/thrown_thing/thr)
 		..()
-		src.visible_message("<span class='alert'><B>[src] was hit by [AM].</B></span>")
+		src.visible_message(SPAN_ALERT("<B>[src] was hit by [AM].</B>"))
 		playsound(src.loc, 'sound/impact_sounds/Metal_Hit_Light_1.ogg', 100, 1)
 		if (ismob(AM))
 			if(src?.material.hasProperty("electrical"))
@@ -365,7 +349,7 @@
 				damage = 10
 				text = "smashes [src] with incredible strength"
 
-			src.visible_message("<span class='alert'><b>[user]</b> [text]!</span>")
+			src.visible_message(SPAN_ALERT("<b>[user]</b> [text]!"))
 			playsound(src.loc, 'sound/impact_sounds/Metal_Hit_Light_1.ogg', 80, 1)
 
 			damage_blunt(damage)
@@ -376,17 +360,17 @@
 		if (can_be_probed && (ispulsingtool(W) || istype(W, /obj/item/device/t_scanner)))
 			var/net = get_connection()
 			if(!net)
-				boutput(user, "<span class='notice'>No electrical current detected.</span>")
+				boutput(user, SPAN_NOTICE("No electrical current detected."))
 			else
-				boutput(user, "<span class='alert'>CAUTION: Dangerous electrical current detected.</span>")
+				boutput(user, SPAN_ALERT("CAUTION: Dangerous electrical current detected."))
 			return
 
 		else if(can_build_window && istype(W, /obj/item/sheet/))
 			var/obj/item/sheet/S = W
-			if (S.material && S.material.material_flags & MATERIAL_CRYSTAL && S.amount_check(2))
+			if (S.material && S.material.getMaterialFlags() & MATERIAL_CRYSTAL && S.amount_check(2))
 				var/obj/window/WI
 				var/win_thin = 0
-				var/win_dir = 2
+				var/win_dir = SOUTH
 				var/turf/ST = get_turf(src)
 
 				if (ST && isturf(ST))
@@ -414,7 +398,7 @@
 					if(win_thin)
 						WI.set_dir(win_dir)
 						WI.ini_dir = win_dir
-					logTheThing(LOG_STATION, user, "builds a [WI.name] (<b>Material:</b> [WI.material && WI.material.mat_id ? "[WI.material.mat_id]" : "*UNKNOWN*"]) at ([log_loc(user)] in [user.loc.loc])")
+					logTheThing(LOG_STATION, user, "builds a [WI.name] (<b>Material:</b> [WI.material && WI.material.getID() ? "[WI.material.getID()]" : "*UNKNOWN*"]) at ([log_loc(user)] in [user.loc.loc])")
 				else
 					user.show_text("<b>Error:</b> Couldn't spawn window. Try again and please inform a coder if the problem persists.", "red")
 					return
@@ -426,7 +410,7 @@
 				return
 		else if (istype(W, /obj/item/gun))
 			var/obj/item/gun/G = W
-			G.shoot_point_blank(src, user)
+			G.ShootPointBlank(src, user)
 			return
 		// electrocution check
 
@@ -441,20 +425,20 @@
 
 		if (can_be_snipped && issnippingtool(W))
 			damage_slashing(src.health_max)
-			src.visible_message("<span class='alert'><b>[user]</b> cuts apart the [src] with [W].</span>")
+			src.visible_message(SPAN_ALERT("<b>[user]</b> cuts apart the [src] with [W]."))
 			playsound(src.loc, 'sound/items/Wirecutter.ogg', 100, 1)
 
 		else if (can_be_unscrewed && (isscrewingtool(W) && (istype(src.loc, /turf/simulated) || src.anchored)))
 			playsound(src.loc, 'sound/items/Screwdriver.ogg', 100, 1)
 			src.anchored = !( src.anchored )
 			src.stops_space_move = !(src.stops_space_move)
-			src.visible_message("<span class='alert'><b>[user]</b> [src.anchored ? "fastens" : "unfastens"] [src].</span>")
+			src.visible_message(SPAN_ALERT("<b>[user]</b> [src.anchored ? "fastens" : "unfastens"] [src]."))
 			return
 
 		else
 			user.lastattacked = src
 			attack_particle(user,src)
-			src.visible_message("<span class='alert'><b>[user]</b> attacks [src] with [W].</span>")
+			src.visible_message(SPAN_ALERT("<b>[user]</b> attacks [src] with [W]."))
 			playsound(src.loc, 'sound/impact_sounds/Metal_Hit_Light_1.ogg', 80, 1)
 
 			switch(W.hit_type)

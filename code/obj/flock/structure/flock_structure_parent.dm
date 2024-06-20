@@ -2,6 +2,7 @@
 ABSTRACT_TYPE(/obj/flock_structure)
 TYPEINFO(/obj/flock_structure)
 	var/cancellable = TRUE
+	mat_appearances_to_ignore = list("gnesis")
 /obj/flock_structure
 	icon = 'icons/misc/featherzone.dmi'
 	icon_state = "egg"
@@ -19,7 +20,7 @@ TYPEINFO(/obj/flock_structure)
 	flags = USEDELAY
 	mat_changename = FALSE
 	mat_changedesc = FALSE
-	mat_appearances_to_ignore = list("gnesis")
+	default_material = "gnesis"
 	/// when did we get created?
 	var/time_started = 0
 	var/build_time = 6 // in seconds
@@ -34,9 +35,11 @@ TYPEINFO(/obj/flock_structure)
 	var/atom/movable/name_tag/flock_examine_tag/info_tag
 
 	var/fireVuln = 0.2
-	var/datum/flock/flock = null
-	///base compute provided
+	var/tmp/datum/flock/flock = null
+	///base compute provided. negative amount means it uses compute
 	var/compute = 0
+	/// compute required to stay online
+	var/online_compute_cost = 0
 	///resource cost for building
 	var/resourcecost = 0
 	/// can flockdrones pass through this akin to a grille?
@@ -56,12 +59,10 @@ TYPEINFO(/obj/flock_structure)
 	last_process = TIME
 	health_max = health
 	time_started = world.timeofday
-	setMaterial(getMaterial("gnesis"))
 	APPLY_ATOM_PROPERTY(src, PROP_ATOM_FLOCK_THING, "flock_structure")
 
-	if(F)
-		src.flock = F
-		src.flock.registerStructure(src)
+	src.flock = F || get_default_flock()
+	src.flock.registerStructure(src)
 
 	APPLY_ATOM_PROPERTY(src, PROP_ATOM_FLOCK_THING, src)
 	src.AddComponent(/datum/component/flock_protection)
@@ -99,14 +100,14 @@ TYPEINFO(/obj/flock_structure)
 /obj/flock_structure/special_desc(dist, mob/user)
 	if (!isflockmob(user))
 		return
-	var/special_desc = {"<span class='flocksay'><span class='bold'>###=-</span> Ident confirmed, data packet received.
-		<br><span class='bold'>ID:</span> [flock_id]
-		<br><span class='bold'>Flock:</span> [src.flock ? src.flock.name : "none"]
-		<br><span class='bold'>System Integrity:</span> [round((src.health/src.health_max)*100)]%"}
+	var/special_desc = {"[SPAN_BOLD("###=- Ident confirmed, data packet received.")]<br>\
+		[SPAN_BOLD("ID:")] [flock_id]<br>\
+		[SPAN_BOLD("Flock:")] [src.flock ? src.flock.name : "none"]<br>\
+		[SPAN_BOLD("System Integrity:")] [round((src.health/src.health_max)*100)]%<br>"}
 	var/info = building_specific_info()
 	if(!isnull(info))
 		special_desc += "<br>[info]"
-	special_desc += "<br><span class='bold'>###=-</span></span>"
+	special_desc += "[SPAN_BOLD("###=-")]"
 	return special_desc
 
 //override this if compute is conditional or something
@@ -134,6 +135,13 @@ TYPEINFO(/obj/flock_structure)
 
 /obj/flock_structure/proc/process(var/mult)
 	// override
+
+/// overridable checks for if we should skip processing this cycle
+/obj/flock_structure/proc/skip_process()
+	return FALSE
+
+/obj/flock_structure/proc/isEnemy(atom/A)
+	return src.flock.isEnemy(A)
 
 /// multipler for flock loop, used to compensate for lag
 /obj/flock_structure/proc/get_multiplier()
@@ -200,7 +208,7 @@ TYPEINFO(/obj/flock_structure)
 	return src.info_tag
 
 /obj/flock_structure/proc/deconstruct()
-	visible_message("<span class='alert'>[src.name] suddenly dissolves!</span>")
+	visible_message(SPAN_ALERT("[src.name] suddenly dissolves!"))
 	var/refund = round((src.health/src.health_max) * 0.5 * src.resourcecost)
 	if(refund >= 1)
 		var/obj/item/flockcache/cache = new(get_turf(src))
@@ -212,8 +220,8 @@ TYPEINFO(/obj/flock_structure)
 	// no parent calling, we're going to completely override this
 	if (!location)
 		location = get_turf(src)
-	visible_message("<span class='alert'>[src.name] violently breaks apart!</span>")
-	playsound(location, 'sound/impact_sounds/Glass_Shatter_2.ogg', 50, 1)
+	visible_message(SPAN_ALERT("[src.name] violently breaks apart!"))
+	playsound(location, 'sound/impact_sounds/Glass_Shatter_2.ogg', 50, TRUE)
 	flockdronegibs(location)
 	var/num_pieces = rand(2,8)
 	var/atom/movable/B
@@ -246,9 +254,9 @@ TYPEINFO(/obj/flock_structure)
 
 	if(user.a_intent == INTENT_HARM)
 		if(isflockmob(user))
-			boutput(user, "<span class='alert'>You find you can't bring yourself to harm [src]!</span>")
+			boutput(user, SPAN_ALERT("You find you can't bring yourself to harm [src]!"))
 		else
-			user.visible_message("<span class='alert'><b>[user]</b> punches [src]! It's very ineffective!</span>")
+			user.visible_message(SPAN_ALERT("<b>[user]</b> punches [src]! It's very ineffective!"))
 			src.report_attack()
 			src.takeDamage("brute", 1)
 			playsound(src.loc, 'sound/impact_sounds/Crystal_Hit_1.ogg', 50, 1)
@@ -262,10 +270,10 @@ TYPEINFO(/obj/flock_structure)
 				action = "pushes"
 			if(INTENT_GRAB)
 				action = "squeezes"
-		src.visible_message("<span class='alert'><b>[user]</b> [action] [src], but nothing happens.</span>")
+		src.visible_message(SPAN_ALERT("<b>[user]</b> [action] [src], but nothing happens."))
 
 /obj/flock_structure/attackby(obj/item/W, mob/user)
-	src.visible_message("<span class='alert'><b>[user]</b> attacks [src] with [W]!</span>")
+	src.visible_message(SPAN_ALERT("<b>[user]</b> attacks [src] with [W]!"))
 	src.report_attack()
 	attack_particle(user, src)
 	user.lastattacked = src
@@ -338,7 +346,7 @@ TYPEINFO(/obj/flock_structure)
 
 
 /obj/flock_structure/blob_act(var/power)
-	src.visible_message("<span class='alert'>[src] is hit by the blob!/span>")
+	src.visible_message(SPAN_ALERT("[src] is hit by the blob!"))
 	src.report_attack()
 
 	var/modifier = power / 20

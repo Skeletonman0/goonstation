@@ -73,11 +73,12 @@
 	set name = "Debug Resource Cache"
 	set hidden = 1
 	ADMIN_ONLY
+	SHOW_VERB_DESC
 
 	var/msg = "Resource cache contents:"
 	for (var/r in cachedResources)
 		msg += "<br>[r]"
-	out(src, msg)
+	boutput(src, msg)
 
 
 /client/proc/toggleResourceCache()
@@ -85,9 +86,10 @@
 	set name = "Toggle Resource Cache"
 	set desc = "Enable or disable the resource cache system"
 	ADMIN_ONLY
+	SHOW_VERB_DESC
 
 	disableResourceCache = !disableResourceCache
-	boutput(usr, "<span class='notice'>Toggled the resource cache [disableResourceCache ? "off" : "on"]</span>")
+	boutput(usr, SPAN_NOTICE("Toggled the resource cache [disableResourceCache ? "off" : "on"]"))
 	logTheThing(LOG_ADMIN, usr, "toggled the resource cache [disableResourceCache ? "off" : "on"]")
 	logTheThing(LOG_DIARY, usr, "toggled the resource cache [disableResourceCache ? "off" : "on"]", "admin")
 	message_admins("[key_name(usr)] toggled the resource cache [disableResourceCache ? "off" : "on"]")
@@ -165,11 +167,11 @@
 			if (copytext(newPath, -1) != "/" && fexists(newPath)) //"server" already has this file? apparently that causes ~problems~
 				fdel(newPath)
 			if (text2file(parsedFile, newPath)) //make a new file with the parsed text because byond fucking sucks at sending text as anything besides html
-				src << browse(file(newPath), "file=[r];display=0")
+				src << browse_rsc(file(newPath), r)
 			else
 				world.log << "RESOURCE ERROR: Failed to convert text in '[r]' to a temporary file"
 		else //file is binary just throw it at the client as is
-			src << browse(fileRef, "file=[r];display=0")
+			src << browse_rsc(fileRef, r)
 		if(i++ % 100 == 0)
 			sleep(1)
 
@@ -177,7 +179,7 @@
 //A thing for coders locally testing to use (as they might be offline = can't reach the CDN)
 /client/proc/loadResources()
 	if (cdn || src.resourcesLoaded) return 0
-	boutput(src, "<span class='notice'><b>Resources are now loading, browser windows will open normally when complete.</b></span>")
+	boutput(src, SPAN_NOTICE("<b>Resources are now loading, browser windows will open normally when complete.</b>"))
 
 	src.loadResourcesFromList(localResources)
 

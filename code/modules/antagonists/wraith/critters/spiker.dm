@@ -19,6 +19,8 @@
 	var/shuffling = FALSE
 	var/mob/living/intangible/wraith/master = null
 
+	faction = list(FACTION_WRAITH)
+
 	New(var/turf/T, var/mob/living/intangible/wraith/M = null)
 		..(T)
 		if(M != null)
@@ -29,7 +31,7 @@
 			M.summons += src
 		APPLY_ATOM_PROPERTY(src, PROP_MOB_NIGHTVISION_WEAK, src)
 		abilityHolder.addAbility(/datum/targetable/critter/spiker/hook)
-		abilityHolder.addAbility(/datum/targetable/critter/spiker/lash)
+		abilityHolder.addAbility(/datum/targetable/critter/frenzy/spiker)
 		abilityHolder.addAbility(/datum/targetable/critter/spiker/shuffle)
 
 	setup_healths()
@@ -49,7 +51,7 @@
 
 	click(atom/target, params, location, control)
 		if (src.shuffling)
-			boutput(src, "<span class='notice'>You cannot interact with this while in this form!</span>")
+			boutput(src, SPAN_NOTICE("You cannot interact with this while in this form!"))
 			return
 		else
 			..()
@@ -82,11 +84,11 @@
 
 				M.throw_at(destination, 10, 1)
 
-				playsound(M, 'sound/impact_sounds/Flesh_Stab_1.ogg', 50, 1)
+				playsound(M, 'sound/impact_sounds/Flesh_Stab_1.ogg', 50, TRUE)
 				M.TakeDamageAccountArmor("All", rand(3,4), 0, 0, DAMAGE_CUT)
 				M.force_laydown_standup()
-				M.changeStatus("paralysis", 5 SECONDS)
-				M.visible_message("<span class='alert'>[M] gets grabbed by a tentacle and dragged!</span>")
+				M.changeStatus("unconscious", 5 SECONDS)
+				M.visible_message(SPAN_ALERT("[M] gets grabbed by a tentacle and dragged!"))
 
 		previous_line = DrawLine(P.special_data["owner"], P, /obj/line_obj/tentacle ,'icons/obj/projectiles.dmi',"mid_tentacle",1,1,"start_tentacle","end_tentacle",OBJ_LAYER,1)
 		SPAWN(1 DECI SECOND)	//Make it last a bit for impact

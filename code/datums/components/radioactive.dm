@@ -35,8 +35,8 @@ TYPEINFO(/datum/component/radioactive)
 		if(parent.GetComponent(src.type)) //don't redo the filters and stuff if we're a duplicate
 			return
 
-		RegisterSignal(parent, COMSIG_ATOM_RADIOACTIVITY, .proc/get_radioactivity)
-		RegisterSignal(parent, COMSIG_ATOM_EXAMINE, .proc/examined)
+		RegisterSignal(parent, COMSIG_ATOM_RADIOACTIVITY, PROC_REF(get_radioactivity))
+		RegisterSignal(parent, COMSIG_ATOM_EXAMINE, PROC_REF(examined))
 		RegisterSignals(parent, list(COMSIG_ATOM_CROSSED,
 			COMSIG_ATOM_ENTERED,
 			COMSIG_ATTACKHAND,
@@ -44,11 +44,11 @@ TYPEINFO(/datum/component/radioactive)
 			COMSIG_ITEM_PICKUP,
 			COMSIG_MOB_GRABBED,
 			COMSIG_ITEM_ATTACK_POST,
-		), .proc/touched)
-		RegisterSignals(parent, list(COMSIG_ITEM_CONSUMED, COMSIG_ITEM_CONSUMED_PARTIAL), .proc/eaten)
+		), PROC_REF(touched))
+		RegisterSignals(parent, list(COMSIG_ITEM_CONSUMED, COMSIG_ITEM_CONSUMED_PARTIAL), PROC_REF(eaten))
 
 		if(isitem(parent))
-			RegisterSignal(parent, COMSIG_ITEM_PROCESS, .proc/ticked)
+			RegisterSignal(parent, COMSIG_ITEM_PROCESS, PROC_REF(ticked))
 			if(!(parent in global.processing_items))
 				global.processing_items.Add(parent)
 				src._added_to_items_processing = TRUE
@@ -68,7 +68,7 @@ TYPEINFO(/datum/component/radioactive)
 			if(isnull(src._turf_glow))
 				src._turf_glow = image('icons/effects/effects.dmi', "greyglow")
 			src._turf_glow.color = color //we can do this because overlays take a copy of the image and do not preserve the link between them
-			PA.UpdateOverlays(src._turf_glow, "radiation_overlay_\ref[src]")
+			PA.AddOverlays(src._turf_glow, "radiation_overlay_\ref[src]")
 		else
 			PA.add_filter("radiation_outline_\ref[src]", 2, outline_filter(size=1.3, color=color))
 
@@ -87,7 +87,7 @@ TYPEINFO(/datum/component/radioactive)
 		PA.remove_simple_light("radiation_light_\ref[src]")
 		PA.remove_filter("radiation_outline_\ref[src]")
 		PA.remove_filter("radiation_color_\ref[src]")
-		PA.UpdateOverlays(null, "radiation_overlay_\ref[src]")
+		PA.ClearSpecificOverlays("radiation_overlay_\ref[src]")
 		PA.color = src._backup_color
 		UnregisterSignal(parent, list(COMSIG_ATOM_RADIOACTIVITY))
 		UnregisterSignal(parent, list(COMSIG_ATOM_EXAMINE))
