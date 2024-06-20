@@ -67,8 +67,7 @@
 	for (var/obj/machinery/shuttle/weapon/weapon in shipparts)
 		weapon.fire()
 
-/obj/machinery/computer/transit_shuttle/construction/get_movement_controller(mob/user)
-	. = ..()
+/obj/machinery/computer/transit_shuttle/construction/proc/get_movement_controller(mob/user)
 	return movementcontroller
 
 /obj/machinery/computer/transit_shuttle/construction/proc/get_edge(var/dir)
@@ -127,14 +126,14 @@
 
 /obj/machinery/computer/transit_shuttle/construction/proc/eject_driver()
 	if (!driver) return
-	driver.use_movement_controller = null
+	driver.override_movement_controller = null
 	driver.reset_keymap()
 	boutput(driver, "<span class='alert'>You stop controlling the [src.shuttlename].</span>")
 	src.unset_dummy()
 	driver = null
 /obj/machinery/computer/transit_shuttle/construction/proc/add_driver(mob/user)
 	driver = user
-	driver.use_movement_controller = src
+	driver.override_movement_controller = src.movementcontroller
 	driver.reset_keymap()
 	src.set_dummy()
 	boutput(driver, "<span class='alert'>You start controlling the [src.shuttlename].</span>")

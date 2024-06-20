@@ -55,7 +55,7 @@
 		..()
 		switch (name)
 			if("exit")
-				user.use_movement_controller = null
+				user.override_movement_controller = null
 				user.reset_keymap()
 
 	modify_keymap(client/C)
