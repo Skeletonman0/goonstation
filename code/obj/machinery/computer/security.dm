@@ -222,7 +222,7 @@
 					src.switchCamera(user, C)
 					use_power(50)
 		if("addfavorite")
-			if (istype(C) && length(src.favorites) <= src.favorites_Max)
+			if (istype(C) && length(src.favorites) < src.favorites_Max)
 				src.favorites += C
 		if("removefavorite")
 			if (istype(C) && locate(C) in favorites)

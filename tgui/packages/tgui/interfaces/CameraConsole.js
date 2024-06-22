@@ -1,7 +1,7 @@
 import { useBackend, useLocalState } from '../backend';
 import { Window } from '../layouts';
-import { Tabs, Button, Section, Table } from 'tgui/components';
-import { Collapsible, Divider, Flex, LabeledList, Stack } from '../components';
+import { Button, Section } from 'tgui/components';
+import { Divider, Stack } from '../components';
 
 export const CameraConsole = (props, context) => {
   const { act, data } = useBackend(context);
@@ -45,7 +45,6 @@ export const CameraConsole = (props, context) => {
       font-size="10pt"
       height="400">
       <Window.Content
-        height="100%" mx="1%"
         onKeyUp={(ev) => {
           if (keybindToggle) {
             act("moveClosest", { camera: current, direction: getDirection(ev.key) });
@@ -60,67 +59,83 @@ export const CameraConsole = (props, context) => {
             toggleKeybind();
           } }}>
         <Stack fill>
-          <Stack.Item grow maxWidth="50%" maxHeight="99%">
-            <Section fill scrollable fitted title="Cameras">
+          <Stack.Item grow>
+            <Section fill scrollable title="Cameras">
               {cameras.map(camera => {
                 return (
-                  <Flex key={camera.name}>
-                    <Flex.Item grow>
+                  <Stack key={camera.camera}>
+                    <Stack.Item grow>
                       <Button content={camera.name}
                         disabled={camera.deactivated}
-                        color="#a4bad6"
+                        color="transparent"
+                        fluid
                         onClick={() => act("switchCamera", { camera: camera.camera })} />
-                    </Flex.Item>
-                    <Flex.Item align="end">
+                    </Stack.Item>
+                    <Stack.Item align="end" color>
                       <Button icon="save"
-                        color="green"
+                        color="transparent"
                         onClick={() => act("addfavorite", { camera: camera.camera })} />
-                    </Flex.Item>
-                  </Flex>
+                    </Stack.Item>
+                  </Stack>
                 );
               })}
             </Section>
           </Stack.Item>
-          <Stack.Item grow maxWidth="50%" >
-            <Section scrollable title="Favorites" fill maxHeight="50%">
-              {favorites && favorites.map(camera => {
-                return (
-                  <Flex key={camera.name}>
-                    <Flex.Item grow bold>
-                      <Button content={camera.name}
-                        disabled={camera.deactivated}
-                        onClick={() => act("switchCamera", { camera: camera.camera })} />
-                    </Flex.Item>
-                    <Flex.Item shrink align="end">
-                      <Button icon="times"
-                        onClick={() => act("removefavorite", { camera: camera.camera })} />
-                    </Flex.Item>
-                  </Flex>
-                );
-              })}
-            </Section>
-            <Section fill fitted maxHeight="50%">
-              <Button icon="eye" content="Viewport"
-                onClick={() => act("createViewport", { camera: current, direction: "NORTH" })} />
-              <Flex align="center" direction="column" fontSize="25px" m="1%">
-                <Flex.Item>
-                  <Button icon="arrow-up"
-                    onClick={() => act("moveClosest", { camera: current, direction: "NORTH" })} />
-                </Flex.Item>
-                <Flex.Item>
-                  <Button icon="arrow-left"
-                    onClick={() => act("moveClosest", { camera: current, direction: "WEST" })} />
-                  <Button icon="arrows-alt"
-                    color={keybindToggle ? "green" : "blue"}
-                    onClick={() => toggleKeybind()} />
-                  <Button icon="arrow-right"
-                    onClick={() => act("moveClosest", { camera: current, direction: "EAST" })} />
-                </Flex.Item>
-                <Flex.Item>
-                  <Button icon="arrow-down"
-                    onClick={() => act("moveClosest", { camera: current, direction: "SOUTH" })} />
-                </Flex.Item>
-              </Flex>
+          <Stack.Item grow>
+            <Section fill>
+              <Stack vertical>
+                <Stack.Item>
+                  <Section scrollable title="Favorites">
+                    {favorites && favorites.map(camera => {
+                      return (
+                        <Stack key={camera.camera}>
+                          <Stack.Item grow>
+                            <Button content={camera.name}
+                              disabled={camera.deactivated}
+                              color="transparent"
+                              fluid
+                              onClick={() => act("switchCamera", { camera: camera.camera })} />
+                          </Stack.Item>
+                          <Stack.Item align="end">
+                            <Button icon="times"
+                              color="red"
+                              onClick={() => act("removefavorite", { camera: camera.camera })} />
+                          </Stack.Item>
+                        </Stack>
+                      );
+                    })}
+                  </Section>
+                </Stack.Item>
+
+                <Stack.Item grow>
+                  <Button icon="eye" content="Viewport" fluid
+                    onClick={() => act("createViewport", { camera: current, direction: "NORTH" })} />
+                  <Divider />
+                  <Stack align="center" vertical fontSize="2em">
+                    <Stack.Item>
+                      <Button icon="arrow-up" fluid
+                        color="transparent"
+                        onClick={() => act("moveClosest", { camera: current, direction: "NORTH" })} />
+                    </Stack.Item>
+                    <Stack.Item>
+                      <Button icon="arrow-left"
+                        color="transparent"
+                        onClick={() => act("moveClosest", { camera: current, direction: "WEST" })} />
+                      <Button icon="arrows-alt"
+                        color={keybindToggle ? "green" : ""}
+                        onClick={() => toggleKeybind()} />
+                      <Button icon="arrow-right"
+                        color="transparent"
+                        onClick={() => act("moveClosest", { camera: current, direction: "EAST" })} />
+                    </Stack.Item>
+                    <Stack.Item>
+                      <Button icon="arrow-down"
+                        color="transparent"
+                        onClick={() => act("moveClosest", { camera: current, direction: "SOUTH" })} />
+                    </Stack.Item>
+                  </Stack>
+                </Stack.Item>
+              </Stack>
             </Section>
           </Stack.Item>
         </Stack>
