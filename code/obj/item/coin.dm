@@ -12,10 +12,22 @@
 	var/emagged = FALSE
 
 /obj/item/coin/attack_self(mob/user as mob)
-	boutput(user, "<span class='notice'>You flip the coin</span>")
-	SPAWN(1 SECOND)
-		src.set_loc(user.loc)
-		user.u_equip(src)
+	boutput(user, SPAN_NOTICE("You flip the coin..."))
+	user.u_equip(src)
+	src.set_loc(user.loc)
+	//Spin it in midair
+	animate(src, transform = turn(matrix(), 120), time = 6 DECI SECONDS, flags = ANIMATION_PARALLEL)
+	animate(transform = turn(matrix(), 240), time = 6 DECI SECONDS)
+	animate(transform = null, time = 6 DECI SECONDS)
+	//First throw
+	animate(src, time = 6 DECI SECONDS, pixel_y = 14, easing = SINE_EASING | EASE_OUT, flags = ANIMATION_PARALLEL)
+	animate(time = 6 DECI SECONDS, pixel_y = 0, easing = SINE_EASING | EASE_IN)
+	//One bounce on the ground
+	animate(src, time = 12 DECI SECONDS,  flags = ANIMATION_PARALLEL)
+	animate(time= 3 DECI SECONDS, pixel_y = 4, easing = SINE_EASING | EASE_OUT)
+	animate(time = 3 DECI SECONDS, pixel_y = 0, , easing = SINE_EASING | EASE_IN)
+	sleep(18 DECI SECOND)
+	if(!istype(src.loc, /mob/))	//Hot dog, you caught it midair!
 		playsound(src.loc, 'sound/items/coindrop.ogg', 30, 1)
 		flip()
 
@@ -27,25 +39,25 @@
 /obj/item/coin/emag_act(var/mob/user, var/obj/item/card/emag/E)
 	..()
 	if(!emagged)
-		boutput(user, "You magnetize the coin, ruining it's chances of ever being used in the Inter-galactic Poker Tournaments ever again.")
+		boutput(user, "You magnetize the coin, restoring an old order to the universe.")
 		emagged = TRUE
 		return TRUE
 
 /obj/item/coin/proc/flip()
 	if(!emagged)
 		if(prob(1))
-			src.visible_message("<span class='notice'>The coin lands on its side. Fuck.</span>")
+			src.visible_message(SPAN_NOTICE("The coin lands on its side. Fuck."))
 		else if(prob(50))
-			src.visible_message("<span class='notice'>The coin comes up Moons.</span>")
+			src.visible_message(SPAN_NOTICE("The coin comes up Moons (heads)."))
 		else
-			src.visible_message("<span class='notice'>The coin comes up Craters.</span>")
+			src.visible_message(SPAN_NOTICE("The coin comes up Craters (tails)."))
 		return
 	if(prob(49))
-		src.visible_message("<span class='notice'>The coin comes up Moons.</span>")
+		src.visible_message(SPAN_NOTICE("The coin comes up Moons (heads)."))
 	else if(prob(49))
-		src.visible_message("<span class='notice'>The coin comes up Craters.</span>")
+		src.visible_message(SPAN_NOTICE("The coin comes up Craters (tails)."))
 	else
-		src.visible_message("<span class='notice'>The coin lands on its side. Fuck.</span>")
+		src.visible_message(SPAN_NOTICE("The coin lands on its side. Fuck."))
 
 
 /obj/item/coin_bot
@@ -69,7 +81,7 @@
 /obj/item/coin/suicide(var/mob/user as mob)
 	if (!src.user_can_suicide(user))
 		return 0
-	user.visible_message("<span class='alert'><b>[user] swallows [src] and begins to choke!</b></span>")
+	user.visible_message(SPAN_ALERT("<b>[user] swallows [src] and begins to choke!</b>"))
 	user.take_oxygen_deprivation(175)
 	qdel(src)
 	return 1

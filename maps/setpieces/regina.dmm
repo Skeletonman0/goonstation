@@ -48,9 +48,7 @@
 	},
 /area/space)
 "aQ" = (
-/obj/npc/trader/random{
-	trader_area = "/area/shuttle/merchant_shuttle/left_station"
-	},
+/obj/npc/trader/random,
 /obj/stool/chair/comfy,
 /turf/unsimulated/floor/shuttle{
 	icon_state = "floor2"
@@ -87,7 +85,9 @@
 /turf/simulated/floor/airless/engine,
 /area/space)
 "cc" = (
-/obj/machinery/atmospherics/unary/vent_pump/west,
+/obj/machinery/atmospherics/unary/vent_pump{
+	dir = 8
+	},
 /obj/decal/tile_edge/stripe/extra_big{
 	dir = 4
 	},
@@ -145,6 +145,12 @@
 	dir = 4
 	},
 /area/space)
+"es" = (
+/obj/indestructible/shuttle_corner{
+	dir = 8
+	},
+/turf/simulated/floor/airless/engine/vacuum,
+/area/regina)
 "et" = (
 /obj/decoration/vent/vent2,
 /turf/simulated/wall/auto/shuttle{
@@ -201,11 +207,11 @@
 /turf/simulated/drawbridge/floor,
 /area/space)
 "fA" = (
-/obj/wingrille_spawn/auto,
+/obj/mapping_helper/wingrille_spawn/auto,
 /turf/unsimulated/floor/plating,
 /area/shuttle/merchant_shuttle/right_centcom/cogmap2)
 "fG" = (
-/obj/wingrille_spawn/bulletproof,
+/obj/mapping_helper/wingrille_spawn/bulletproof,
 /obj/decal/fakeobjects/shuttleengine{
 	dir = 1;
 	icon_state = "alt_heater-R"
@@ -219,7 +225,7 @@
 	},
 /area/shuttle/merchant_shuttle/right_centcom/donut2)
 "fM" = (
-/obj/wingrille_spawn/reinforced/full,
+/obj/mapping_helper/wingrille_spawn/reinforced/full,
 /turf/unsimulated/floor/plating,
 /area/space)
 "gd" = (
@@ -262,14 +268,18 @@
 	},
 /area/shuttle/merchant_shuttle/diner_centcom)
 "gF" = (
-/obj/wingrille_spawn/auto,
+/obj/mapping_helper/wingrille_spawn/auto,
 /turf/unsimulated/floor/plating,
 /area/shuttle/merchant_shuttle/diner_centcom)
+"gM" = (
+/obj/indestructible/shuttle_corner{
+	dir = 8
+	},
+/turf/simulated/floor/airless/engine,
+/area/regina)
 "gP" = (
 /obj/stool/chair/comfy,
-/obj/npc/trader/random{
-	trader_area = "/area/shuttle/merchant_shuttle/right_station"
-	},
+/obj/npc/trader/random,
 /turf/unsimulated/floor/shuttle{
 	icon_state = "floor2"
 	},
@@ -365,10 +375,11 @@
 /turf/simulated/grimycarpet,
 /area/regina)
 "hS" = (
-/turf/simulated/shuttle/wall{
+/obj/indestructible/shuttle_corner{
 	dir = 1;
-	icon_state = "wall3_space"
+	icon_state = "wall3_trans"
 	},
+/turf/simulated/floor/airless/engine,
 /area/regina)
 "hV" = (
 /obj/window/reinforced/east,
@@ -406,7 +417,8 @@
 /obj/decal/fakeobjects/pipe{
 	desc = "Part of a system for hauling oversized crates.";
 	dir = 9;
-	name = "actuating frame"
+	name = "actuating frame";
+	color = "b4b4b4"
 	},
 /obj/decal/fakeobjects/shuttleengine{
 	desc = "An electromagnetic clamping mechanism for hauling large cargo containers.";
@@ -475,6 +487,12 @@
 	dir = 4
 	},
 /area/regina)
+"jC" = (
+/obj/indestructible/shuttle_corner{
+	dir = 1
+	},
+/turf/simulated/floor/airless/engine/vacuum,
+/area/regina)
 "jD" = (
 /obj/decal/tile_edge/line/black{
 	dir = 8;
@@ -490,7 +508,7 @@
 	dir = 4;
 	icon_state = "lattice-dir"
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine,
 /area/regina)
 "jG" = (
 /obj/indestructible/shuttle_corner{
@@ -527,7 +545,7 @@
 /obj/indestructible/shuttle_corner{
 	dir = 1
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine/vacuum,
 /area/regina)
 "kK" = (
 /obj/indestructible/shuttle_corner{
@@ -539,9 +557,7 @@
 /area/shuttle/merchant_shuttle/left_centcom/destiny)
 "kL" = (
 /obj/stool/chair/comfy,
-/obj/npc/trader/random{
-	trader_area = "/area/shuttle/merchant_shuttle/right_station"
-	},
+/obj/npc/trader/random,
 /obj/machinery/light/small/floor,
 /turf/unsimulated/floor/shuttle{
 	icon_state = "floor2"
@@ -575,7 +591,7 @@
 /turf/space,
 /area/space)
 "lp" = (
-/obj/wingrille_spawn/bulletproof,
+/obj/mapping_helper/wingrille_spawn/bulletproof,
 /obj/decal/fakeobjects/shuttleengine{
 	dir = 1;
 	icon_state = "alt_heater-L"
@@ -586,7 +602,8 @@
 /obj/decal/fakeobjects/pipe{
 	desc = "Part of a system for hauling oversized crates.";
 	dir = 5;
-	name = "actuating frame"
+	name = "actuating frame";
+	color = "b4b4b4"
 	},
 /obj/decal/fakeobjects/shuttleengine{
 	desc = "An electromagnetic clamping mechanism for hauling large cargo containers.";
@@ -598,7 +615,7 @@
 /turf/simulated/floor/airless/engine,
 /area/regina)
 "lB" = (
-/obj/wingrille_spawn/auto,
+/obj/mapping_helper/wingrille_spawn/auto,
 /turf/unsimulated/floor/shuttle{
 	icon_state = "floor2"
 	},
@@ -785,7 +802,8 @@
 /obj/decal/fakeobjects/pipe{
 	desc = "Part of a system for hauling oversized crates.";
 	dir = 10;
-	name = "actuating frame"
+	name = "actuating frame";
+	color = "b4b4b4"
 	},
 /turf/simulated/floor/airless/engine,
 /area/regina)
@@ -799,7 +817,7 @@
 	},
 /area/shuttle/merchant_shuttle/diner_centcom)
 "pi" = (
-/obj/wingrille_spawn/reinforced/full,
+/obj/mapping_helper/wingrille_spawn/reinforced/full,
 /turf/simulated/floor/black,
 /area/regina)
 "pp" = (
@@ -847,7 +865,8 @@
 /obj/decal/fakeobjects/pipe{
 	desc = "Part of a system for hauling oversized crates.";
 	dir = 10;
-	name = "actuating frame"
+	name = "actuating frame";
+	color = "b4b4b4"
 	},
 /turf/simulated/floor/airless/engine,
 /area/regina)
@@ -882,7 +901,7 @@
 /turf/simulated/floor/airless/plating,
 /area/regina)
 "qj" = (
-/obj/wingrille_spawn/auto,
+/obj/mapping_helper/wingrille_spawn/auto,
 /turf/unsimulated/floor/engine,
 /area/shuttle/merchant_shuttle/right_centcom/cogmap2)
 "qn" = (
@@ -931,7 +950,7 @@
 	dir = 1;
 	icon_state = "alt_propulsion"
 	},
-/turf/unsimulated/floor/arctic/snow/ice,
+/turf/simulated/floor/airless/engine,
 /area/shuttle/merchant_shuttle/right_centcom/destiny)
 "ri" = (
 /obj/decal/fakeobjects/teleport_pad,
@@ -986,7 +1005,7 @@
 /turf/simulated/floor/airless/engine,
 /area/shuttle/merchant_shuttle/left_centcom/donut2)
 "sI" = (
-/obj/wingrille_spawn/auto,
+/obj/mapping_helper/wingrille_spawn/auto,
 /turf/unsimulated/floor/shuttle{
 	icon_state = "floor2"
 	},
@@ -997,7 +1016,7 @@
 	},
 /area/regina)
 "sT" = (
-/obj/wingrille_spawn/auto,
+/obj/mapping_helper/wingrille_spawn/auto,
 /turf/unsimulated/floor/engine,
 /area/shuttle/merchant_shuttle/left_centcom/cogmap2)
 "sZ" = (
@@ -1007,7 +1026,7 @@
 /turf/space,
 /area/space)
 "ta" = (
-/obj/wingrille_spawn/auto,
+/obj/mapping_helper/wingrille_spawn/auto,
 /turf/unsimulated/floor/plating,
 /area/shuttle/merchant_shuttle/left_centcom/cogmap2)
 "te" = (
@@ -1021,7 +1040,7 @@
 /obj/indestructible/shuttle_corner{
 	dir = 4
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine,
 /area/regina)
 "tk" = (
 /obj/indestructible/shuttle_corner{
@@ -1035,8 +1054,7 @@
 /area/space)
 "tp" = (
 /turf/simulated/shuttle/wall/cockpit{
-	icon_state = "shuttlecock_mining";
-	plane = 5
+	icon_state = "shuttlecock_mining"
 	},
 /area/regina)
 "ty" = (
@@ -1081,12 +1099,6 @@
 	},
 /turf/simulated/floor/airless/engine,
 /area/shuttle/merchant_shuttle/right_centcom/donut2)
-"up" = (
-/turf/simulated/shuttle/wall{
-	dir = 1;
-	icon_state = "wall3_space"
-	},
-/area/space)
 "ur" = (
 /turf/simulated/floor/caution/north,
 /area/regina)
@@ -1144,6 +1156,16 @@
 	icon_state = "floor2"
 	},
 /area/shuttle/merchant_shuttle/left_centcom/cogmap2)
+"vC" = (
+/obj/lattice{
+	dir = 8;
+	icon_state = "lattice-dir"
+	},
+/obj/rail{
+	dir = 4
+	},
+/turf/simulated/floor/airless/engine/vacuum,
+/area/regina)
 "vY" = (
 /obj/decal/tile_edge/line/black{
 	dir = 4;
@@ -1174,7 +1196,7 @@
 	dir = 10;
 	icon_state = "lattice-dir"
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine/vacuum,
 /area/regina)
 "wh" = (
 /turf/simulated/grimycarpet,
@@ -1189,7 +1211,7 @@
 /obj/indestructible/shuttle_corner{
 	dir = 0
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine/vacuum,
 /area/space)
 "wL" = (
 /obj/decal/fakeobjects/teleport_pad,
@@ -1201,9 +1223,7 @@
 /area/shuttle/merchant_shuttle/right_centcom/cogmap2)
 "wR" = (
 /obj/stool/chair/comfy,
-/obj/npc/trader/random{
-	trader_area = "/area/shuttle/merchant_shuttle/right_station"
-	},
+/obj/npc/trader/random,
 /turf/unsimulated/floor/shuttle{
 	icon_state = "floor2"
 	},
@@ -1336,15 +1356,34 @@
 	},
 /turf/simulated/floor/airless/engine/caution/north,
 /area/space)
-"yN" = (
-/obj/indestructible/shuttle_corner{
-	dir = 1
+"yH" = (
+/obj/lattice{
+	dir = 10;
+	icon_state = "lattice-dir"
 	},
+/obj/rail{
+	dir = 4
+	},
+/obj/indestructible/shuttle_corner{
+	dir = 8
+	},
+/turf/simulated/floor/airless/engine/vacuum,
+/area/regina)
+"yK" = (
+/obj/indestructible/shuttle_corner{
+	dir = 4
+	},
+/turf/simulated/floor/airless/engine,
+/area/regina)
+"yN" = (
 /obj/lattice{
 	dir = 4;
 	icon_state = "lattice-dir"
 	},
-/turf/space,
+/obj/indestructible/shuttle_corner{
+	dir = 1
+	},
+/turf/simulated/floor/airless/engine/vacuum,
 /area/regina)
 "yU" = (
 /obj/machinery/sleeper{
@@ -1372,7 +1411,8 @@
 /obj/decal/fakeobjects/pipe{
 	desc = "Part of a system for hauling oversized crates.";
 	dir = 9;
-	name = "actuating frame"
+	name = "actuating frame";
+	color = "b4b4b4"
 	},
 /turf/simulated/floor/airless/engine,
 /area/regina)
@@ -1400,7 +1440,7 @@
 /obj/indestructible/shuttle_corner{
 	dir = 0
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine/vacuum,
 /area/regina)
 "zY" = (
 /obj/machinery/shuttle/engine/heater{
@@ -1454,7 +1494,7 @@
 	},
 /area/space)
 "AI" = (
-/obj/wingrille_spawn/auto,
+/obj/mapping_helper/wingrille_spawn/auto,
 /turf/unsimulated/floor/shuttle{
 	icon_state = "floor2"
 	},
@@ -1543,11 +1583,11 @@
 /turf/simulated/drawbridge/wall,
 /area/regina)
 "Df" = (
-/obj/wingrille_spawn/reinforced/full,
+/obj/mapping_helper/wingrille_spawn/reinforced/full,
 /turf/unsimulated/floor/plating,
 /area/regina)
 "Dg" = (
-/obj/wingrille_spawn/reinforced/full,
+/obj/mapping_helper/wingrille_spawn/reinforced/full,
 /turf/unsimulated/floor/arctic/snow/ice,
 /area/regina)
 "Dl" = (
@@ -1584,7 +1624,7 @@
 	},
 /area/shuttle/merchant_shuttle/right_centcom/destiny)
 "DT" = (
-/obj/wingrille_spawn/auto,
+/obj/mapping_helper/wingrille_spawn/auto,
 /turf/unsimulated/floor/shuttle{
 	icon_state = "floor2"
 	},
@@ -1608,7 +1648,7 @@
 /obj/indestructible/shuttle_corner{
 	dir = 0
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine/vacuum,
 /area/regina)
 "EQ" = (
 /turf/unsimulated/floor/shuttle{
@@ -1621,9 +1661,7 @@
 /area/space)
 "Fc" = (
 /obj/stool/chair/comfy,
-/obj/npc/trader/random{
-	trader_area = "/area/shuttle/merchant_shuttle/right_station"
-	},
+/obj/npc/trader/random,
 /turf/unsimulated/floor/shuttle{
 	icon_state = "floor2"
 	},
@@ -1636,7 +1674,10 @@
 /obj/indestructible/shuttle_corner{
 	dir = 4
 	},
-/turf/space,
+/obj/indestructible/shuttle_corner{
+	dir = 4
+	},
+/turf/simulated/floor/airless/engine/caution/south,
 /area/regina)
 "Fi" = (
 /obj/lattice{
@@ -1649,7 +1690,7 @@
 /obj/indestructible/shuttle_corner{
 	dir = 0
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine/vacuum,
 /area/regina)
 "Fk" = (
 /turf/simulated/wall/auto/shuttle,
@@ -1693,7 +1734,7 @@
 /obj/indestructible/shuttle_corner{
 	dir = 8
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine,
 /area/regina)
 "FM" = (
 /obj/machinery/shuttle/engine/propulsion{
@@ -1723,19 +1764,12 @@
 	icon_state = "floor2"
 	},
 /area/shuttle/merchant_shuttle/right_centcom/cogmap)
-"GR" = (
-/obj/indestructible/shuttle_corner{
-	dir = 1;
-	icon_state = "wall3_trans"
-	},
-/turf/space,
-/area/space)
 "GT" = (
-/obj/wingrille_spawn/bulletproof,
+/obj/mapping_helper/wingrille_spawn/bulletproof,
 /turf/simulated/floor/plating,
 /area/space)
 "GV" = (
-/obj/wingrille_spawn/auto,
+/obj/mapping_helper/wingrille_spawn/auto,
 /turf/unsimulated/floor/shuttle,
 /area/shuttle/merchant_shuttle/left_centcom/cogmap)
 "Hi" = (
@@ -1791,12 +1825,14 @@
 /obj/decal/fakeobjects/pipe{
 	desc = "Part of a system for hauling oversized crates.";
 	dir = 9;
-	name = "actuating frame"
+	name = "actuating frame";
+	color = "b4b4b4"
 	},
 /obj/decal/fakeobjects/pipe{
 	desc = "Part of a system for hauling oversized crates.";
 	dir = 9;
-	name = "actuating frame"
+	name = "actuating frame";
+	color = "b4b4b4"
 	},
 /turf/simulated/floor/airless/engine,
 /area/regina)
@@ -1816,13 +1852,13 @@
 	dir = 8;
 	icon_state = "lattice-dir"
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine/vacuum,
 /area/regina)
 "IV" = (
 /obj/indestructible/shuttle_corner{
 	dir = 8
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine/caution/south,
 /area/regina)
 "Jo" = (
 /obj/storage/crate/xmas,
@@ -1845,9 +1881,7 @@
 /area/regina)
 "Ki" = (
 /obj/stool/chair/comfy,
-/obj/npc/trader/random{
-	trader_area = "/area/shuttle/merchant_shuttle/right_station"
-	},
+/obj/npc/trader/random,
 /turf/unsimulated/floor/shuttle{
 	icon_state = "floor2"
 	},
@@ -1856,10 +1890,11 @@
 /turf/simulated/floor/airless/damaged3,
 /area/regina)
 "Km" = (
-/turf/simulated/shuttle/wall{
+/obj/indestructible/shuttle_corner{
 	dir = 8;
-	icon_state = "wall3_space"
+	icon_state = "wall3_trans"
 	},
+/turf/simulated/floor/airless/engine,
 /area/regina)
 "Kw" = (
 /obj/lattice{
@@ -1898,6 +1933,12 @@
 	},
 /turf/simulated/floor/airless/engine,
 /area/space)
+"KU" = (
+/obj/indestructible/shuttle_corner{
+	dir = 1
+	},
+/turf/simulated/floor/airless/engine/caution/north,
+/area/regina)
 "KV" = (
 /obj/machinery/door/airlock/pyro/external{
 	dir = 4
@@ -1905,7 +1946,7 @@
 /turf/simulated/floor/airless/engine,
 /area/space)
 "La" = (
-/obj/wingrille_spawn,
+/obj/mapping_helper/wingrille_spawn,
 /turf/simulated/floor/shuttle{
 	icon_state = "floor2"
 	},
@@ -1916,13 +1957,6 @@
 	},
 /turf/simulated/floor/airless/engine,
 /area/shuttle/merchant_shuttle/right_centcom/cogmap2)
-"Lh" = (
-/obj/indestructible/shuttle_corner{
-	dir = 8;
-	icon_state = "wall3_trans"
-	},
-/turf/space,
-/area/space)
 "Ln" = (
 /obj/indestructible/shuttle_corner{
 	icon_state = "wall3_trans"
@@ -1932,7 +1966,9 @@
 	},
 /area/shuttle/merchant_shuttle/right_centcom/cogmap2)
 "Ls" = (
-/obj/machinery/atmospherics/unary/vent_pump/south,
+/obj/machinery/atmospherics/unary/vent_pump{
+	dir = 2
+	},
 /turf/simulated/floor/caution/north,
 /area/regina)
 "Lt" = (
@@ -1963,7 +1999,7 @@
 	},
 /area/shuttle/merchant_shuttle/left_centcom/destiny)
 "LP" = (
-/obj/wingrille_spawn/bulletproof,
+/obj/mapping_helper/wingrille_spawn/bulletproof,
 /obj/decal/fakeobjects/shuttleengine{
 	dir = 1;
 	icon_state = "alt_heater-M"
@@ -2078,7 +2114,7 @@
 	dir = 4;
 	icon_state = "lattice-dir"
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine/vacuum,
 /area/regina)
 "NB" = (
 /turf/unsimulated/floor/engine,
@@ -2092,7 +2128,7 @@
 /turf/simulated/floor/yellowblack,
 /area/regina)
 "Ov" = (
-/obj/wingrille_spawn/reinforced/full,
+/obj/mapping_helper/wingrille_spawn/reinforced/full,
 /turf/simulated/floor/black,
 /area/space)
 "OA" = (
@@ -2101,15 +2137,6 @@
 	icon_state = "floor2"
 	},
 /area/shuttle/merchant_shuttle/left_centcom/donut2)
-"OH" = (
-/obj/stool/chair/comfy/shuttle/brown,
-/obj/machinery/computer/shuttle_bus/embedded/south{
-	plane = 6
-	},
-/turf/simulated/floor/shuttle{
-	icon_state = "floor2"
-	},
-/area/regina)
 "OM" = (
 /obj/decal/poster/wallsign/hazard_danger,
 /turf/simulated/wall/auto/shuttle,
@@ -2160,12 +2187,10 @@
 	dir = 4;
 	icon_state = "lattice-dir"
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine/vacuum,
 /area/regina)
 "Qf" = (
-/obj/npc/trader/random{
-	trader_area = "/area/shuttle/merchant_shuttle/right_station"
-	},
+/obj/npc/trader/random,
 /obj/stool/chair/comfy,
 /turf/unsimulated/floor/shuttle{
 	icon_state = "floor2"
@@ -2303,7 +2328,7 @@
 /turf/simulated/floor/airless/engine,
 /area/regina)
 "SX" = (
-/obj/wingrille_spawn/auto,
+/obj/mapping_helper/wingrille_spawn/auto,
 /turf/unsimulated/floor/shuttle,
 /area/shuttle/merchant_shuttle/right_centcom/cogmap)
 "Tm" = (
@@ -2375,12 +2400,6 @@
 	icon_state = "floor2"
 	},
 /area/shuttle/merchant_shuttle/right_centcom/cogmap)
-"Un" = (
-/turf/simulated/shuttle/wall{
-	dir = 8;
-	icon_state = "wall3_space"
-	},
-/area/space)
 "Uq" = (
 /obj/indestructible/shuttle_corner{
 	dir = 8;
@@ -2424,9 +2443,7 @@
 /area/regina)
 "Vv" = (
 /obj/stool/chair/comfy,
-/obj/npc/trader/random{
-	trader_area = "/area/shuttle/merchant_shuttle/left_station"
-	},
+/obj/npc/trader/random,
 /turf/unsimulated/floor/shuttle{
 	icon_state = "floor2"
 	},
@@ -2463,7 +2480,8 @@
 /obj/decal/fakeobjects/pipe{
 	desc = "Part of a system for hauling oversized crates.";
 	dir = 6;
-	name = "actuating frame"
+	name = "actuating frame";
+	color = "b4b4b4"
 	},
 /turf/simulated/floor/airless/engine,
 /area/regina)
@@ -2484,6 +2502,12 @@
 	dir = 4
 	},
 /turf/simulated/floor/airless/engine/vacuum,
+/area/regina)
+"WO" = (
+/obj/indestructible/shuttle_corner{
+	dir = 0
+	},
+/turf/simulated/floor/airless/engine/caution/north,
 /area/regina)
 "Xb" = (
 /turf/unsimulated/wall/auto/adventure/hospital/interior,
@@ -2572,7 +2596,8 @@
 /obj/decal/fakeobjects/pipe{
 	desc = "Part of a system for hauling oversized crates.";
 	dir = 5;
-	name = "actuating frame"
+	name = "actuating frame";
+	color = "b4b4b4"
 	},
 /turf/simulated/floor/airless/engine,
 /area/regina)
@@ -2636,7 +2661,7 @@
 /area/regina)
 "Zc" = (
 /obj/table/reinforced/auto,
-/obj/deskclutter,
+/obj/decal/cleanable/desk_clutter,
 /turf/simulated/floor/yellowblack,
 /area/regina)
 "Zf" = (
@@ -2657,7 +2682,7 @@
 /obj/indestructible/shuttle_corner{
 	dir = 1
 	},
-/turf/space,
+/turf/simulated/floor/airless/engine,
 /area/regina)
 "Zs" = (
 /obj/decal/fakeobjects/teleport_pad,
@@ -2697,14 +2722,12 @@
 /turf/simulated/floor/airless/engine,
 /area/shuttle/merchant_shuttle/right_centcom/cogmap)
 "ZV" = (
-/obj/wingrille_spawn/auto,
+/obj/mapping_helper/wingrille_spawn/auto,
 /turf/unsimulated/floor/engine,
 /area/shuttle/merchant_shuttle/diner_centcom)
 "ZW" = (
 /obj/stool/chair/comfy,
-/obj/npc/trader/random{
-	trader_area = "/area/shuttle/merchant_shuttle/right_station"
-	},
+/obj/npc/trader/random,
 /turf/unsimulated/floor/shuttle{
 	icon_state = "floor2"
 	},
@@ -3487,7 +3510,7 @@ WE
 sN
 pi
 pi
-Fh
+yK
 Wn
 pR
 TV
@@ -3575,7 +3598,7 @@ Uu
 oN
 oN
 WE
-Fh
+yK
 pR
 TV
 dR
@@ -3645,7 +3668,7 @@ TB
 aI
 aI
 UG
-Ey
+WO
 iU
 Vf
 wh
@@ -3906,18 +3929,18 @@ TB
 aI
 aI
 UG
-Zj
+KU
 sN
 jE
 Tm
 qd
 Ug
 nQ
-Zj
+jC
 yc
 iV
 yc
-IV
+es
 nQ
 Tm
 qd
@@ -4778,7 +4801,7 @@ jd
 Rm
 xf
 Wn
-wU
+vC
 WM
 dY
 dY
@@ -5213,7 +5236,7 @@ jd
 Rm
 xf
 Wn
-wU
+vC
 XU
 im
 im
@@ -5308,7 +5331,7 @@ rw
 Ug
 Zj
 mp
-IV
+gM
 Tm
 rw
 im
@@ -5488,7 +5511,7 @@ rw
 Za
 Za
 XU
-FK
+yH
 Wn
 pR
 TV
@@ -5538,7 +5561,7 @@ Wn
 Km
 lu
 zd
-Un
+KR
 lu
 If
 Wn
@@ -5973,7 +5996,7 @@ Wn
 hS
 ir
 XW
-up
+hH
 ir
 XW
 Wn
@@ -6837,7 +6860,7 @@ UO
 UO
 UO
 TO
-Lh
+KR
 pv
 pv
 pv
@@ -7185,7 +7208,7 @@ UO
 UO
 UO
 TO
-GR
+hH
 pv
 pv
 pv
@@ -9141,7 +9164,7 @@ hv
 hv
 aG
 MG
-OH
+AM
 La
 tp
 pT

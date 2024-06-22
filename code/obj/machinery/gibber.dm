@@ -1,10 +1,13 @@
+TYPEINFO(/obj/machinery/gibber)
+	mats = 15
+
 /obj/machinery/gibber
 	name = "Gibber"
 	desc = "The name isn't descriptive enough?"
 	icon = 'icons/obj/kitchen.dmi'
 	icon_state = "grinder"
 	density = 1
-	anchored = 1
+	anchored = ANCHORED
 	var/operating = 0 //Is it on?
 	var/dirty = 0 // Does it need cleaning?
 	var/mob/occupant // Mob who has been put inside
@@ -14,7 +17,6 @@
 	var/machine_startup_sound = 'sound/machines/tractorrev.ogg'
 	var/machine_shutdown_sound = 'sound/machines/tractor_running3.ogg'
 	var/rotor_sound = 'sound/machines/lavamoon_rotors_fast_short.ogg'
-	mats = 15
 	deconstruct_flags =  DECON_WRENCH | DECON_WELDER
 
 	output_north
@@ -45,10 +47,10 @@
 	if (!src.user_can_suicide(user))
 		return 0
 	if(src.occupant)
-		user.visible_message("<span class='alert'><b>[user] tries to climb on top of the gibber but someone's already there!</b></span>")
+		user.visible_message(SPAN_ALERT("<b>[user] tries to climb on top of the gibber but someone's already there!</b>"))
 		return 0
 	if (user.client)
-		user.visible_message("<span class='alert'><b>[user] climbs on top of the gibber!</b></span>")
+		user.visible_message(SPAN_ALERT("<b>[user] climbs on top of the gibber!</b>"))
 		enter_gibber(user)
 		src.startgibbing(user)
 		return 1
@@ -59,28 +61,28 @@
 
 /obj/machinery/gibber/attack_hand(mob/user)
 	if(operating)
-		boutput(user, "<span class='alert'>It's locked and running</span>")
+		boutput(user, SPAN_ALERT("It's locked and running"))
 		return
 	else
 		src.startgibbing(user)
 
 /obj/machinery/gibber/attackby(obj/item/grab/G, mob/user)
 	if(src.occupant)
-		boutput(user, "<span class='alert'>The gibber is full, empty it first!</span>")
+		boutput(user, SPAN_ALERT("The gibber is full, empty it first!"))
 		return
 	if (!(istype(G, /obj/item/grab)) || !ishuman(G.affecting))
-		boutput(user, "<span class='alert'>This item is not suitable for the gibber!</span>")
+		boutput(user, SPAN_ALERT("This item is not suitable for the gibber!"))
 		return
 	if (!isdead(G.affecting))
-		boutput(user, "<span class='alert'>[G.affecting.name] needs to be dead first!</span>")
+		boutput(user, SPAN_ALERT("[G.affecting.name] needs to be dead first!"))
 		return
-	user.visible_message("<span class='alert'>[user] starts to put [G.affecting] onto the gibber!</span>")
+	user.visible_message(SPAN_ALERT("[user] starts to put [G.affecting] onto the gibber!"))
 	src.add_fingerprint(user)
 	SETUP_GENERIC_ACTIONBAR(user, src, 3 SECONDS, /obj/machinery/gibber/proc/gibber_action, list(G, user), 'icons/mob/screen1.dmi', "grabbed", null, null)
 
 /obj/machinery/gibber/proc/gibber_action(obj/item/grab/G as obj, mob/user as mob)
 	if(G?.affecting && (BOUNDS_DIST(user, src) == 0))
-		user.visible_message("<span class='alert'>[user] shoves [G.affecting] on top of the gibber!</span>")
+		user.visible_message(SPAN_ALERT("[user] shoves [G.affecting] on top of the gibber!"))
 		logTheThing(LOG_COMBAT, user, "forced [constructTarget(G.affecting,"combat")] into a gibber at [log_loc(src)].")
 		var/mob/M = G.affecting
 		enter_gibber(M)
@@ -131,14 +133,14 @@
 	if(src.operating)
 		return
 	if(!src.occupant)
-		boutput(user, "<span class='alert'>Nothing is loaded inside.</span>")
+		boutput(user, SPAN_ALERT("Nothing is loaded inside."))
 		return
 	else
 		var/bdna = null // For forensics (Convair880).
 		var/btype = null
 
-		user.visible_message("<span class='alert'>[user] presses a button on the [src]. Its engines begin to rev up!</span>",
-				"<span class='alert'>You press the button on the [src]. The engines rev up.</span>")
+		user.visible_message(SPAN_ALERT("[user] presses a button on the [src]. Its engines begin to rev up!"),
+				SPAN_ALERT("You press the button on the [src]. The engines rev up."))
 		src.operating = 1
 		src.icon_state = "grinder-on"
 

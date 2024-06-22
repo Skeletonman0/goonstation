@@ -74,7 +74,7 @@
 				saveStat("Map Vote Link:",mapVoteLinkStat)
 
 				if (mapSwitcher.voteCurrentDuration)
-					saveStat("Map Vote Time:", "([round(((mapSwitcher.voteStartedAt + mapSwitcher.voteCurrentDuration + PREGAME_LOBBY_TICKS) - world.time) / 10)] seconds remaining, [map_vote_holder.voters] vote[map_vote_holder.voters != 1 ? "s" : ""])")
+					saveStat("Map Vote Time:", "([round(((mapSwitcher.voteStartedAt + mapSwitcher.voteCurrentDuration) - TIME) / (1 SECOND))] seconds remaining, [map_vote_holder.voters] vote[map_vote_holder.voters != 1 ? "s" : ""])")
 			else
 				stats["Map Vote Link:"] = 0
 				stats["Map Vote Time:"] = 0
@@ -154,18 +154,25 @@ var/global/datum/mob_stat_thinker/mobStat = new
 				//BLUEGH ADMIN SHIT
 				if (mobStat.statNames[i] == "Server Load:")
 					stat("Server Load:", "[world.cpu]")
-					#if DM_VERSION >= 514
 					stat("Map CPU %:", "[world.map_cpu]")
-					#endif
 					#if TIME_DILATION_ENABLED == 1
 					stat("Variable Ticklag:", "[world.tick_lag]")
 					#endif
 					stat("Maptick/Client:", "[world.map_cpu/length(clients)]")
+					if(config.whitelistEnabled != config.baseWhitelistEnabled)
+						var/current_status = config.whitelistEnabled ? "temporarily ON" : "temporarily OFF"
+						if(!config.whitelistEnabled && config.baseWhitelistEnabled)
+							if(config.roundsLeftWithoutWhitelist == 0)
+								current_status += " (final round)"
+							else
+								current_status += " ([config.roundsLeftWithoutWhitelist] rounds left)"
+						stat("Whitelist:", current_status)
 
-					if (!istype(src.loc, /turf) && !isnull(loc))
-						stat("Co-ordinates:", "([loc.x], [loc.y], [loc.z])")
+					var/turf/T = get_turf(src)
+					if (T)
+						stat("Coordinates:", "([T.x], [T.y], [T.z])")
 					else
-						stat("Co-ordinates:", "([x], [y], [z])")
+						stat("Coordinates:", "null")
 					stat("Runtimes:", runtime_count)
 					continue
 				if (mobStat.statNames[i] == "Game Mode:")
@@ -191,9 +198,6 @@ var/global/datum/mob_stat_thinker/mobStat = new
 		#endif
 
 		stat(null, " ")
-
-	if (abilityHolder)
-		abilityHolder.Stat()
 
 	if (is_near_gauntlet())
 		gauntlet_controller.Stat()

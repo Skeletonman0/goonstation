@@ -10,14 +10,14 @@
 //Also, make sure the bridges can extend in a straight line. Or you're gonna have a really bad time
 
 /* -------------------- Controller -------------------- */
-
+ADMIN_INTERACT_PROCS(/obj/airbridge_controller, proc/toggle_bridge, proc/pressurize)
 /obj/airbridge_controller
 	name = "Airbridge Controller"
 	desc = "This is an invisible thing. Yet you can see it. You notice reality unraveling around you."
 	icon = 'icons/misc/mark.dmi'
 	icon_state = "airbr"
 	invisibility = INVIS_ALWAYS_ISH
-	anchored = 1
+	anchored = ANCHORED
 	density = 0
 
 	var/tunnel_width = 1
@@ -82,16 +82,9 @@
 			for(var/turf/simulated/T in maintaining_turfs)
 				if(!T.air && T.density)
 					continue
-				ZERO_BASE_GASES(T.air)
-#ifdef ATMOS_ARCHIVING
-				ZERO_ARCHIVED_BASE_GASES(T.air)
-				T.air.ARCHIVED(temperature) = null
-#endif
-				T.air.oxygen = MOLES_O2STANDARD
-				T.air.nitrogen = MOLES_N2STANDARD
-				T.air.fuel_burnt = 0
-				T.air.remove_trace_gas()
-				T.air.temperature = T20C
+				if(T.parent?.group_processing)
+					T.parent.suspend_group_processing()
+				T.stabilize()
 				LAGCHECK(LAG_LOW)
 
 			working = 0
@@ -171,7 +164,7 @@
 						animate_turf_slideout(curr, src.floor_turf, dir, slide_delay)
 					curr.set_dir(dir)
 					maintaining_turfs.Add(curr)
-				playsound(T, 'sound/effects/airbridge_dpl.ogg', 50, 1)
+				playsound(T, 'sound/effects/airbridge_dpl.ogg', 50, TRUE)
 				sleep(slide_delay)
 				for(var/i = -tunnel_width, i <= tunnel_width, i++)
 					curr = get_steps(T, turn(dir, 90), i)
@@ -205,6 +198,11 @@
 			linked.remove_bridge()
 			return
 
+		if (global.map_currently_underwater)
+			src.original_turf = /turf/space/fluid
+		else if (src.original_turf == /turf/space/fluid)
+			src.original_turf = /turf/space
+
 		working = 1
 		maintaining_bridge = 0
 		playsound(src.loc, 'sound/machines/warning-buzzer.ogg', 50, 1)
@@ -227,7 +225,7 @@
 				for(var/i = -tunnel_width, i <= tunnel_width, i++)
 					curr = get_steps(T, turn(dir, 90), i)
 					animate_turf_slidein(curr, src.original_turf, opdir, slide_delay)
-				playsound(T, 'sound/effects/airbridge_dpl.ogg', 50, 1)
+				playsound(T, 'sound/effects/airbridge_dpl.ogg', 50, TRUE)
 				sleep(slide_delay)
 				for(var/i = -tunnel_width, i <= tunnel_width, i++)
 					curr = get_steps(T, turn(dir, 90), i)
@@ -282,7 +280,7 @@
 		if (src.emergency && emergency_shuttle) // emergency_shuttle is the controller datum
 			emergency_shuttle.airbridges += src
 		if (src.connected_dock)
-			RegisterSignal(GLOBAL_SIGNAL, src.connected_dock, .proc/dock_signal_handler)
+			RegisterSignal(GLOBAL_SIGNAL, src.connected_dock, PROC_REF(dock_signal_handler))
 
 	initialize()
 		..()
@@ -429,24 +427,24 @@
 		if (href_list["create"])
 			if (src.emergency && emergency_shuttle)
 				if (emergency_shuttle.location != SHUTTLE_LOC_STATION)
-					boutput(usr, "<span class='alert'>The airbridge cannot be deployed while the shuttle is not in position.</span>")
+					boutput(usr, SPAN_ALERT("The airbridge cannot be deployed while the shuttle is not in position."))
 					return
 			if (!(src.allowed(usr)))
-				boutput(usr, "<span class='alert'>Access denied.</span>")
+				boutput(usr, SPAN_ALERT("Access denied."))
 				return
 			if (src.establish_bridge())
 				logTheThing(LOG_STATION, usr, "extended the airbridge at [usr.loc.loc] ([log_loc(usr)])")
 
 		else if (href_list["remove"])
 			if (!(src.allowed(usr)))
-				boutput(usr, "<span class='alert'>Access denied.</span>")
+				boutput(usr, SPAN_ALERT("Access denied."))
 				return
 			if (src.remove_bridge())
 				logTheThing(LOG_STATION, usr, "retracted the airbridge at [usr.loc.loc] ([log_loc(usr)])")
 
 		else if (href_list["air"])
 			if (!(src.allowed(usr)))
-				boutput(usr, "<span class='alert'>Access denied.</span>")
+				boutput(usr, SPAN_ALERT("Access denied."))
 				return
 			if (src.pressurize())
 				logTheThing(LOG_STATION, usr, "pressurized the airbridge at [usr.loc.loc] ([log_loc(usr)])")
@@ -496,10 +494,10 @@
 	desc = ""
 	var/id = "noodles"
 	var/state = 0
-	anchored = 1
+	anchored = ANCHORED
 
 	attack_hand(mob/user)
 		for(var/obj/airbridge_controller/C in range(3, src))
-			boutput(user, "<span class='notice'>[C.toggle_bridge()]</span>")
+			boutput(user, SPAN_NOTICE("[C.toggle_bridge()]"))
 			break
 		return

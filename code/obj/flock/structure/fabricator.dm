@@ -3,11 +3,13 @@
 	name = "angled pedestal"
 	desc = "A strange machine. It appears to have some sort of output slot?"
 	flock_desc = "A converter that turns its contents into resource cubes."
+	tutorial_desc = "A converter that turns its contents into resource cubes. Created by converting a human resource container (vending machine, fluid tank, etc.)."
 	flock_id = "Fabricator"
 	health = 20
 	health_max = 20
 	repair_per_resource = 1
 	passthrough = TRUE
+	show_in_tutorial = TRUE
 
 	var/resources_to_produce = 0
 
@@ -19,9 +21,9 @@
 				src.resources_to_produce += get_initial_item_health(product.product_path) * product.product_amount
 		else if (istype(content_holder, /obj/machinery/manufacturer))
 			var/obj/machinery/manufacturer/fab = content_holder
-			if (fab.free_resource_amt)
-				for (var/obj/item/material_piece/mat as anything in fab.free_resources)
-					src.resources_to_produce += get_initial_item_health(mat) * fab.free_resource_amt
+			if (length(fab.free_resources) > 0)
+				for (var/obj/item/material_piece/mat_type as anything in fab.free_resources)
+					src.resources_to_produce += get_initial_item_health(mat_type) * fab.free_resources[mat_type]
 			else
 				for (var/obj/item/material_piece/mat in fab.contents)
 					src.resources_to_produce += get_initial_item_health(mat) * mat.amount
@@ -50,7 +52,7 @@
 			ON_COOLDOWN(src, "resource_production", 10 SECONDS)
 
 	building_specific_info()
-		return "<span class='bold'>Resources left to produce:</span> [src.resources_to_produce]."
+		return "[SPAN_BOLD("Resources left to produce:")] [src.resources_to_produce]."
 
 	process(mult)
 		if (!src.resources_to_produce)

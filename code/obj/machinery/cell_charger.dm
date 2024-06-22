@@ -1,13 +1,19 @@
+TYPEINFO(/obj/machinery/cell_charger)
+	mats = 8
+
 /obj/machinery/cell_charger
 	name = "cell charger"
 	desc = "A charging unit for power cells."
 	icon = 'icons/obj/power.dmi'
-	icon_state = "ccharger0"
+	#ifdef IN_MAP_EDITOR
+	icon_state = "ccharger-map"
+	#else
+	icon_state = "ccharger"
+	#endif
 	var/obj/item/cell/charging = null
 	var/chargerate = 250 // power per tick
 	var/chargelevel = -1
-	anchored = 1
-	mats = 8
+	anchored = ANCHORED
 	deconstruct_flags = DECON_SCREWDRIVER | DECON_WIRECUTTERS | DECON_MULTITOOL
 	power_usage = 50
 
@@ -31,21 +37,20 @@
 		UpdateIcon()
 
 /obj/machinery/cell_charger/update_icon()
-	icon_state = "ccharger[charging ? 1 : 0]"
-
-	if(charging && !(status & (BROKEN|NOPOWER)) )
-
-		var/newlevel = 	round( charging.percent() * 4.0 / 99 )
-		//boutput(world, "nl: [newlevel]")
-
-		if(chargelevel != newlevel)
-
-			overlays = null
-			overlays += image('icons/obj/power.dmi', "ccharger-o[newlevel]")
-
-			chargelevel = newlevel
+	if(charging)
+		UpdateOverlays(image(charging.icon, charging.icon_state, layer = src.layer + 0.1, pixel_x = 3, pixel_y = 1), "cell") //offsets to seat the cell properly on the base
+		UpdateOverlays(image('icons/obj/power.dmi', "ccharger_filled", layer = src.layer + 0.2), "wires")
+		if (!(status & (BROKEN|NOPOWER)))
+			var/newlevel = 	round( charging.percent() * 4.0 / 99 )
+			if(chargelevel != newlevel)
+				UpdateOverlays(image('icons/obj/power.dmi', "ccharger-o[newlevel]"), "indicator")
+				chargelevel = newlevel
+		else
+			UpdateOverlays(null, "indicator")
 	else
-		overlays = null
+		UpdateOverlays(image('icons/obj/power.dmi', "ccharger_empty"), "wires")
+		UpdateOverlays(null, "indicator")
+		UpdateOverlays(null, "cell")
 
 /obj/machinery/cell_charger/attack_hand(mob/user)
 	add_fingerprint(user)
@@ -54,12 +59,12 @@
 		return
 
 	if(charging)
+		charging.add_fingerprint(user)
+		charging.UpdateIcon()
 		if(iscarbon(user))
 			user.put_in_hand_or_drop(charging)
 		else
 			charging.set_loc(src.loc)
-		charging.add_fingerprint(user)
-		charging.UpdateIcon()
 		src.charging = null
 		user.visible_message("[user] removes the cell from the charger.", "You remove the cell from the charger.")
 		chargelevel = -1
@@ -68,10 +73,6 @@
 /obj/machinery/cell_charger/process(mult)
 	if (status & BROKEN)
 		return
-	if (charging)
-		power_usage = 50 + src.chargerate / CELLRATE
-	else
-		power_usage = 50
 	..()
 	//boutput(world, "ccpt [charging] [stat]")
 	if(status & NOPOWER)
@@ -83,7 +84,7 @@
 		return
 
 	var/added = charging.give(src.chargerate * mult)
-	use_power(added / CELLRATE)
+	use_power(added)
 
 	src.UpdateIcon()
 
@@ -92,3 +93,9 @@
 	. = ..()
 	if(Obj == src.charging)
 		src.charging = null
+
+/obj/machinery/cell_charger/get_desc(dist)
+	. = ..()
+	if(!charging)
+		return
+	. += "<br>[SPAN_NOTICE("\The [src] is currently charging \the [src.charging]! It is [round(src.charging.percent())]% charged and has [round(src.charging.charge)]/[src.charging.maxcharge] PUs. ")]"

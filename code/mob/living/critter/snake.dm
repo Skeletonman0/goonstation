@@ -5,20 +5,23 @@
 	icon_state = "snake"
 	density = FALSE
 	custom_gib_handler = /proc/gibs
-	hand_count = 0
+	hand_count = 1
 	can_help = TRUE
 	can_throw = FALSE
 	can_grab = TRUE
 	can_disarm = FALSE
-	butcherable = TRUE
+	butcherable = BUTCHER_ALLOWED
 	name_the_meat = FALSE
 	max_skins = 1
-	health_brute = 25
+	health_brute = 15
 	health_brute_vuln = 0.5
-	health_burn = 25
+	health_burn = 15
 	health_burn_vuln = 0.25
-	ai_type = /datum/aiHolder/snake
+	ai_type = /datum/aiHolder/aggressive
 	is_npc = TRUE
+	ai_retaliates = TRUE
+	ai_retaliate_patience = 0
+	ai_retaliate_persistence = RETALIATE_UNTIL_DEAD //angry snek kills you
 
 	//Special behaviour vars
 	var/double = 0
@@ -30,28 +33,34 @@
 	var/atom/movable/my_stick = null
 
 	//note: this is not the best way to do this, but I'm showing it here as an example. It is better to create a peaceful AI holder with no attack tasks and use that.
-	var/aggressive = TRUE
+	aggressive = TRUE
 
-	critter_attack(var/mob/target)
-		src.visible_message("<span class='combat'><B>[src]</B> bites [target]!</span>", "<span class='combat'>You bite [target]!</span>")
-		playsound(src.loc, 'sound/impact_sounds/Generic_Hit_1.ogg', 50, 1, -1)
-		random_brute_damage(target, rand(src.attack_damage, src.attack_damage+5))
+	faction = list(FACTION_WIZARD)
+
+	setup_hands()
+		..()
+		var/datum/handHolder/HH = hands[1]
+		HH.limb = new /datum/limb/mouth	// if not null, the special limb to use when attack_handing
+		var/datum/limb/mouth/M = HH.limb
+		M.stam_damage_mult = 0.5
+		HH.icon = 'icons/mob/critter_ui.dmi'	// the icon of the hand UI background
+		HH.icon_state = "mouth"					// the icon state of the hand UI background
+		HH.name = "mouth"						// designation of the hand - purely for show
+		HH.limb_name = "teeth"					// name for the dummy holder
+		HH.can_hold_items = 0
+
+	valid_target(mob/living/C)
+		if (C.ckey == null) return FALSE //do not attack non-threats ie. NPC monkeys and AFK players
+		. = ..()
 
 	seek_target(var/range)
-		. = list()
 		if(!src.aggressive) //see above note regarding peacefulness
 			return .
-		for (var/mob/living/C in hearers(range, src))
-			if (isdead(C)) continue //don't attack the dead
-			if (isintangible(C)) continue //don't attack the AI eye
-			if (istype(C, src.type)) continue //don't attack other snakes
-			if (C.ckey == null) continue //do not attack non-threats ie. NPC monkeys and AFK players
-			if (iswizard(C)) continue //do not attack our master
-			. += C
+		. = ..()
 
 		if(length(.) && prob(30))
 			playsound(src.loc, 'sound/voice/animal/cat_hiss.ogg', 50, 1)
-			src.visible_message("<span class='alert'><B>[src]</B> hisses!</span>")
+			src.visible_message(SPAN_ALERT("<B>[src]</B> hisses!"))
 
 	//Special behaviour for Sticks To Snakes spell
 
@@ -86,7 +95,7 @@
 			my_stick.mouse_opacity = 1
 			my_stick.set_loc(src.loc)
 			if(revert_message)
-				src.visible_message("<span class='combat'><b>[src]</b> reverts into [my_stick]!</span>")
+				src.visible_message(SPAN_COMBAT("<b>[src]</b> reverts into [my_stick]!"))
 			if(istype(my_stick, /mob/living/critter/small_animal/snake))
 				var/mob/living/critter/small_animal/snake/snake = my_stick
 				snake.start_expiration(2 MINUTES)
@@ -174,7 +183,7 @@
 
 	proc/contents_check()
 		if(!src.allow_empty && !length(src.contents))
-			src.visible_message("<span class='notice'><B>[src]</B> realizes that its material essence is missing and vanishes in a puff of logic!</span>")
+			src.visible_message(SPAN_NOTICE("<B>[src]</B> realizes that its material essence is missing and vanishes in a puff of logic!"))
 			qdel(src)
 
 	death(var/gibbed)

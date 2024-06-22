@@ -22,7 +22,7 @@
 	/// Triggers on destruction of a drone beacon
 	#define COMSIG_DRONE_BEACON_DESTROYED "drone_beacon_destroyed"
 
-// ---- fullauto signals ----
+// ---- gun signals ----
 
 	/// Mouse down while shooting full auto
 	#define COMSIG_FULLAUTO_MOUSEDOWN "fullauto_mousedown"
@@ -32,7 +32,10 @@
 	#define COMSIG_FULLAUTO_MOUSEMOVE "fullauto_mousemove"
 	/// Gun projectile changed while in fullauto mode
 	#define COMSIG_GUN_PROJECTILE_CHANGED "gun_proj_changed"
-
+	/// before ...gun/shoot() - return truthy to cancel shoot() - (target, start, shooter, POX, POY, is_dual_wield, called_target)
+	#define COMSIG_GUN_TRY_SHOOT "gun_shooty"
+	/// before ...gun/shoot_point_blank() - return truthy to cancel shoot_point_blank() - (target, user, second_shot)
+	#define COMSIG_GUN_TRY_POINTBLANK "gun_pointblank"
 // ---- small cell stuff ----
 
 	// ---- signals ----
@@ -67,6 +70,9 @@
 		/// Cell is fully charged
 		#define CELL_FULL 32
 
+// ---- energy shield thing ----
+	/// Sent by the itemability to toggle the energyshield component
+	#define COMSIG_SHIELD_TOGGLE "energy_shield_toggle"
 
 // ---- atom property signals ----
 
@@ -96,7 +102,7 @@
 
 // ---- Dock Signals and Events ----
 // Docks are categorized by the shuttle that uses them. Docks are not interchangable.
-// Registered listeners recieve a signal for each shuttle state change.
+// Registered listeners receive a signal for each shuttle state change.
 // When handling the signal, the provided argument will match a dock event define.
 
 	// ---- Dock Events ----
@@ -121,3 +127,31 @@
 
 		/// The diner trading area
 		#define COMSIG_DOCK_TRADER_DINER "trader_diner"
+
+
+
+// ---- Light stuff, used by /datum/component/loctargeting/simple_light, .../sm_light, and .../medium_light ----
+/// Send to a thing to enable component lights on it
+#define COMSIG_LIGHT_ENABLE "enable_light"
+/// Send to a thing to disable component lights on it
+#define COMSIG_LIGHT_DISABLE "disable_light"
+
+// ---- Door signals, for bucket pranks ----
+/// When the door was bumped open, send the movable that opened it
+#define COMSIG_DOOR_OPENED "door_opened"
+
+// ---- Player Piano Automatic Linking ----
+
+#define COMSIG_IS_PLAYER_PIANO_AUTO_LINKER_ACTIVE "is_player_piano_auto_linker_active"
+
+// ---- Sniper Scope integration with other gun components ----
+/// Sent to an item when its sniper_scope components scope is toggled, TRUE if on and FALSE if off
+#define COMSIG_SCOPE_TOGGLED "sniper_scope_toggled"
+/// Sent to a mob when its client pixel offset is changed by a scope (delta_x, delta_y)
+#define COMSIG_MOB_SCOPE_MOVED "sniper_scope_toggled"
+
+// ---- Client Signals ----
+/// When a client logs into a mob. (client, mob)
+#define COMSIG_CLIENT_LOGIN "client_login"
+/// When a client logs out of a mob. (client, mob)
+#define COMSIG_CLIENT_LOGOUT "client_logout"

@@ -17,7 +17,7 @@
 	<a href='?src=\ref[src];action=traitorradio'>Radio Uplink</a> |
 	<a href='?src=\ref[src];action=traitorpda'>PDA Uplink</a> |
 	<a href='?src=\ref[src];action=traitorhard'>Hard Mode</a> |
-	<a href='?src=\ref[src];action=traitoromni'>Omnitraitor</a> |
+	<a href='?src=\ref[src];action=omnitraitor'>Omnitraitor</a> |
 	<a href='?src=\ref[src];action=traitorgeneric'>Generic</a> |
 	<a href='?src=\ref[src];action=sleeper'>Sleeper agent</a>
 </div>
@@ -34,8 +34,8 @@
 </div>
 <div class='antagType' style='border-color:#AEC6CF'><b class='title' style='background:#AEC6CF'>Nuke/Rev</b>
 	<a href='?src=\ref[src];action=nukeop'>Nuke Op</a> |
-	<a href='?src=\ref[src];action=nukeop-commander'>Nuke Op Commander</a> |
-	<a href='?src=\ref[src];action=nukeop-gunbot'>Nuke Op Gunbot</a> |
+	<a href='?src=\ref[src];action=nukeop_commander'>Nuke Op Commander</a> |
+	<a href='?src=\ref[src];action=nukeop_gunbot'>Nuke Op Gunbot</a> |
 	<a href='?src=\ref[src];action=revhead'>Rev Head</a> |
 	<a href='?src=\ref[src];action=revved'>Revved</a> |
 	<a href='?src=\ref[src];action=derevved'>De-Revved</a>
@@ -128,7 +128,7 @@
 			if ("traitorhard")
 				window_title = "Hardmode Traitor Tips"
 				filename = "html/traitorTips/traitorhardTips.html"
-			if ("traitoromni")
+			if ("omnitraitor")
 				window_title = "Omni-Traitor Tips"
 				filename = "html/traitorTips/omniTips.html"
 			if ("traitorgeneric")
@@ -167,13 +167,13 @@
 			if ("nukeop")
 				window_title = "Nuclear Operative Basics"
 				filename = "html/traitorTips/nukeopTips.html"
-			if ("nukeop-commander")
+			if ("nukeop_commander")
 				window_title = "Nuclear Commander Basics"
 				filename = "html/traitorTips/nukeopcommanderTips.html"
-			if ("nukeop-gunbot")
+			if ("nukeop_gunbot")
 				window_title = "Nuclear Gun-Bot Basics"
 				filename = "html/traitorTips/nukeopgunbotTips.html"
-			if ("revhead")
+			if (ROLE_HEAD_REVOLUTIONARY)
 				window_title = "Revolutionary Head Goals"
 				filename = "html/traitorTips/revTips.html"
 			if ("revved")
@@ -198,6 +198,9 @@
 			if ("gang_member")
 				window_title = "You've joined a Gang!"
 				filename = "html/traitorTips/gang_member_added.html"
+			if ("gang_leader")
+				window_title = "You've started a Gang!"
+				filename = "html/traitorTips/gang_leader.html"
 
 			// vamp/changeling
 			if ("vampire")
@@ -324,16 +327,12 @@
 
 		if (!filename)
 			return
-		var/html = grabResource(filename)
-		html = replacetext(html, "{ref}", "\ref[get_singleton(/datum/antagPopups)]")
-		M.Browse(html, "window=antagTips;size=700x450;title=[window_title]")
 
+		SPAWN(0)
+			var/html = grabResource(filename)
+			html = replacetext(html, "{ref}", "\ref[get_singleton(/datum/antagPopups)]")
+			M.Browse(html, "window=antagTips;size=700x450;title=[window_title]")
 
-/client/proc/cmd_admin_antag_popups()
-	set name = "View Special Role Popups"
-	SET_ADMIN_CAT(ADMIN_CAT_SERVER)
-	if (src.holder)
-		get_singleton(/datum/antagPopups).showPanel()
 
 /mob
 	///Stores the name of the last antag popup shown to the mob

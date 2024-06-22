@@ -4,7 +4,7 @@
 	desc = "The dark is trying to get you! Stay in the light!"
 	icon_state = "dread1"
 	unique = 1
-	duration = 20 SECONDS
+	duration = 30 SECONDS
 	maxDuration = 3 MINUTES
 	var/mob/living/carbon/human/H
 
@@ -28,34 +28,33 @@
 						H.emote("pale")
 					if (2)
 						H.emote("shiver")
-						boutput(H, pick("The shadows grow colder", "You feel a chill run down your spine"))
+						boutput(H, pick(SPAN_NOTICE("The shadows grow colder"), SPAN_NOTICE("You feel a chill run down your spine")))
 					if (3)
 						H.emote("scream")
-						boutput(H, pick("<span class='alert'>You feel something brush against your arm!<span>", "<span class='alert'>Oh god! Did you see that?!</span>"))
+						boutput(H, pick(SPAN_ALERT("You feel something brush against your arm!"), SPAN_ALERT("Oh god! Did you see that?!")))
 					if (4)
 						H.emote("twitch")
-						boutput(H, "You hear some clicking noises, akin to an insect.")
+						boutput(H, SPAN_NOTICE("You hear some clicking noises, akin to an insect."))
 					if (5)
 						H.emote("twitch_v")
-						boutput(H, pick("<span class='alert'>You feel something crawling on your back<span class='alert'>", "<span class='alert'>Something just crawled up your leg!</span>"))
-		if ((duration > 30 SECONDS) && (duration < 60 SECONDS))
+						boutput(H, pick(SPAN_ALERT("You feel something crawling on your back"), SPAN_ALERT("Something just crawled up your leg!")))
+		if ((duration > 30 SECONDS) && (duration < 45 SECONDS))
 			if(icon_state != "dread2")
 				icon_state = "dread2"
 			if(probmult(9))
 				switch (rand(1,3))
 					if (1)
 						H.emote("scream")
-						boutput(H, pick("<span class='alert'>The shadows are getting thicker! YOU HAVE TO <b>RUN</b>!<span class='alert'>", "<span class='alert'>You hate it here! Find some light, NOW!"))
+						boutput(H, pick(SPAN_NOTICE("The shadows are getting thicker! YOU HAVE TO <b>RUN</b>!"), SPAN_ALERT("You hate it here! Find some light, NOW!")))
 					if (2)
 						H.emote("flipout")
-						boutput(H, "<span class='alert'>You can't stay in the dark! RUN!</span>")
+						boutput(H, SPAN_ALERT("You can't stay in the dark! RUN!"))
 					if (3)
 						H.setStatus("stunned", 2 SECONDS)
-						H.visible_message("<span class='alert'>[H] flails around wildly, trying to get some invisible things off [himself_or_herself(H)].</span>", "<span class='alert'>You flail around wildly trying to defend yourself from the shadows!</span>")
-		if ((duration >= 60 SECONDS) && (duration < 90 SECONDS))
+						H.visible_message(SPAN_ALERT("[H] flails around wildly, trying to get some invisible things off [himself_or_herself(H)]."), SPAN_ALERT("You flail around wildly trying to defend yourself from the shadows!"))
+		if ((duration >= 45 SECONDS) && (duration < 70 SECONDS))
 			SPAWN(1 SECOND)
 				H.playsound_local(H, "sound/effects/heartbeat.ogg", 50)
-			H.make_jittery(30)
 			H.setStatus("terror", 30 SECONDS)
 			if(icon_state != "dread3")
 				icon_state = "dread3"
@@ -63,22 +62,21 @@
 				switch (rand(1, 4))
 					if (1)
 						H.take_brain_damage(10)
-						boutput(H, pick("<span class='alert'>YOU CANT THINK IN THE DARK LIKE THIS! FIND SOME LIGHT!</span>", "<span class='alert'>You hate it! ALL OF IT!</span>, <span class='alert'>Your temples pound, you cant think like this!</span>"))
+						boutput(H, pick(SPAN_ALERT("YOU CANT THINK IN THE DARK LIKE THIS! FIND SOME LIGHT!"), SPAN_ALERT("You hate it! ALL OF IT!"), SPAN_ALERT("Your temples pound, you cant think like this!")))
 					if (2)
 						H.losebreath += 2
-						boutput(H, pick("<span class='notice'>You cant control your breathing!</span>", "<span class='notice'>You hyperventilate</span>"))
+						boutput(H, pick(SPAN_NOTICE("You cant control your breathing!"), SPAN_NOTICE("You hyperventilate")))
 						H.playsound_local(H, "sound/effects/hyperventstethoscope.ogg", 50)
 					if (3)
 						H.emote("panic")
-						boutput(H, pick("<span class='alert'>THE DARK! STAY OUT OF THE DARK!</span>", "<span class='alert'>What the <b>FUCK</b> was THAT?"))
+						boutput(H, pick(SPAN_ALERT("THE DARK! STAY OUT OF THE DARK!"), SPAN_ALERT("What the <b>FUCK</b> was THAT?")))
 					if (4)
 						random_brute_damage(H, 3)
 						H.playsound_local(H, "sound/impact_sounds/Flesh_Tear_[pick("1", "2", "3")].ogg", 70)
-						boutput(H, pick("<span class='alert'>SOMETHING BIT YOU, HOLY SHIT!!!</span>"))
-		if ((duration >= 90 SECONDS) && (duration < 130 SECONDS))
+						boutput(H, pick(SPAN_ALERT("SOMETHING BIT YOU, HOLY SHIT!!!")))
+		if ((duration >= 70 SECONDS) && (duration < 100 SECONDS))
 			SPAWN(5 DECI SECONDS)
 				H.playsound_local(H, "sound/effects/heartbeat.ogg", 70)
-			H.make_jittery(30)
 			H.setStatus("terror", 30 SECONDS)
 			if(icon_state != "dread4")
 				icon_state = "dread4"
@@ -86,20 +84,20 @@
 				switch (rand(1, 4))
 					if (1)
 						H.take_brain_damage(10)
-						boutput(H, pick("<span class='alert'>YOU CANT TAKE IT ANYMORE!!!</span>", "<span class='alert'>This cant be real!</span>", "<span class='alert'>It's ALL LIES! ALL OF IT!</span>"))
+						boutput(H, pick(SPAN_ALERT("YOU CANT TAKE IT ANYMORE!!!"), SPAN_ALERT("This cant be real!"), SPAN_ALERT("It's ALL LIES! ALL OF IT!")))
 					if (2)
 						H.emote("scream")
-						boutput(H, "<span class='alert'>NO, NO, NO!</span>")
+						boutput(H, SPAN_ALERT("NO, NO, NO!"))
 					if (3)
 						H.emote("panic")
-						boutput(H, pick("<span class='alert'>IT'S RIGHT HERE, YOU JUST CAN'T SEE IT!</span>", "<span class='alert'>IT'S WATCHING YOU, LAUGHING! YOU KNOW IT!</span>"))
+						boutput(H, pick(SPAN_ALERT("IT'S RIGHT HERE, YOU JUST CAN'T SEE IT!"), SPAN_ALERT("IT'S WATCHING YOU, LAUGHING! YOU KNOW IT!")))
 					if (4)
 						H.contract_disease(/datum/ailment/malady/heartfailure,null,null,1)	//Bad luck
-						H.visible_message("<span class='alert'>[H] suddenly clutches their chest with a terrified expression</span>", "<span class='alert'>Your heart is beating out of your chest! You feel like death!</span>")
-		if ((duration >= 130 SECONDS))
+						H.visible_message(SPAN_ALERT("[H] suddenly clutches their chest with a terrified expression"), SPAN_ALERT("Your heart is beating out of your chest! You feel like death!"))
+		if ((duration >= 100 SECONDS))
 			H.contract_disease(/datum/ailment/malady/heartfailure,null,null,1)
 			H.contract_disease(/datum/ailment/malady/flatline,null,null,1)
-			H.visible_message("<span class='alert'>[H]'s face goes blank as they start to collapse to the ground</span>", "<span class='alert'>Your nerves can't take it any longer! Your heart is giving up on you!</span>")
+			H.visible_message(SPAN_ALERT("[H]'s face goes blank as they start to collapse to the ground"), SPAN_ALERT("Your nerves can't take it any longer! Your heart is giving up on you!"))
 			duration = 60 SECONDS
 
 		for (var/obj/item/device/pda2/P in range(3, H)) //Turn off all nearby pda lights
@@ -217,16 +215,16 @@
 									volume = 90
 									boutput(H, "<h1 class='alert'>Frontier Authority Update</h1>")
 									boutput(H, "<h2 class='alert'>Nuclear Weapon Detected</h2>")
-									boutput(H, "<span class='alert'>A nuclear bomb has been armed in [pick("the Bridge", "the Bar", "the security lobby", "the medical lobby")]. It will explode in 5 minutes. All personnel must report to the plant area to disarm the bomb immediatly.</span>")
-									has_faked_nuke = true
+									boutput(H, SPAN_ALERT("A nuclear bomb has been armed in [pick("the Bridge", "the Bar", "the security lobby", "the medical lobby")]. It will explode in 5 minutes. All personnel must report to the plant area to disarm the bomb immediately."))
+									has_faked_nuke = TRUE
 							if (2)
 								if(!has_faked_shuttle)
 									sound_effect = 'sound/misc/shuttle_enroute.ogg'
 									volume = 80
 									boutput(H, "<h1 class='alert'>The Emergency Shuttle Has Been Called</h1>")
 									boutput(H, "<span>No reason given.</span>")
-									boutput(H, "<span class='alert'>It will arrive in 6 minutes.</span>")
-									has_faked_shuttle = true
+									boutput(H, SPAN_ALERT("It will arrive in 6 minutes."))
+									has_faked_shuttle = TRUE
 					H.playsound_local(H.loc,sound_effect, volume, 1)
 				if (3) //Wall based, blood pouring out of the walls and other spooky stuff
 					var/turf/owner_turf = get_turf(owner)
@@ -269,15 +267,15 @@
 /datum/statusEffect/corporeal
 	id = "corporeal"
 	icon_state = "eye"
-	desc = "You've manifested into the phyiscal realm!"
+	desc = "You've manifested into the physical realm!"
 	unique = TRUE
 	maxDuration = 1 MINUTE
 
 	onAdd(optional) // optional = forced to manifest
 		. = ..()
 		var/mob/M = owner
-		if (istype(M, /mob/wraith))
-			var/mob/wraith/W = M
+		if (istype(M, /mob/living/intangible/wraith))
+			var/mob/living/intangible/wraith/W = M
 			if(optional)
 				M.addOverlayComposition(/datum/overlayComposition/insanity_light)
 				M.updateOverlaysClient(M.client)
@@ -285,30 +283,32 @@
 			else
 				W.haunting = TRUE
 				W.flags &= !UNCRUSHABLE
-			if (!istype_exact(M, /mob/wraith/poltergeist))
+			if (!istype_exact(M, /mob/living/intangible/wraith/poltergeist))
 				M.alpha = 255
-		if (istype_exact(M, /mob/wraith/poltergeist))
+		if (istype_exact(M, /mob/living/intangible/wraith/poltergeist))
 			M.icon_state = "poltergeist-corp"
 			M.update_body()
 		M.set_density(TRUE)
+		M.event_handler_flags &= ~MOVE_NOCLIP
 		REMOVE_ATOM_PROPERTY(M, PROP_MOB_INVISIBILITY, M)
 		M.see_invisible = INVIS_NONE
-		M.visible_message(pick("<span class='alert'>A horrible apparition fades into view!</span>", "<span class='alert'>A pool of shadow forms!</span>"), pick("<span class='alert'>A shell of ectoplasm forms around you!</span>", "<span class='alert'>You manifest!</span>"))
+		M.visible_message(pick(SPAN_ALERT("A horrible apparition fades into view!"), SPAN_ALERT("A pool of shadow forms!")), pick(SPAN_ALERT("A shell of ectoplasm forms around you!"), SPAN_ALERT("You manifest!")))
 
 	onRemove()
 		var/mob/M = owner
-		if (istype(M, /mob/wraith))
-			var/mob/wraith/W = M
+		if (istype(M, /mob/living/intangible/wraith))
+			var/mob/living/intangible/wraith/W = M
 			W.forced_manifest = FALSE
 			W.haunting = FALSE
 			W.flags |= UNCRUSHABLE
-			if (!istype_exact(M, /mob/wraith/poltergeist))
+			if (!istype_exact(M, /mob/living/intangible/wraith/poltergeist))
 				M.alpha = 160
-		if (istype_exact(M, /mob/wraith/poltergeist))
+		if (istype_exact(M, /mob/living/intangible/wraith/poltergeist))
 			M.icon_state = "poltergeist"
 			M.update_body()
-		M.visible_message(pick("<span class='alert'>[M] vanishes!</span>", "<span class='alert'>The [M] dissolves into shadow!</span>"), pick("<span class='notice'>The ectoplasm around you dissipates!</span>", "<span class='notice'>You fade into the aether!</span>"))
+		M.visible_message(pick(SPAN_ALERT("[M] vanishes!"), SPAN_ALERT("The [M] dissolves into shadow!")), pick(SPAN_NOTICE("The ectoplasm around you dissipates!"), SPAN_NOTICE("You fade into the aether!")))
 		M.set_density(FALSE)
+		M.event_handler_flags |= MOVE_NOCLIP
 		APPLY_ATOM_PROPERTY(M, PROP_MOB_INVISIBILITY, M, INVIS_SPOOKY)
 		M.see_invisible = INVIS_SPOOKY
 		M.removeOverlayComposition(/datum/overlayComposition/insanity_light)

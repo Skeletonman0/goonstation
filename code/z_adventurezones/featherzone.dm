@@ -31,7 +31,7 @@ TYPEINFO_NEW(/turf/unsimulated/wall/auto/feather)
 	desc = "A pile of metal and glass fibre that seems to have... congealed? Weird. Also gross."
 	icon = 'icons/misc/featherzone.dmi'
 	icon_state = "drone-long-dead"
-	anchored = 1
+	anchored = ANCHORED
 	density = 1
 
 /obj/decal/fakeobjects/permanentcage
@@ -39,7 +39,7 @@ TYPEINFO_NEW(/turf/unsimulated/wall/auto/feather)
 	desc = "A permanent cage used for keeping things in one place."
 	icon = 'icons/misc/featherzone.dmi'
 	icon_state = "cage"
-	anchored = 1
+	anchored = ANCHORED
 	density = 1
 
 	New()
@@ -49,4 +49,4 @@ TYPEINFO_NEW(/turf/unsimulated/wall/auto/feather)
 			O.set_loc(src)
 
 	attack_hand(mob/user)
-		user.visible_message("<span class='combat'><b>[user]</b> kicks [src], but it doesn't budge.</span>", "<span class='alert'>You kick [src], but it doesn't budge.</span>")
+		user.visible_message(SPAN_COMBAT("<b>[user]</b> kicks [src], but it doesn't budge."), SPAN_ALERT("You kick [src], but it doesn't budge."))

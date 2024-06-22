@@ -56,7 +56,6 @@
 	var/target_name = tgui_input_list(usr, "Which creature should you track?", "Track", creatures)
 
 	if (!target_name)
-		//usr:cameraFollow = null
 		src.tracker.cease_track()
 		return
 
@@ -75,7 +74,7 @@
 
 	for(var/C in creatures)
 		var/name = creatures[C].name
-		if (name == heard_name)
+		if (name == heard_name || C == heard_name)
 			candidates += C
 			candidates[C] = creatures[C]
 
@@ -216,7 +215,7 @@
 		owner.eyecam.stopObserving()
 		tracking = null
 		delay = success_delay
-		owner.hud.update_tracking()
+		owner.hud?.update_tracking()
 
 	proc/cease_track_temporary()
 		owner.eyecam.stopObserving()
@@ -252,16 +251,19 @@
 		last_track = world.timeofday
 
 	proc/can_track(mob/target as mob)
+		// hiding in bushes stops tracking
+		if (locate(/obj/shrub) in target.loc)
+			return FALSE
 		//Allow tracking of cyborgs & mobcritters, however
 		//Track autofails if:
 		//Target is wearing a syndicate ID
 		//Target is inside a dummy
 		//Target is not at a turf
 		//Target is not on station level
-		return (target.loc?.z == 1) \
+		return (target.loc?.z == Z_LEVEL_STATION) \
 				&& ((issilicon(target) && istype(target.loc, /turf) ) \
 				|| (ismobcritter(target) && istype(target.loc, /turf) ) \
 				|| !((ishuman(target) \
-				&& istype(target:wear_id, /obj/item/card/id/syndicate)) \
-				|| (hasvar(target, "wear_id") && istype(target:wear_id, /obj/item/device/pda2) && target:wear_id:ID_card && istype(target:wear_id:ID_card, /obj/item/card/id/syndicate)) \
+				&& istype(get_id_card(target:wear_id), /obj/item/card/id/syndicate)) \
+				|| (hasvar(target, "wear_id") && istype(get_id_card(target:wear_id), /obj/item/card/id/syndicate)) \
 				||  !istype(target.loc, /turf)))

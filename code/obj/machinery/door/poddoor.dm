@@ -362,6 +362,14 @@
 
 	// meant for use inside station, or if connected to space, not a door
 	shutters
+		New()
+			..()
+			START_TRACKING
+
+		disposing()
+			STOP_TRACKING
+			..()
+
 
 /obj/machinery/door/poddoor/blast/pyro
 	icon = 'icons/obj/doors/SL_doors.dmi'
@@ -957,16 +965,13 @@
 	src.add_fingerprint(user)
 	if (ispryingtool(C) && src.density && (src.status & NOPOWER) && !( src.operating ))
 		if(!ON_COOLDOWN(src, "prying_sound", 1.5 SECONDS))
-			playsound(src, 'sound/machines/airlock_pry.ogg', 35, 1)
+			playsound(src, 'sound/machines/airlock_pry.ogg', 35, TRUE)
 		src.operating = TRUE
 		flick("[icon_base]c0", src)
 		src.icon_state = "[icon_base]0"
 		sleep(1.5 SECONDS)
 		src.set_density(0)
-		if (ignore_light_or_cam_opacity)
-			src.set_opacity(0)
-		else
-			src.RL_SetOpacity(0)
+		src.set_opacity(0)
 		src.operating = FALSE
 		src.update_nearby_tiles()
 	else if (C && src.density && !src.operating)
@@ -975,7 +980,7 @@
 		playsound(src.loc, src.hitsound , 50, 1, pitch = 1.6)
 		src.take_damage(C.force)
 
-/obj/machinery/door/poddoor/bumpopen(mob/user)
+/obj/machinery/door/poddoor/bumpopen(atom/movable/AM)
 	return 0
 
 /obj/machinery/door/poddoor/open()
@@ -994,10 +999,7 @@
 		src.icon_state = "[icon_base]0"
 		sleep(1 SECOND)
 		src.set_density(0)
-		if (ignore_light_or_cam_opacity)
-			src.set_opacity(0)
-		else
-			src.RL_SetOpacity(0)
+		src.set_opacity(0)
 		src.update_nearby_tiles()
 
 		if(src.operating == 1) //emag again
@@ -1017,14 +1019,11 @@
 
 	SPAWN(0)
 		src.operating = 1
-		flick("[icon_base]1", src)
+		flick("[icon_base]c1", src)
 		src.icon_state = "[icon_base]1"
 		src.set_density(1)
 		if (src.visible)
-			if (ignore_light_or_cam_opacity)
-				src.set_opacity(1)
-			else
-				src.RL_SetOpacity(1)
+			src.set_opacity(1)
 		src.update_nearby_tiles()
 
 		sleep(1 SECOND)
@@ -1075,16 +1074,13 @@
 			src.icon_state = "[icon_base][doordir]0"
 			sleep(1.5 SECONDS)
 			src.set_density(0)
-			if (ignore_light_or_cam_opacity)
-				src.set_opacity(0)
-			else
-				src.RL_SetOpacity(0)
+			src.set_opacity(0)
 			src.operating = 0
 			src.update_nearby_tiles()
 			return
 	return
 
-/obj/machinery/door/poddoor/blast/bumpopen(mob/user)
+/obj/machinery/door/poddoor/blast/bumpopen(atom/movable/AM)
 	return 0
 
 /obj/machinery/door/poddoor/blast/open()
@@ -1102,10 +1098,7 @@
 		src.icon_state = "[icon_base][doordir]0"
 		sleep(1 SECOND)
 		src.set_density(0)
-		if (ignore_light_or_cam_opacity)
-			src.set_opacity(0)
-		else
-			src.RL_SetOpacity(0)
+		src.set_opacity(0)
 		src.update_nearby_tiles()
 
 		if(operating == 1) //emag again
@@ -1127,10 +1120,7 @@
 		src.icon_state = "[icon_base][doordir]1"
 		src.set_density(1)
 		if (src.visible)
-			if (ignore_light_or_cam_opacity)
-				src.set_opacity(1)
-			else
-				src.RL_SetOpacity(1)
+			src.set_opacity(1)
 		src.update_nearby_tiles()
 
 		sleep(1 SECOND)

@@ -20,7 +20,7 @@
 		curse_icon = image('icons/mob/wraith_ui.dmi', owner, icon_state = "blood_status")
 		curse_icon.blend_mode = BLEND_ADD
 		curse_icon.plane = PLANE_ABOVE_LIGHTING
-		curse_icon.appearance_flags = RESET_COLOR | RESET_ALPHA | RESET_TRANSFORM
+		curse_icon.appearance_flags = RESET_COLOR | RESET_ALPHA | RESET_TRANSFORM | PIXEL_SCALE
 		curse_icon.pixel_y = 28
 		curse_icon.alpha = 170
 		get_image_group(CLIENT_IMAGE_GROUP_CURSES).add_image(curse_icon)
@@ -31,7 +31,7 @@
 			var/turf/T = get_turf(owner)
 			make_cleanable(/obj/decal/cleanable/blood,T)
 		if (probmult(3))
-			owner.visible_message("<span class='alert'>[owner] vomits a lot of blood!</span>")
+			owner.visible_message(SPAN_ALERT("[owner] vomits a lot of blood!"))
 			playsound(owner.loc, 'sound/impact_sounds/Slimy_Splat_1.ogg', 50, 1)
 			bleed(owner, rand(5,8), 5)
 
@@ -57,10 +57,10 @@
 
 	OnAdd()
 		. = ..()
-		curse_icon = image('icons/mob/wraith_ui.dmi', owner, icon_state = "blood_status")
+		curse_icon = image('icons/mob/wraith_ui.dmi', owner, icon_state = "blind_status")
 		curse_icon.blend_mode = BLEND_ADD
 		curse_icon.plane = PLANE_ABOVE_LIGHTING
-		curse_icon.appearance_flags = RESET_COLOR | RESET_ALPHA | RESET_TRANSFORM
+		curse_icon.appearance_flags = RESET_COLOR | RESET_ALPHA | RESET_TRANSFORM | PIXEL_SCALE
 		curse_icon.pixel_y = 28
 		curse_icon.alpha = 170
 		get_image_group(CLIENT_IMAGE_GROUP_CURSES).add_image(curse_icon)
@@ -70,13 +70,13 @@
 			owner.eye_damage += 10
 			if (owner.eye_damage > 90)
 				owner.emote("blink")
-				boutput(owner, "<span class='alert'>A shadowy veil falls over your vision.</span>")
+				boutput(owner, SPAN_ALERT("A shadowy veil falls over your vision."))
 			else if (owner.eye_damage > 50)
 				owner.emote("blink")
-				boutput(owner, "<span class='alert'>You can't seem to be able to see things clearly anymore.</span>")
+				boutput(owner, SPAN_ALERT("You can't seem to be able to see things clearly anymore."))
 			else
 				owner.emote("blink")
-				boutput(owner, "<span class='notice'>You blink and notice that your vision is blurier than before.<span>")
+				boutput(owner, SPAN_NOTICE("You blink and notice that your vision is blurier than before."))
 
 	OnRemove()
 		. = ..()
@@ -101,20 +101,20 @@
 		curse_icon = image('icons/mob/wraith_ui.dmi', owner, icon_state = "weak_status")
 		curse_icon.blend_mode = BLEND_ADD
 		curse_icon.plane = PLANE_ABOVE_LIGHTING
-		curse_icon.appearance_flags = RESET_COLOR | RESET_ALPHA | RESET_TRANSFORM
+		curse_icon.appearance_flags = RESET_COLOR | RESET_ALPHA | RESET_TRANSFORM | PIXEL_SCALE
 		curse_icon.pixel_y = 28
 		curse_icon.alpha = 170
 		get_image_group(CLIENT_IMAGE_GROUP_CURSES).add_image(curse_icon)
 
 	OnLife(mult)
 		if (probmult(5))
-			boutput(owner, "<span class='notice'>You suddenly feel very [pick("winded", "tired")].</span>")
+			boutput(owner, SPAN_NOTICE("You suddenly feel very [pick("winded", "tired")]."))
 			owner.changeStatus("slowed", 10 SECONDS)
 		if (probmult(3))
-			boutput(owner, pick("<span class='notice'>Your muscles tense up.</span>", "<span class='notice'>You feel light-headed.</span>", "<span class='notice'>Your legs almost give in.</span>"))
+			boutput(owner, pick(SPAN_NOTICE("Your muscles tense up."), SPAN_NOTICE("You feel light-headed."), SPAN_NOTICE("Your legs almost give in.")))
 			owner.emote("pale")
 		if (probmult(3))
-			boutput(owner, pick("<span class='notice'>Your conscience slips.</span>", "<span class='notice'>You feel awfully drowsy.</span>"))
+			boutput(owner, pick(SPAN_NOTICE("Your conscience slips."), SPAN_NOTICE("You feel awfully drowsy.")))
 			owner.changeStatus("drowsy", 10 SECONDS)
 
 	OnRemove()
@@ -142,15 +142,15 @@
 			curse_icon = image('icons/mob/wraith_ui.dmi', owner, icon_state = "rot_status")
 			curse_icon.blend_mode = BLEND_ADD
 			curse_icon.plane = PLANE_ABOVE_LIGHTING
-			curse_icon.appearance_flags = RESET_COLOR | RESET_ALPHA | RESET_TRANSFORM
+			curse_icon.appearance_flags = RESET_COLOR | RESET_ALPHA | RESET_TRANSFORM | PIXEL_SCALE
 			curse_icon.pixel_y = 26
 			curse_icon.alpha = 170
 			get_image_group(CLIENT_IMAGE_GROUP_CURSES).add_image(curse_icon)
 
 	OnLife(mult)
 		if (probmult(5))
-			owner.visible_message("<span class='alert'>[owner] suddenly vomits on the floor!</span>")
-			owner.vomit(rand(3,5))
+			var/vomit_message = SPAN_ALERT("[owner] suddenly vomits on the floor!")
+			owner.vomit(rand(3,5), null, vomit_message)
 		if (probmult(3))
 			owner.emote(pick("cough", "sneeze"))
 
@@ -160,3 +160,17 @@
 			owner.bioHolder.RemoveEffect("stinky")
 		get_image_group(CLIENT_IMAGE_GROUP_CURSES).remove_image(curse_icon)
 		. = ..()
+
+//Used mostly to track if someone got rid of this curse in the meantime
+/datum/bioEffect/death_curse
+	name = "Curse of death"
+	desc = "Curse of death."
+	id = "death_curse"
+	effectType = EFFECT_TYPE_DISABILITY
+	can_copy = 0
+	isBad = 1
+	occur_in_genepools = 0
+	scanner_visibility = 0
+	acceptable_in_mutini = 0
+	probability = 0
+	curable_by_mutadone = 0

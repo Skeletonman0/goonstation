@@ -1,10 +1,12 @@
+TYPEINFO(/obj/item/audio_tape)
+	mats = 3
+
 /obj/item/audio_tape
 	name = "compact tape"
 	desc = "A small audio tape.  You could make some rad mix-tapes with this!"
 	icon = 'icons/obj/items/device.dmi'
 	icon_state = "recordertape"
 	w_class = W_CLASS_TINY
-	mats = 3
 
 	var/log_line = 1 //Which line of the log it's on.
 	var/max_lines = 100
@@ -36,7 +38,7 @@
 				else
 					return null
 
-			return "[speakers.len < log_line ? "Unknown" : speakers[log_line]]|[messages[log_line]]"
+			return "[length(speakers) < log_line ? "Unknown" : speakers[log_line]]|[messages[log_line]]"
 
 		next(continuous)
 			if (log_line >= messages.len)
@@ -71,11 +73,14 @@
 #define MODE_RECORDING 1
 #define MODE_PLAYING 2
 
+TYPEINFO(/obj/item/device/audio_log)
+	mats = 4
+
 /obj/item/device/audio_log
 	name = "audio log"
 	desc = "A fairly spartan recording device."
-	icon_state = "recorder"
-	uses_multiple_icon_states = TRUE
+	icon = 'icons/obj/radiostation.dmi'
+	icon_state = "audiolog_newSmall"
 	item_state = "electronic"
 	w_class = W_CLASS_SMALL
 	var/obj/item/audio_tape/tape = null
@@ -87,7 +92,6 @@
 	var/list/audiolog_messages = list()
 	var/list/audiolog_speakers = list()
 	var/self_destruct = FALSE
-	mats = 4
 
 	wall_mounted
 		name = "Mounted Logger"
@@ -95,7 +99,7 @@
 		max_lines = 30
 
 		attack_hand(mob/user)
-			return attack_self(user)
+			return src.AttackSelf(user)
 
 		updateSelfDialog()
 			return updateUsrDialog()
@@ -103,8 +107,7 @@
 	New()
 		..()
 		if (!src.chat_text)
-			src.chat_text = new
-		src.vis_contents += src.chat_text
+			src.chat_text = new(null, src)
 		SPAWN(1 SECOND)
 			if (!src.tape)
 				src.tape = new /obj/item/audio_tape(src)
@@ -297,7 +300,7 @@
 				for (var/image/chat_maptext/I in src.chat_text.lines)
 					if (I != audio_log_text)
 						I.bump_up(audio_log_text.measured_height)
-		src.audible_message("<span class='game radio' style='color: [speaker_colour]'><span class='name'>[speaker]</span><b> [bicon(src)]\[Log\]</b> <span class='message'>\"[message]\"</span></span>", 2, assoc_maptext = audio_log_text)
+		src.audible_message("<span class='radio' style='color: [speaker_colour]'>[SPAN_NAME("[speaker]")]<b> [bicon(src)]\[Log\]</b> [SPAN_MESSAGE("\"[message]\"")]</span>", assoc_maptext = audio_log_text)
 		return
 
 	proc/explode()
@@ -361,6 +364,9 @@
 
 			src.tape.speakers = src.audiolog_speakers
 			src.audiolog_speakers = null
+
+			SPAWN(10 SECONDS) // Let people get their bearings first
+				src.play()
 
 			return
 

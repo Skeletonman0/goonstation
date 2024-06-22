@@ -74,6 +74,7 @@ export class Window extends Component {
     const { debugLayout } = useDebug(this.context);
     const dispatch = useDispatch(this.context);
     const fancy = config.window?.fancy;
+    const mode = config.window?.mode; /* |GOONSTATION-ADD| */
     // Determine when to show dimmer
     const showDimmer = config.user && (
       config.user.observer
@@ -83,7 +84,8 @@ export class Window extends Component {
     return (
       <Layout
         className="Window"
-        theme={theme}>
+        theme={theme}
+        mode={mode}>
         <TitleBar
           className="Window__titleBar"
           title={!suspended && (title || decodeHtmlEntities(config.title))}
@@ -202,13 +204,8 @@ const TitleBar = (props, context) => {
         </div>
       )}
       {Boolean(fancy && canClose) && (
-        <div
-          className="TitleBar__close TitleBar__clickable"
-          // IE8: Synthetic onClick event doesn't work on IE8.
-          // IE8: Use a plain character instead of a unicode symbol.
-          // eslint-disable-next-line react/no-unknown-property
-          onclick={onClose}>
-          {Byond.IS_LTE_IE8 ? 'x' : '×'}
+        <div className="TitleBar__close TitleBar__clickable" onClick={onClose}>
+          {'×'}
         </div>
       )}
     </div>

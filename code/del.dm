@@ -24,6 +24,12 @@ proc/qdel(var/datum/D)
 			for (var/C in D:contents)
 				qdel(C)
 
+		#ifdef OPENDREAM
+		SPAWN(1)
+			del(D)
+		return
+		#endif
+
 		/**
 			* We'll assume here that the object will be GC'ed.
 			* If the object is not GC'ed and must be explicitly deleted,
@@ -45,11 +51,11 @@ proc/qdel(var/datum/D)
 		//	D.qdeltime = world.time
 
 		// delete_queue.enqueue("\ref[O]")
-		delete_queue_2[((delqueue_pos + DELQUEUE_WAIT) % DELQUEUE_SIZE) + 1] += "\ref[D]"
+		var/refD = "\ref[D]"
+		delete_queue_2[((delqueue_pos + DELQUEUE_WAIT) % DELQUEUE_SIZE) + 1] += ADDR_TO_NUM(refD)
 	else
 		if(islist(D))
 			D:len = 0
-			del(D)
 		else if(D == world)
 			del(D)
 			CRASH("Cannot qdel /world! Fuck you!")
@@ -87,7 +93,6 @@ proc/qdel(var/datum/D)
 
 	src.tag = null // not part of components but definitely should happen
 
-	signal_enabled = FALSE
 	var/list/dc = datum_components
 	if(dc)
 		var/all_components = dc[/datum/component]
@@ -113,6 +118,18 @@ proc/qdel(var/datum/D)
 
 	for(var/target in signal_procs)
 		UnregisterSignal(target, signal_procs[target])
+
+/*
+/datum/Del()
+	if(!disposed)
+		disposing()
+	..()
+
+/client/Del()
+	if(!disposed)
+		disposing()
+	..()
+*/
 
 // don't override this one, just call it instead of delete to get rid of something cheaply
 #ifdef DISPOSE_IS_QDEL

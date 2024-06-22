@@ -95,7 +95,8 @@ The say/whisper/me wrappers and cancel_typing remove the typing indicator.
 
 	remove_emote_typing_indicator()
 	if(message)
-		say_verb("*customv [message]")
+		var/emote_verb = winget(src, "emotewindow.say-input", "saved-params")
+		say_verb("[emote_verb] [message]")
 
 /mob/verb/me_wrapper(message as text)
 	set name = ".Me"
@@ -108,8 +109,7 @@ The say/whisper/me wrappers and cancel_typing remove the typing indicator.
 
 // -- Human Typing Indicators -- //
 /mob/living/create_typing_indicator()
-	if(!src.has_typing_indicator && isalive(src) && !src.bioHolder?.HasEffect("mute")) //Prevents sticky overlays and typing while in any state besides conscious
-		src.UpdateOverlays(living_typing_bubble, TYPING_OVERLAY_KEY)
+	if(!src.has_typing_indicator && isalive(src) && !src.bioHolder?.HasEffect("mute") && !src.hasStatus("muted")) //Prevents sticky overlays and typing while in any state besides conscious
 		src.has_typing_indicator = TRUE
 		if(SEND_SIGNAL(src, COMSIG_CREATE_TYPING))
 			return
@@ -123,8 +123,7 @@ The say/whisper/me wrappers and cancel_typing remove the typing indicator.
 		src.UpdateOverlays(null, TYPING_OVERLAY_KEY)
 
 /mob/living/create_emote_typing_indicator()
-	if(!src.has_typing_indicator && isalive(src))
-		src.UpdateOverlays(living_emote_typing_bubble, TYPING_OVERLAY_KEY)
+	if(!src.has_typing_indicator && isalive(src) && !src.hasStatus("paralysis"))
 		src.has_typing_indicator = TRUE
 		if(SEND_SIGNAL(src, COMSIG_CREATE_TYPING))
 			return
@@ -138,6 +137,8 @@ The say/whisper/me wrappers and cancel_typing remove the typing indicator.
 		src.UpdateOverlays(null, TYPING_OVERLAY_KEY)
 
 /mob/living/show_speech_bubble(speech_bubble)
+	if (!isalive(src) || src.hasStatus("paralysis"))
+		return
 	if(SEND_SIGNAL(src, COMSIG_SPEECH_BUBBLE, speech_bubble))
 		return
 	src.UpdateOverlays(speech_bubble, "speech_bubble")

@@ -8,11 +8,12 @@
 /obj/flock_structure/sentinel
 	name = "glowing pylon"
 	desc = "A glowing pylon of sorts, faint sparks are jumping inside of it."
-	flock_desc = "A charged pylon, capable of sending disorienting arcs of electricity at enemies."
+	flock_desc = "A charged pylon, capable of sending disorienting arcs of electricity at enemies. Consumes 20 compute."
 	icon_state = "sentinel"
 	flock_id = "Sentinel"
 	health = 80
 	resourcecost = 150
+	show_in_tutorial = TRUE
 	var/charge_status = NOT_CHARGED
 	/// 0-100 charge percent
 	var/charge = 0
@@ -21,12 +22,17 @@
 	/// Turret range in tiles
 	var/range = 4
 	/// The wattage of the arcflash
-	var/wattage = 6000
+	var/wattage = 5000
+	/// has extra range when chaining
+	var/extra_chain_range = FALSE
+	var/chain_targets = 2
 	var/powered = FALSE
 
 	passthrough = TRUE
 
-	var/online_compute_cost = 20
+	accepts_sapper_power = TRUE
+
+	online_compute_cost = 20
 	compute = 0 //targetting consumes compute
 
 	var/obj/effect/flock_sentinelrays/rays = null
@@ -39,6 +45,7 @@
 
 /obj/flock_structure/sentinel/disposing()
 	qdel(src.rays)
+	src.rays = null
 	..()
 
 /obj/flock_structure/sentinel/building_specific_info()
@@ -52,8 +59,11 @@
 			charge_message = "Charging"
 		if (CHARGED)
 			charge_message = "Charged"
-	return {"<span class='bold'>Status:</span> [charge_message].
-		<br><span class='bold'>Charge Percentage:</span> [src.charge]%."}
+	return {"[SPAN_BOLD("Status:")] [charge_message].
+		<br>[SPAN_BOLD("Charge Percentage:")] [src.charge]%."}
+
+/obj/flock_structure/sentinel/skip_process()
+	return !length(src.flock?.enemies)
 
 /obj/flock_structure/sentinel/process(mult)
 	if(!src.flock)
@@ -72,6 +82,8 @@
 		src.compute = 0
 		src.powered = FALSE
 
+	src.updatefilter()
+
 	if(src.powered)
 		if (src.charge_status != CHARGED)
 			src.icon_state = "sentinelon"
@@ -79,38 +91,38 @@
 			src.charge_status = CHARGING
 		if (src.charge == 100)
 			src.charge_status = CHARGED
-			if (!length(src.flock?.enemies))
-				src.updatefilter()
+			if (src.skip_process())
 				return
 			var/atom/to_hit
 			var/list/hit = list()
 			for(var/atom/A as anything in view(src.range, src))
-				if(src.flock?.isEnemy(A))
+				if(src.isEnemy(A))
 					if (ismob(A))
 						var/mob/M = A
-						if (isdead(M))
+						if (isdead(M) || is_incapacitated(M))
 							continue
+					if (ON_COOLDOWN(A, "sentinel_shock", 2 SECONDS))
+						continue
 					to_hit = A
 					break
 			if(!to_hit)
-				src.updatefilter()
 				return
-			arcFlash(src, to_hit, wattage, 1.1)
+			arcFlash(src, to_hit, wattage, 0.9)
 			logTheThing(LOG_COMBAT, src, "Flock sentinel at [log_loc(src)] belonging to flock [src.flock?.name] fires an arcflash at [constructTarget(to_hit)].")
 			hit += to_hit
 
 			var/atom/last_hit = to_hit
 			var/found_chain_target
-			for(var/i in 1 to rand(5, 6)) // chaining
+			for(var/i in 1 to src.chain_targets) // chaining
 				found_chain_target = FALSE
-				for(var/atom/A as anything in view(2, last_hit.loc))
+				for(var/atom/A as anything in view(2 + (src.extra_chain_range ? 1 : 0), last_hit.loc))
 					if(src.flock?.isEnemy(A) && !(A in hit))
 						if (ismob(A))
 							var/mob/M = A
-							if (isdead(M))
+							if (isdead(M) || is_incapacitated(M))
 								continue
 						found_chain_target = TRUE
-						arcFlash(last_hit, A, wattage / 1.5, 1.1)
+						arcFlash(last_hit, A, wattage / 1.5, 0.8)
 						logTheThing(LOG_COMBAT, src, "Flock sentinel at [log_loc(src)] belonging to [src.flock?.name] hits [constructTarget(A)] with a chained arcflash.")
 						hit += A
 						last_hit = A
@@ -127,16 +139,35 @@
 			src.icon_state = "sentinel"
 			src.charge_status = NOT_CHARGED
 
-	src.updatefilter()
-
 /obj/flock_structure/sentinel/proc/charge(chargeamount)
 	src.charge = clamp(src.charge + chargeamount, 0, 100)
 	src.info_tag.set_info_tag("Charge: [src.charge]%")
 
+/obj/flock_structure/sentinel/sapper_power()
+	if (!src.powered || !..())
+		return FALSE
+	src.accepts_sapper_power = FALSE
+	src.extra_chain_range = TRUE
+	src.chain_targets = 3
+	SPAWN(10 SECONDS)
+		if (!QDELETED(src))
+			src.chain_targets = initial(src.chain_targets)
+			src.accepts_sapper_power = TRUE
+			src.extra_chain_range = FALSE
+	return TRUE
+
 /obj/flock_structure/sentinel/proc/updatefilter()
-	UNLINT(var/dm_filter/filter = src.rays.get_filter("flock_sentinel_rays")) // remove when SpacemanDMM knows about this type
+	var/dm_filter/filter = src.rays.get_filter("flock_sentinel_rays")
 	// for non-linear scaling of size, using an oscillating value from 0 to 1 * 32
 	UNLINT(animate(filter, size = ((-(cos(180 * (charge / 100)) - 1) / 2) * 32), flags = ANIMATION_PARALLEL))
+
+
+/obj/flock_structure/sentinel/angry
+	skip_process()
+		return FALSE //too ANGRY
+
+	isEnemy(mob/M)
+		return istype(M) && isalive(M) && !isintangible(M)
 
 /obj/effect/flock_sentinelrays
 	mouse_opacity = 0
@@ -145,8 +176,8 @@
 
 	New()
 		src.add_filter("flock_sentinel_rays", 0, rays_filter(x = -0.2, y = 6, size = 1, color = rgb(255,255,255), offset = rand(1000), density = 20, threshold = 0.2, factor = 1))
-		UNLINT(var/dm_filter/f = src.get_filter("flock_sentinel_rays")) // remove when SpacemanDMM knows about this type
-		UNLINT(animate(f, size = 0, time = 5 MINUTES, loop = -1, offset = f.offset + 100))
+		var/dm_filter/filter = src.get_filter("flock_sentinel_rays")
+		UNLINT(animate(filter, size = 0, time = 5 MINUTES, loop = -1, offset = filter.offset + 100))
 		..()
 
 #undef NOT_CHARGED

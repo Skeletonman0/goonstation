@@ -1,14 +1,20 @@
+/// Amount of 'free' power that docking stations give. For each 1 unit of APC cell power, cyborgs will recharge this many units of cyborg cell power.
+/// Band-aid.
+#define MAGIC_BULLSHIT_FREE_POWER_MULTIPLIER 3
+
+TYPEINFO(/obj/machinery/recharge_station)
+	mats = 10
+
 /obj/machinery/recharge_station
 	name = "cyborg docking station"
 	icon = 'icons/obj/robot_parts.dmi'
 	desc = "A station which allows cyborgs to repair damage, recharge their cells, and have upgrades installed if they are present in the station."
 	icon_state = "station"
 	density = 1
-	anchored = 1
-	mats = 10
+	anchored = ANCHORED
 	event_handler_flags = NO_MOUSEDROP_QOL | USE_FLUID_ENTER
 	deconstruct_flags = DECON_SCREWDRIVER | DECON_WRENCH | DECON_CROWBAR | DECON_WELDER | DECON_MULTITOOL
-	allow_stunned_dragndrop = 1
+	allow_stunned_dragndrop = TRUE
 	var/chargerate = 400
 	var/cabling = 250
 	var/list/cells = list()
@@ -22,14 +28,17 @@
 
 /obj/machinery/recharge_station/New()
 	..()
+	src.flags |= NOSPLASH
 	src.create_reagents(500)
 	src.reagents.add_reagent("fuel", 250)
 	src.build_icon()
+	START_TRACKING
 
 /obj/machinery/recharge_station/disposing()
 	if (src.occupant)
 		src.occupant.set_loc(get_turf(src.loc))
 		src.occupant = null
+	STOP_TRACKING
 	..()
 
 /obj/machinery/recharge_station/process(mult)
@@ -40,38 +49,37 @@
 		..()
 	if (src.status & BROKEN || (src.status & NOPOWER && !conversion_chamber))
 		if (src.occupant)
-			boutput(src.occupant, "<span class='alert'>You are automatically ejected from [src]!</span>")
+			boutput(src.occupant, SPAN_ALERT("You are automatically ejected from [src]!"))
 			src.go_out()
-		return
 
 	if (src.occupant)
 		src.process_occupant(mult)
-
-	use_power(power_usage)
 	return 1
 
 /obj/machinery/recharge_station/allow_drop()
-	return 0
+	return FALSE
 
 /obj/machinery/recharge_station/relaymove(mob/user as mob)
 	if (src.conversion_chamber && !isrobot(user))
-		boutput(user, "<span class='alert'>You're trapped inside!</span>")
+		boutput(user, SPAN_ALERT("You're trapped inside!"))
 		return
 	src.go_out()
 
 /obj/machinery/recharge_station/ex_act(severity)
 	src.go_out()
+	if (severity > 1 && src.conversion_chamber) //syndie version is a little tougher
+		return
 	return ..(severity)
 
 /obj/machinery/recharge_station/attack_hand(mob/user)
 	if (src.status & BROKEN)
-		boutput(user, "<span class='alert'>[src] is broken and cannot be used.</span>")
+		boutput(user, SPAN_ALERT("[src] is broken and cannot be used."))
 		return
 	if (src.status & NOPOWER && !src.conversion_chamber)
-		boutput(user, "<span class='alert'>[src] is out of power and cannot be used.</span>")
+		boutput(user, SPAN_ALERT("[src] is out of power and cannot be used."))
 		return
 	if (!src.anchored)
-		boutput(user, "<span class='alert'>You must attach [src]'s floor bolts before the machine will work.</span>")
+		boutput(user, SPAN_ALERT("You must attach [src]'s floor bolts before the machine will work."))
 		return
 
 	interact_particle(user, src)
@@ -80,7 +88,7 @@
 /obj/machinery/recharge_station/attackby(obj/item/W, mob/user)
 	if (istype(W, /obj/item/clothing))
 		if (!istype(W, /obj/item/clothing/mask) && !istype(W, /obj/item/clothing/head) && !istype(W, /obj/item/clothing/under) && !istype(W, /obj/item/clothing/suit))
-			boutput(user, "<span class='alert'>This type of is not compatible.</span>")
+			boutput(user, SPAN_ALERT("This type of clothing is not compatible."))
 			return
 		if (user.contents.Find(W))
 			user.drop_item()
@@ -117,26 +125,27 @@
 			user.drop_item()
 		qdel(W)
 
-	else if (istype(W, /obj/item/reagent_containers/glass))
-		var/obj/item/reagent_containers/glass/G = W
-		if (!G.reagents.total_volume)
-			boutput(user, "<span class='alert'>There is nothing in [G] to pour!</span>")
+	//this is defined here instead of just using OPENCONTAINER because we want to be able to dump large amounts of reagents at once
+	else if (istype(W, /obj/item/reagent_containers/glass) || istype(W, /obj/item/reagent_containers/food/drinks))
+		if (!W.reagents.total_volume)
+			boutput(user, SPAN_ALERT("There is nothing in [W] to pour!"))
 			return
-		if (!G.reagents.has_reagent("fuel"))
-			boutput(user, "<span class='alert'>There's no fuel in [G]. It would be pointless to pour it in.</span>")
+		if (!W.reagents.has_reagent("fuel"))
+			boutput(user, SPAN_ALERT("There's no fuel in [W]. It would be pointless to pour it in."))
 			return
-		else
-			user.visible_message("<span class='notice'>[user] pours [G.amount_per_transfer_from_this] units of [G]'s contents into [src].</span>")
-			playsound(src.loc, 'sound/impact_sounds/Liquid_Slosh_1.ogg', 25, 1)
-			W.reagents.trans_to(src, G.amount_per_transfer_from_this)
-			if (!G.reagents.total_volume)
-				boutput(user, "<span class='alert'><b>[G] is now empty.</b></span>")
-			src.reagents.isolate_reagent("fuel")
+		if (src.reagents.total_volume >= src.reagents.maximum_volume)
+			boutput(user, SPAN_ALERT("[src] is full."))
+			return
+		var/amount = min(W.reagents.total_volume, src.reagents.maximum_volume - src.reagents.total_volume, 50)
+		user.visible_message(SPAN_NOTICE("[user] pours [amount] units of [W]'s contents into [src]."))
+		playsound(src.loc, 'sound/impact_sounds/Liquid_Slosh_1.ogg', 25, 1)
+		W.reagents.trans_to(src, amount)
+		src.reagents.isolate_reagent("fuel")
 
 	else if (istype(W, /obj/item/grab))
 		var/obj/item/grab/G = W
 		if (G.state == GRAB_PASSIVE)
-			boutput(user, "<span class='alert'>You need a tighter grip!</span>")
+			boutput(user, SPAN_ALERT("You need a tighter grip!"))
 			return
 		if (src.move_human_inside(user, G.affecting))
 			qdel(G)
@@ -148,18 +157,20 @@
 /// on success returns true, else returns false
 /obj/machinery/recharge_station/proc/move_human_inside(mob/user, mob/victim)
 	if (!src.conversion_chamber)
-		boutput(user, "<span class='alert'>Humans cannot enter recharging stations.</span>")
+		boutput(user, SPAN_ALERT("Humans cannot enter recharging stations."))
 		return FALSE
 	if (!ishuman(victim))
-		boutput(user, "<span class='alert'>Non-Humans are not compatible with this device.</span>")
+		boutput(user, SPAN_ALERT("Non-Humans are not compatible with this device."))
 		return FALSE
 	if (isdead(victim))
-		boutput(user, "<span class='alert'>[victim] is dead and cannot be forced inside.</span>")
+		boutput(user, SPAN_ALERT("[victim] is dead and cannot be forced inside."))
 		return FALSE
 	if (!src.anchored)
-		boutput(user, "<span class='alert'>You must attach [src]'s floor bolts before the machine will work.</span>")
+		boutput(user, SPAN_ALERT("You must attach [src]'s floor bolts before the machine will work."))
 		return FALSE
-
+	if (src.occupant)
+		boutput(user, SPAN_ALERT("There's already someone in there."))
+		return FALSE
 	var/mob/living/carbon/human/H = victim
 	logTheThing(LOG_COMBAT, user, "puts [constructTarget(H,"combat")] into a conversion chamber at [log_loc(src)]")
 	user.visible_message("<span class='notice>[user] stuffs [H] into \the [src].")
@@ -171,24 +182,31 @@
 	src.build_icon()
 	return TRUE
 
+/obj/machinery/recharge_station/Click(location, control, params)
+	if(!src.ghost_observe_occupant(usr, src.occupant))
+		. = ..()
+
 /obj/machinery/recharge_station/MouseDrop_T(atom/movable/AM as mob|obj, mob/user as mob)
-	if (BOUNDS_DIST(AM, user) > 0 || BOUNDS_DIST(src, user) > 0)
+	if (BOUNDS_DIST(AM, src) > 0 || BOUNDS_DIST(src, user) > 0)
+		return
+	if (!isturf(AM.loc) && !(AM in user))
 		return
 	if (!isliving(user) || isAI(user))
 		return
-
-	if (isitem(AM) && !user.stat)
+	if (isintangible(user))
+		return
+	if (isitem(AM) && can_act(user))
 		src.Attackby(AM, user)
 		return
 
 	if (isliving(AM) && src.occupant)
-		boutput(user, "<span class='alert'>\The [src] is already occupied!</span>")
+		boutput(user, SPAN_ALERT("\The [src] is already occupied!"))
 		return
 
 	if (isrobot(AM))
 		var/mob/living/silicon/robot/R = AM
 		if (isdead(R))
-			boutput(user, "<span class='alert'>[R] is dead and cannot enter [src].</span>")
+			boutput(user, SPAN_ALERT("[R] is dead and cannot enter [src]."))
 			return
 		if (user != R)
 			if (isunconscious(user))
@@ -206,7 +224,7 @@
 	if (isshell(AM))
 		var/mob/living/silicon/hivebot/H = AM
 		if (isdead(H))
-			boutput(user, "<span class='alert'>[H] is dead and cannot enter [src].</span>")
+			boutput(user, SPAN_ALERT("[H] is dead and cannot enter [src]."))
 			return
 		if (user != H)
 			if (isunconscious(user))
@@ -244,29 +262,17 @@
 			src.go_out()
 			return
 
-		if (isrobot(src.occupant))
-			var/mob/living/silicon/robot/R = src.occupant
+		if (issilicon(src.occupant))
+			var/mob/living/silicon/R = src.occupant
 			if (!R.cell)
 				return
-			else if (R.cell.charge * mult >= R.cell.maxcharge)
+			else if (R.cell.charge >= R.cell.maxcharge)
 				R.cell.charge = R.cell.maxcharge
 				return
 			else
-				R.cell.charge += src.chargerate * mult
-				src.use_power(50)
-				return
-
-		else if (isshell(src.occupant))
-			var/mob/living/silicon/hivebot/H = src.occupant
-
-			if (!H.cell)
-				return
-			else if (H.cell.charge * mult >= H.cell.maxcharge)
-				H.cell.charge = H.cell.maxcharge
-				return
-			else
-				H.cell.charge += src.chargerate * mult
-				src.use_power(50)
+				var/added_charge = clamp(src.chargerate * mult, 0, R.cell.maxcharge-R.cell.charge)
+				R.cell.charge += added_charge
+				src.use_power(added_charge)
 				return
 
 		else if (ishuman(occupant) && src.conversion_chamber)
@@ -282,7 +288,7 @@
 					'sound/effects/syringeproj.ogg',
 				), 60, 1)
 				if (prob(15))
-					src.visible_message("<span class='alert'>[src] [pick("whirs", "grinds", "rumbles", "clatters", "clangs")] [pick("horribly", "in a grisly manner", "horrifyingly", "scarily")]!</span>")
+					src.visible_message(SPAN_ALERT("[src] [pick("whirs", "grinds", "rumbles", "clatters", "clangs")] [pick("horribly", "in a grisly manner", "horrifyingly", "scarily")]!"))
 				if (prob(25))
 					SPAWN(0.3 SECONDS)
 						playsound(src.loc, pick(
@@ -298,7 +304,7 @@
 						occupant?.emote("scream", FALSE)
 
 			if (H.health <= 2)
-				boutput(H, "<span class='alert'>You feel... different.</span>")
+				boutput(H, SPAN_ALERT("You feel... different."))
 				src.go_out()
 
 				SPAWN(0)
@@ -307,7 +313,7 @@
 					if (H.bioHolder.Uid && H.bioHolder.bloodType)
 						bdna = H.bioHolder.Uid
 						btype = H.bioHolder.bloodType
-					gibs(src.loc, null, null, bdna, btype)
+					gibs(src.loc, null, bdna, btype)
 
 					H.Robotize_MK2(TRUE, syndicate=TRUE)
 					src.build_icon()
@@ -315,15 +321,13 @@
 			else
 				H.bioHolder.AddEffect("eaten")
 				random_brute_damage(H, 10)
-				H.changeStatus("weakened", 5 SECONDS)
+				H.changeStatus("knockdown", 5 SECONDS)
 				if (prob(15))
-					boutput(H, "<span class='alert'>[pick("You feel chunks of your flesh being ripped off!"," Something cold and sharp skewers you!", "You feel your organs being pulped and mashed!", "Machines shred you from every direction!")]</span>")
+					boutput(H, SPAN_ALERT("[pick("You feel chunks of your flesh being ripped off!"," Something cold and sharp skewers you!", "You feel your organs being pulped and mashed!", "Machines shred you from every direction!")]"))
 			src.updateUsrDialog()
 
 /obj/machinery/recharge_station/proc/go_out()
-	if (!src.occupant)
-		return
-	src.occupant.set_loc(get_turf(src))
+	MOVE_OUT_TO_TURF_SAFE(src.occupant, src)
 	src.occupant = null
 	src.build_icon()
 
@@ -337,7 +341,7 @@
 		return
 	if (ishuman(usr))
 		if (src.conversion_chamber && src.occupant == usr)
-			boutput(usr, "<span class='alert'>You're trapped inside!</span>")
+			boutput(usr, SPAN_ALERT("You're trapped inside!"))
 			return
 	src.go_out()
 	add_fingerprint(usr)
@@ -350,10 +354,10 @@
 	if (isdead(usr))
 		return
 	if (!isrobot(usr) && !src.conversion_chamber)
-		boutput(usr, "<span class='alert'>Only cyborgs may enter [src]!</span>")
+		boutput(usr, SPAN_ALERT("Only cyborgs may enter [src]!"))
 		return
 	if (src.occupant)
-		boutput(usr, "<span class='alert'>\The [src] is already occupied!</span>")
+		boutput(usr, SPAN_ALERT("\The [src] is already occupied!"))
 		return
 	usr.remove_pulling()
 	usr.set_loc(src)
@@ -365,7 +369,7 @@
 /obj/machinery/recharge_station/syndicate
 	conversion_chamber = 1
 	is_syndicate = 1
-	anchored = 0
+	anchored = UNANCHORED
 	p_class = 1.5
 
 /obj/machinery/recharge_station/syndicate/attackby(obj/item/W, mob/user)
@@ -374,7 +378,7 @@
 		if (!anchored)
 			src.go_out()
 		user.show_text("You [src.anchored ? "attach" : "release"] \the [src]'s floor clamps", "red")
-		playsound(src, 'sound/items/Ratchet.ogg', 40, 0, 0)
+		playsound(src, 'sound/items/Ratchet.ogg', 40, FALSE, 0)
 		return
 	..()
 
@@ -492,7 +496,7 @@
 
 		if (R.module)
 			var/obj/item/robot_module/M = R.module
-			occupant_data["module"] = M.name
+			occupant_data["moduleName"] = M.name
 
 		var/list/occupant_upgrades = list()
 		if (length(R.upgrades))
@@ -515,13 +519,13 @@
 		occupant_data["clothing"] = occupant_clothing
 
 		var/list/occupant_cosmetics = list()
-		if(istype(R.cosmetic_mods, /datum/robot_cosmetic))
+		if (istype(R.cosmetic_mods, /datum/robot_cosmetic))
 			var/datum/robot_cosmetic/COS = R.cosmetic_mods
-			if(COS.ches_mod) occupant_cosmetics["chest"] = COS.ches_mod
-			if(COS.painted) occupant_cosmetics["paint"] = COS.paint // hex color representation
-			if(COS.head_mod) occupant_cosmetics["head"] = COS.head_mod
-			if(COS.arms_mod) occupant_cosmetics["arms"] = COS.arms_mod
-			if(COS.legs_mod) occupant_cosmetics["legs"] = COS.legs_mod
+			if (COS.ches_mod) occupant_cosmetics["chest"] = COS.ches_mod
+			if (COS.painted) occupant_cosmetics["paint"] = COS.paint // hex color representation
+			if (COS.head_mod) occupant_cosmetics["head"] = COS.head_mod
+			if (COS.arms_mod) occupant_cosmetics["arms"] = COS.arms_mod
+			if (COS.legs_mod) occupant_cosmetics["legs"] = COS.legs_mod
 			occupant_cosmetics["fx"] = COS.fx // R,G,B representation
 
 		occupant_data["cosmetics"] = occupant_cosmetics
@@ -538,12 +542,12 @@
 		occupant_data["name"] = E.name
 		occupant_data["kind"] = "eyebot"
 		if (E.cell)
-			var/list/this_cell = list()
 			var/obj/item/cell/C = E.cell
-			this_cell["name"] = C.name
-			this_cell["current"] = C.charge
-			this_cell["max"] = C.maxcharge
-			occupant_data["cell"] = this_cell
+			occupant_data["cell"] = list(
+				"name" = C.name,
+				"current" = C.charge,
+				"max" = C.maxcharge
+			)
 
 	.["occupant"] = occupant_data
 
@@ -594,15 +598,15 @@
 
 	if (isrobot(user))
 		if (user != src.occupant)
-			boutput(user, "<span class='alert'>You must be inside the docking station to use the functions.</span>")
+			boutput(user, SPAN_ALERT("You must be inside the docking station to use the functions."))
 			return
 	else
 		if (user == src.occupant && !isshell(user))
-			boutput(user, "<span class='alert'>Non-cyborgs cannot use the docking station functions.</span>")
+			boutput(user, SPAN_ALERT("Non-cyborgs cannot use the docking station functions."))
 			return
 
 	if (!src.allow_self_service && user == src.occupant)
-		boutput(user, "<span class='alert'>Self-service has been disabled at this station.</span>")
+		boutput(user, SPAN_ALERT("Self-service has been disabled at this station."))
 		return
 
 	switch(action)
@@ -610,16 +614,18 @@
 			if (!isrobot(src.occupant))
 				return
 			var/mob/living/silicon/robot/R = src.occupant
+			if (R.shell || R.dependent) //no renaming AI shells
+				return
 			var/newname = copytext(strip_html(sanitize(tgui_input_text(user, "What do you want to rename [R]?", "Cyborg Maintenance", R.name))), 1, 64)
 			if ((!issilicon(user) && (BOUNDS_DIST(user, src) > 0)) || user.stat || !newname)
 				return
 			if (url_regex?.Find(newname))
-				boutput(user, "<span class='notice'><b>Web/BYOND links are not allowed in ingame chat.</b></span>")
-				boutput(user, "<span class='alert'>&emsp;<b>\"[newname]</b>\"</span>")
+				boutput(user, SPAN_NOTICE("<b>Web/BYOND links are not allowed in ingame chat.</b>"))
+				boutput(user, SPAN_ALERT("&emsp;<b>\"[newname]</b>\""))
 				return
 			if(newname && newname != R.name)
 				phrase_log.log_phrase("name-cyborg", newname, no_duplicates=TRUE)
-			logTheThing(LOG_COMBAT, user, "uses a docking station to rename [constructTarget(R,"combat")] to [newname].")
+			logTheThing(LOG_STATION, user, "uses a docking station to rename [constructTarget(R,"combat")] to [newname].")
 			R.real_name = "[newname]"
 			R.UpdateName()
 			if (R.internal_pda)
@@ -637,7 +643,7 @@
 			if (R.cosmetic_mods)
 				C = R.cosmetic_mods
 			else
-				boutput(user, "<span class='alert'>ERROR: Cannot find cyborg's decorations.</span>")
+				boutput(user, SPAN_ALERT("ERROR: Cannot find cyborg's decorations."))
 				return
 			C.painted = TRUE
 			C.paint = input(user) as color
@@ -652,7 +658,7 @@
 			if (R.cosmetic_mods)
 				C = R.cosmetic_mods
 			else
-				boutput(user, "<span class='alert'>ERROR: Cannot find cyborg's decorations.</span>")
+				boutput(user, SPAN_ALERT("ERROR: Cannot find cyborg's decorations."))
 				return
 			C.painted = FALSE
 			R.update_appearance()
@@ -666,7 +672,7 @@
 			if (R.cosmetic_mods)
 				C = R.cosmetic_mods
 			else
-				boutput(user, "<span class='alert'>ERROR: Cannot find cyborg's decorations.</span>")
+				boutput(user, SPAN_ALERT("ERROR: Cannot find cyborg's decorations."))
 				return
 			C.paint = input(user) as color
 			R.update_appearance()
@@ -680,7 +686,7 @@
 			if (R.cosmetic_mods)
 				C = R.cosmetic_mods
 			else
-				boutput(user, "<span class='alert'>ERROR: Cannot find cyborg's decorations.</span>")
+				boutput(user, SPAN_ALERT("ERROR: Cannot find cyborg's decorations."))
 				return
 			var/selected_color = input(user) as color
 			if(selected_color)
@@ -696,7 +702,7 @@
 			if (R.cosmetic_mods)
 				C = R.cosmetic_mods
 			else
-				boutput(user, "<span class='alert'>ERROR: Cannot find cyborg's decorations.</span>")
+				boutput(user, SPAN_ALERT("ERROR: Cannot find cyborg's decorations."))
 				return
 			var/mod = tgui_input_list(user, "Please select a chest decoration!", "Cyborg Decoration", list("Nothing", "Medical Insignia", "Lab Coat"))
 			if (!mod)
@@ -716,7 +722,7 @@
 			if (R.cosmetic_mods)
 				C = R.cosmetic_mods
 			else
-				boutput(user, "<span class='alert'>ERROR: Cannot find cyborg's decorations.</span>")
+				boutput(user, SPAN_ALERT("ERROR: Cannot find cyborg's decorations."))
 				return
 			var/mod = tgui_input_list(user, "Please select a head decoration!", "Cyborg Decoration", list("Nothing", "Medical Mirror", "Janitor Cap", "Hard Hat", "Afro and Shades"))
 			if (!mod)
@@ -736,7 +742,7 @@
 			if (R.cosmetic_mods)
 				C = R.cosmetic_mods
 			else
-				boutput(user, "<span class='alert'>ERROR: Cannot find cyborg's decorations.</span>")
+				boutput(user, SPAN_ALERT("ERROR: Cannot find cyborg's decorations."))
 				return
 			var/mod = tgui_input_list(user, "Please select an arms decoration!", "Cyborg Decoration", list("Nothing"))
 			if (!mod)
@@ -757,7 +763,7 @@
 			if (R.cosmetic_mods)
 				C = R.cosmetic_mods
 			else
-				boutput(user, "<span class='alert'>ERROR: Cannot find cyborg's decorations.</span>")
+				boutput(user, SPAN_ALERT("ERROR: Cannot find cyborg's decorations."))
 				return
 			var/mod = tgui_input_list(user, "Please select a legs decoration!", "Cyborg Decoration", list("Nothing", "Disco Flares"))
 			if (!mod)
@@ -773,7 +779,7 @@
 
 		if("self-service")
 			if (isrobot(user))
-				boutput(user, "<span class='alert'>Cyborgs are not allowed to toggle this option.</span>")
+				boutput(user, SPAN_ALERT("Cyborgs are not allowed to toggle this option."))
 				return
 			else
 				src.allow_self_service = !src.allow_self_service
@@ -784,7 +790,7 @@
 				return
 			var/mob/living/silicon/robot/R = src.occupant
 			if (src.reagents.get_reagent_amount("fuel") < 1)
-				boutput(user, "<span class='alert'>Not enough welding fuel for repairs.</span>")
+				boutput(user, SPAN_ALERT("Not enough welding fuel for repairs."))
 				return
 			if ((!issilicon(user) && (BOUNDS_DIST(user, src) > 0)) || user.stat)
 				return
@@ -802,7 +808,7 @@
 				return
 			var/mob/living/silicon/robot/R = src.occupant
 			if (src.cabling < 1)
-				boutput(user, "<span class='alert'>Not enough wiring for repairs.</span>")
+				boutput(user, SPAN_ALERT("Not enough wiring for repairs."))
 				return
 			if ((!issilicon(user) && (BOUNDS_DIST(user, src) > 0)) || user.stat)
 				return
@@ -863,15 +869,15 @@
 				var/obj/item/roboupgrade/upgrade = locate(upgradeRef) in src.upgrades
 				if (upgrade)
 					if (length(R.upgrades) >= R.max_upgrades)
-						boutput(user, "<span class='alert'>[R] has no room for further upgrades.</span>")
+						boutput(user, SPAN_ALERT("[R] has no room for further upgrades."))
 						return
 					if (locate(upgrade.type) in R.upgrades)
-						boutput(user, "<span class='alert'>[R] already has that upgrade.</span>")
+						boutput(user, SPAN_ALERT("[R] already has that upgrade."))
 						return
 					src.upgrades.Remove(upgrade)
 					R.upgrades.Add(upgrade)
 					upgrade.set_loc(R)
-					boutput(R, "<span class='notice'>You received [upgrade]! It can be activated from your panel.</span>")
+					boutput(R, SPAN_NOTICE("You received [upgrade]! It can be activated from your panel."))
 					R.hud.update_upgrades()
 			. = TRUE
 		if("upgrade-remove")
@@ -883,9 +889,9 @@
 				var/obj/item/roboupgrade/upgrade = locate(upgradeRef) in R.upgrades
 				if (upgrade)
 					if (!upgrade.removable)
-						boutput(user, "<span class='alert'>This upgrade cannot be removed.</span>")
+						boutput(user, SPAN_ALERT("This upgrade cannot be removed."))
 					else
-						boutput(R, "<span class='alert'>[upgrade] was removed!</span>")
+						boutput(R, SPAN_ALERT("[upgrade] was removed!"))
 						upgrade.upgrade_deactivate(R)
 						src.upgrades.Add(upgrade)
 						R.upgrades.Remove(upgrade)
@@ -956,7 +962,7 @@
 						src.clothes.Add(clothing_to_remove)
 						clothing_to_remove.set_loc(src)
 						R.clothes.Remove(clothing_slot)
-						boutput(R, "<span class='alert'>\The [clothing_to_remove.name] was removed!</span>")
+						boutput(R, SPAN_ALERT("\The [clothing_to_remove.name] was removed!"))
 						R.update_appearance()
 						break
 			. = TRUE
@@ -974,7 +980,10 @@
 			if (!isrobot(src.occupant))
 				return
 			if (user == src.occupant)
-				boutput(user, "<span class='alert'>You can't modify your own power cell!</span>")
+				boutput(user, SPAN_ALERT("You can't modify your own power cell!"))
+				return
+			if (isAIeye(user))
+				boutput(user, SPAN_ALERT("You have to be physically present for this!"))
 				return
 			var/mob/living/silicon/robot/R = src.occupant
 			var/cellRef = params["cellRef"]
@@ -986,19 +995,22 @@
 					cell_to_remove.set_loc(src)
 					R.cell = null
 					R.part_chest?.cell = null
-					boutput(R, "<span class='notice'>Your power cell is being swapped...</span>")
+					boutput(R, SPAN_NOTICE("Your power cell is being swapped..."))
 				src.cells.Remove(cell_to_install)
 				cell_to_install.set_loc(R)
 				R.cell = cell_to_install
 				R.part_chest?.cell = cell_to_install
-				boutput(R, "<span class='notice'>Power cell installed: [cell_to_install].</span>")
+				boutput(R, SPAN_NOTICE("Power cell installed: [cell_to_install]."))
 				R.hud.update_charge()
 			. = TRUE
 		if("cell-remove")
 			if (!isrobot(src.occupant))
 				return
+			if (isAIeye(user))
+				boutput(user, SPAN_ALERT("You have to be physically present for this!"))
+				return
 			if (user == src.occupant)
-				boutput(user, "<span class='alert'>You can't modify your own power cell!</span>")
+				boutput(user, SPAN_ALERT("You can't modify your own power cell!"))
 				return
 			var/mob/living/silicon/robot/R = src.occupant
 			var/obj/item/cell_to_remove = R.cell
@@ -1006,7 +1018,7 @@
 			cell_to_remove.set_loc(src)
 			R.cell = null
 			R.part_chest?.cell = null
-			boutput(R, "<span class='alert'>Your power cell was removed!</span>")
+			boutput(R, SPAN_ALERT("Your power cell was removed!"))
 			logTheThing(LOG_COMBAT, user, "removes [constructTarget(R,"combat")]'s power cell at [log_loc(user)].")
 			R.hud.update_charge()
 			. = TRUE
@@ -1019,3 +1031,5 @@
 					if (cell_to_eject.loc == src)
 						user.put_in_hand_or_eject(cell_to_eject)
 			. = TRUE
+
+#undef MAGIC_BULLSHIT_FREE_POWER_MULTIPLIER

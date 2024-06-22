@@ -29,7 +29,7 @@ module.exports = (env = {}, argv) => {
   const config = {
     mode,
     context: path.resolve(__dirname),
-    target: ['web', 'es3', 'browserslist:ie 8'],
+    target: ['web', 'es5', 'browserslist:ie 11'],
     entry: {
       'tgui': [
         './packages/tgui-polyfill',
@@ -47,6 +47,7 @@ module.exports = (env = {}, argv) => {
       filename: '[name].bundle.js',
       chunkFilename: '[name].bundle.js',
       chunkLoadTimeout: 15000,
+      hashFunction: "sha256",
     },
     resolve: {
       extensions: ['.tsx', '.ts', '.js'],
@@ -91,17 +92,13 @@ module.exports = (env = {}, argv) => {
               options: {
                 esModule: false,
               },
-            }
+            },
           ],
         },
       ],
     },
     optimization: {
       emitOnErrors: false,
-      splitChunks: {
-        chunks: 'initial',
-        name: 'tgui-common',
-      },
     },
     performance: {
       hints: false,
@@ -139,17 +136,12 @@ module.exports = (env = {}, argv) => {
 
   // Production build specific options
   if (argv.mode === 'production') {
-    const TerserPlugin = require('terser-webpack-plugin');
+    const { EsbuildPlugin } = require('esbuild-loader');
     config.optimization.minimizer = [
-      new TerserPlugin({
-        extractComments: false,
-        terserOptions: {
-          ie8: true,
-          output: {
-            ascii_only: true,
-            comments: false,
-          },
-        },
+      new EsbuildPlugin({
+        target: 'ie11',
+        css: true,
+        legalComments: 'none', // We're open source, these are in the original source files
       }),
     ];
   }
@@ -158,6 +150,8 @@ module.exports = (env = {}, argv) => {
   if (argv.mode !== 'production') {
     config.devtool = 'cheap-module-source-map';
   }
+  // Uncomment the below if you need to locally generate source maps to debug production
+  // config.devtool = 'source-map';
 
   // Development server specific options
   if (argv.devServer) {

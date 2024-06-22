@@ -1,3 +1,13 @@
+ABSTRACT_TYPE(/datum/targetable/critter/plague_rat)
+/datum/targetable/critter/plague_rat
+	var/border_icon = 'icons/mob/wraith_ui.dmi'
+	var/border_state = "plague_frame"
+
+	onAttach(datum/abilityHolder/holder)
+		..()
+		var/atom/movable/screen/ability/topBar/B = src.object
+		B.UpdateOverlays(image(border_icon, border_state), "mob_type")
+
 /datum/targetable/critter/plague_rat/eat_filth
 	name = "Eat filth"
 	desc = "Eat some filth, healing you a little bit and slowly growing."
@@ -9,13 +19,10 @@
 	var/list/decal_list = list(/obj/decal/cleanable/blood,
 	/obj/decal/cleanable/ketchup,
 	/obj/decal/cleanable/rust,
-	/obj/decal/cleanable/urine,
 	/obj/decal/cleanable/vomit,
 	/obj/decal/cleanable/greenpuke,
 	/obj/decal/cleanable/slime,
 	/obj/decal/cleanable/fungus)
-	var/border_icon = 'icons/mob/wraith_ui.dmi'
-	var/border_state = "plague_frame"
 	var/list/found_decals = list()
 
 	cast(atom/target)
@@ -23,7 +30,7 @@
 			return TRUE
 
 		if (BOUNDS_DIST(holder.owner, target) > 0)
-			boutput(holder.owner, "<span class='alert'>That is too far away to eat.</span>")
+			boutput(holder.owner, SPAN_ALERT("That is too far away to eat."))
 			return TRUE
 
 		var/turf/T = null
@@ -33,7 +40,7 @@
 			T = get_turf(target)
 
 		if (T == null)
-			boutput(holder.owner, "<span class='alert'>There is nothing to eat here.</span>")
+			boutput(holder.owner, SPAN_ALERT("There is nothing to eat here."))
 			return TRUE
 
 		var/mob/living/critter/wraith/plaguerat/P = holder.owner
@@ -48,18 +55,12 @@
 		if (length(found_decals) > 0)
 			actions.start(new/datum/action/bar/private/icon/plaguerat_eat(found_decals, src), P)
 		else
-			boutput(holder.owner, "<span class='alert'>You can't eat that, it doesnt satisfy your appetite.</span>")
+			boutput(holder.owner, SPAN_ALERT("You can't eat that, it doesn't satisfy your appetite."))
 			return TRUE
-
-	onAttach(datum/abilityHolder/holder)
-		..()
-		var/atom/movable/screen/ability/topBar/B = src.object
-		B.UpdateOverlays(image(border_icon, border_state), "mob_type")
 
 /datum/action/bar/private/icon/plaguerat_eat
 	duration = 9 SECONDS
 	interrupt_flags = INTERRUPT_MOVE | INTERRUPT_STUNNED | INTERRUPT_ACT | INTERRUPT_ATTACKED
-	id = "plaguerat_eat"
 	icon = 'icons/mob/screen1.dmi'
 	icon_state = "grabbed"
 	var/list/obj/decal/cleanable/targets = list()
@@ -77,9 +78,8 @@
 			interrupt(INTERRUPT_ALWAYS)
 			return
 		current_target = targets[1]
-		M.visible_message("<span class='combat'><b>[M] begins eating [current_target]!</b></span>",\
-			"<span class='combat'><b>You start eating [current_target]!</b></span>")
-		logTheThing("debug", src, null, "Targets = [length(targets)]")
+		M.visible_message(SPAN_COMBAT("<b>[M] begins eating [current_target]!</b>"),\
+			SPAN_COMBAT("<b>You start eating [current_target]!</b>"))
 
 	onUpdate()
 		..()
@@ -98,12 +98,10 @@
 		..()
 
 		var/mob/living/critter/wraith/plaguerat/P = owner
-		P.visible_message("<span class='combat'><b>[P] eats [current_target]!</b></span>",\
-					"<span class='combat'><b>You finish eating [current_target]!</b></span>")
+		P.visible_message(SPAN_COMBAT("<b>[P] eats [current_target]!</b>"),\
+					SPAN_COMBAT("<b>You finish eating [current_target]!</b>"))
 		targets -= targets[1]
-		logTheThing("debug", src, null, "Targets = [length(targets)]")
 		qdel(current_target)
-		logTheThing("debug", src, null, "Targets = [length(targets)]")
 		P.eaten_amount ++
 		if (P.eaten_amount >= P.amount_to_grow)
 			P.grow_up()
@@ -120,7 +118,7 @@
 		..()
 
 		var/mob/living/M = owner
-		boutput(M, "<span class='alert'>You were interrupted!</span>")
+		boutput(M, SPAN_ALERT("You were interrupted!"))
 
 /datum/targetable/critter/plague_rat/rat_bite
 	name = "Bite"
@@ -129,8 +127,6 @@
 	icon_state = "ratbite"
 	cooldown = 5 SECOND
 	targeted = 1
-	var/border_icon = 'icons/mob/wraith_ui.dmi'
-	var/border_state = "plague_frame"
 
 
 	cast(atom/target)
@@ -141,36 +137,32 @@
 		if (isturf(target))
 			target = locate(/mob/living) in target
 			if (!target)
-				boutput(holder.owner, "<span class='alert'>Nothing to bite there.</span>")
+				boutput(holder.owner, SPAN_ALERT("Nothing to bite there."))
 				return TRUE
 		if (target == holder.owner)
 			return TRUE
 		if (BOUNDS_DIST(holder.owner, target) > 0)
-			boutput(holder.owner, "<span class='alert'>That is too far away to bite.</span>")
+			boutput(holder.owner, SPAN_ALERT("That is too far away to bite."))
+			return TRUE
+		var/mob/living/critter/wraith/plaguerat/P = holder.owner
+		if (!isturf(P.loc))
+			boutput(holder.owner, SPAN_ALERT("You definitely can't bite through [istype(P.loc,/obj/dummy/disposalmover) ? "a disposal pipe" : "\the [P.loc]"]."))
 			return TRUE
 		var/mob/MT = target
-		var/mob/living/critter/wraith/plaguerat/P = holder.owner
 		MT.TakeDamageAccountArmor("All", rand(1,3), 0, 0, DAMAGE_BLUNT)
 		MT.changeStatus("slowed", 2 SECONDS)
-		holder.owner.visible_message("<span class='combat'><b>[holder.owner] bites [MT]!</b></span>",\
-		"<span class='combat'><b>You bite [MT]!</b></span>")
+		holder.owner.visible_message(SPAN_COMBAT("<b>[holder.owner] bites [MT]!</b>"),\
+		SPAN_COMBAT("<b>You bite [MT]!</b>"))
 		P.venom_bite(MT)
 		return 0
-
-	onAttach(datum/abilityHolder/holder)
-		..()
-		var/atom/movable/screen/ability/topBar/B = src.object
-		B.UpdateOverlays(image(border_icon, border_state), "mob_type")
 
 /datum/targetable/critter/plague_rat/spawn_rat_den
 	name = "spawn rat den"
 	desc = "Spawn your rat nest, healing you when in range and summoning some tiny diseased mice."
 	icon = 'icons/mob/critter_ui.dmi'
 	icon_state = "ratden"
-	cooldown = 90 SECONDS
+	cooldown = 120 SECONDS
 	targeted = 0
-	var/border_icon = 'icons/mob/wraith_ui.dmi'
-	var/border_state = "plague_frame"
 
 	cast(atom/target)
 		if (..())
@@ -180,33 +172,21 @@
 			if (P.linked_den == null)
 				var/obj/machinery/wraith/rat_den/W = new /obj/machinery/wraith/rat_den(P.loc)
 				P.linked_den = W
-				boutput (P, "<span class='notice'>You spawn a rat den</span>")
+				boutput (P, SPAN_NOTICE("You spawn a rat den"))
 			else if (!P.linked_den.loc)
 				var/obj/machinery/wraith/rat_den/W = new /obj/machinery/wraith/rat_den(P.loc)
 				P.linked_den = W
-				boutput (P, "<span class='notice'>You spawn a new rat den</span>")
+				boutput (P, SPAN_NOTICE("You spawn a new rat den"))
 			else
 				qdel(P.linked_den)
 				P.linked_den = null
-				boutput (P, "<span class='notice'>You had an old rat den, it is now destroyed.</span>")
+				boutput (P, SPAN_NOTICE("You had an old rat den, it is now destroyed."))
 				var/obj/machinery/wraith/rat_den/W = new /obj/machinery/wraith/rat_den(P.loc)
 				P.linked_den = W
-				boutput (P, "<span class='notice'>You spawn a new rat den</span>")
+				boutput (P, SPAN_NOTICE("You spawn a new rat den"))
 			return 0
 		return TRUE
-
-	onAttach(datum/abilityHolder/holder)
-		..()
-		var/atom/movable/screen/ability/topBar/B = src.object
-		B.UpdateOverlays(image(border_icon, border_state), "mob_type")
 
 /datum/targetable/critter/slam/rat
 	icon = 'icons/mob/critter_ui.dmi'
 	icon_state = "ratrush"
-	var/border_icon = 'icons/mob/wraith_ui.dmi'
-	var/border_state = "plague_frame"
-
-	onAttach(datum/abilityHolder/holder)
-		..()
-		var/atom/movable/screen/ability/topBar/B = src.object
-		B.UpdateOverlays(image(border_icon, border_state), "mob_type")

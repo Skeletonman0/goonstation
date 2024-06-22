@@ -1,10 +1,10 @@
 /datum/game_mode/mixed/arcfiend
-	name = "arcfiend"
+	name = "Arcfiend"
 	config_tag = "arcfiend"
 	antag_token_support = TRUE
 	latejoin_antag_compatible = 1
 	latejoin_antag_roles = list(ROLE_ARCFIEND)
-	traitor_types = list(ROLE_ARCFIEND = 1)
+	traitor_types = list(ROLE_ARCFIEND = 5)
 
 
 	has_wizards = 0

@@ -8,6 +8,8 @@
 
 	/// The total number of points we've accumulated over our lifetime
 	var/lifetime_energy = 0
+	/// Number of hearts stopped with Jolt
+	var/hearts_stopped = 0
 
 	onAbilityStat()
 		..()
@@ -53,10 +55,10 @@ ABSTRACT_TYPE(/datum/targetable/arcfiend)
 	castcheck(atom/target)
 		var/mob/living/M = src.holder.owner
 		if (!container_safety_bypass && !isturf(M.loc))
-			boutput(holder.owner, "<span class='alert'>Interference from [M.loc] is preventing use of this ability!</span>")
+			boutput(holder.owner, SPAN_ALERT("Interference from [M.loc] is preventing use of this ability!"))
 			return FALSE
 		if (!can_act(M) && target != holder.owner) // we can self cast while incapacitated
-			boutput(holder.owner, "<span class='alert'>Not while incapacitated.</span>")
+			boutput(holder.owner, SPAN_ALERT("Not while incapacitated."))
 			return FALSE
 		return TRUE
 

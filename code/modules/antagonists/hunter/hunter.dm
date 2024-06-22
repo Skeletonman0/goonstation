@@ -1,6 +1,7 @@
 /datum/antagonist/hunter
 	id = ROLE_HUNTER
 	display_name = "hunter"
+	antagonist_icon = "predator"
 
 	/// The ability holder of this hunter, containing their respective abilities. We also use this for tracking power, at the moment.
 	var/datum/abilityHolder/hunter/ability_holder
@@ -38,7 +39,15 @@
 		M.set_loc(pick_landmark(LANDMARK_LATEJOIN))
 
 	assign_objectives()
-		new /datum/objective_set/hunter(src.owner)
+		new /datum/objective_set/hunter(src.owner, src)
+
+	get_statistics()
+		return list(
+			list(
+				"name" = "Combined Trophy Value",
+				"value" = "[src.owner.current.get_skull_value()]",
+			)
+		)
 
 
 // Called for every human mob spawn and mutantrace change. The value of non-standard skulls is defined in organ.dm.
@@ -70,7 +79,7 @@
 
 				else
 					// Antagonist check.
-					if (checktraitor(H))
+					if (H.mind?.is_antagonist())
 						switch (H.mind.special_role) // Ordered by skull value.
 							if (ROLE_OMNITRAITOR)
 								skull_type = /obj/item/skull/crystal
@@ -120,7 +129,7 @@
 						// Everything's still default, so check for assigned_role. Could be a lizard captain or whatever.
 						if (isnull(skull_type) && skull_value == default_skull_value && skull_desc == default_skull_desc)
 							if (H.mind)
-								if (H.mind.special_role == "macho man") // Not in ticker.Agimmicks.
+								if (H.mind.special_role == ROLE_MACHO_MAN) // Not in ticker.Agimmicks.
 									skull_type = /obj/item/skull/gold
 									skull_desc = "A trophy taken from a legendary wrestler. It is an immeasurable honor."
 								else
@@ -148,24 +157,22 @@
 											skull_desc = "A meaningless trophy from a weak opponent. You feel disgusted to even look at it."
 
 				// Assign new skull or change value/desc.
-				if (!isnull(skull_type))
-					var/obj/item/skull/new_skull = new skull_type
-					skull_value = new_skull.value // Defined in organ.dm. Copied because there isn't always a need to replace the skull.
+				if (isnull(skull_type))
+					skull_type = /obj/item/skull
 
-					if (S.type != new_skull.type)
-						//setup skull AFTER the qdel! otherwise skull gets set to null
-						qdel(S)
-						new_skull.donor = H
-						new_skull.preddesc = skull_desc
-						new_skull.set_loc(H)
-						H.organHolder.skull = new_skull
-						//DEBUG_MESSAGE("[H]'s skull: [new_skull.type] (V: [new_skull.value], D: [new_skull.preddesc])")
-					else
-						qdel(new_skull)
-						S.value = skull_value
-						S.preddesc = skull_desc
-						//DEBUG_MESSAGE("[H]'s skull: [S.type] (V: [S.value], D: [S.preddesc])")
+				var/obj/item/skull/new_skull = new skull_type
+				skull_value = new_skull.value // Defined in organ.dm. Copied because there isn't always a need to replace the skull.
+
+				if (S.type != new_skull.type)
+					//setup skull AFTER the qdel! otherwise skull gets set to null
+					qdel(S)
+					new_skull.donor = H
+					new_skull.preddesc = skull_desc
+					new_skull.set_loc(H)
+					H.organHolder.skull = new_skull
+					//DEBUG_MESSAGE("[H]'s skull: [new_skull.type] (V: [new_skull.value], D: [new_skull.preddesc])")
 				else
+					qdel(new_skull)
 					S.value = skull_value
 					S.preddesc = skull_desc
 					//DEBUG_MESSAGE("[H]'s skull: [S.type] (V: [S.value], D: [S.preddesc])")
@@ -201,7 +208,7 @@
 		if (!spell.holder)
 			return
 		if (!isturf(owner.holder.owner.loc))
-			boutput(owner.holder.owner, "<span class='alert'>You can't use this ability here.</span>")
+			boutput(owner.holder.owner, SPAN_ALERT("You can't use this ability here."))
 			return
 		if (spell.targeted && usr.targeting_ability == owner)
 			usr.targeting_ability = null
@@ -221,7 +228,7 @@
 	usesPoints = 0
 	regenRate = 0
 	tabName = "Hunter"
-	notEnoughPointsMessage = "<span class='alert'>You aren't strong enough to use this ability.</span>"
+	notEnoughPointsMessage = SPAN_ALERT("You aren't strong enough to use this ability.")
 
 /////////////////////////////////////////////// Hunter spell parent ////////////////////////////
 
@@ -276,12 +283,12 @@
 
 		switch (stunned_only_is_okay)
 			if (0)
-				if (!isalive(M) || M.getStatusDuration("stunned") > 0 || M.getStatusDuration("paralysis") > 0 || M.getStatusDuration("weakened"))
+				if (!isalive(M) || M.getStatusDuration("stunned") > 0 || M.getStatusDuration("unconscious") > 0 || M.getStatusDuration("knockdown"))
 					return 0
 				else
 					return 1
 			if (1)
-				if (!isalive(M) || M.getStatusDuration("paralysis") > 0)
+				if (!isalive(M) || M.getStatusDuration("unconscious") > 0)
 					return 0
 				else
 					return 1
@@ -298,23 +305,23 @@
 			return 0
 
 		if (!ishuman(M)) // Only humans use mutantrace datums.
-			boutput(M, "<span class='alert'>You cannot use any powers in your current form.</span>")
+			boutput(M, SPAN_ALERT("You cannot use any powers in your current form."))
 			return 0
 
 		if (M.transforming)
-			boutput(M, "<span class='alert'>You can't use any powers right now.</span>")
+			boutput(M, SPAN_ALERT("You can't use any powers right now."))
 			return 0
 
 		if (hunter_only == 1 && !ishunter(M))
-			boutput(M, "<span class='alert'>You're not quite sure how to go about doing that in your current form.</span>")
+			boutput(M, SPAN_ALERT("You're not quite sure how to go about doing that in your current form."))
 			return 0
 
 		if (incapacitation_check(src.when_stunned) != 1)
-			boutput(M, "<span class='alert'>You can't use this ability while incapacitated!</span>")
+			boutput(M, SPAN_ALERT("You can't use this ability while incapacitated!"))
 			return 0
 
 		if (src.not_when_handcuffed == 1 && M.restrained())
-			boutput(M, "<span class='alert'>You can't use this ability when restrained!</span>")
+			boutput(M, SPAN_ALERT("You can't use this ability when restrained!"))
 			return 0
 
 		return 1
@@ -330,21 +337,17 @@
 	src.real_name = "hunter"
 
 	src.jitteriness = 0
-	src.delStatus("stunned")
-	src.delStatus("weakened")
-	src.delStatus("paralysis")
+	src.remove_stuns()
 	src.delStatus("slowed")
 	src.change_misstep_chance(-INFINITY)
 	src.stuttering = 0
 	src.delStatus("drowsy")
 
 	if (src.hasStatus("handcuffed"))
-		src.visible_message("<span class='alert'><B>[src] rips apart the [src.handcuffs] with pure brute strength!</b></span>")
+		src.visible_message(SPAN_ALERT("<B>[src] rips apart the [src.handcuffs] with pure brute strength!</b>"))
 		src.handcuffs.destroy_handcuffs(src)
 	src.buckled = null
 
-	if (src.mutantrace)
-		qdel(src.mutantrace)
 	src.set_mutantrace(/datum/mutantrace/hunter)
 
 	var/datum/abilityHolder/hunter/A = src.get_ability_holder(/datum/abilityHolder/hunter)
@@ -357,21 +360,18 @@
 
 	src.unequip_all()
 
-	var/obj/item/implant/revenge/microbomb/hunter/B = new /obj/item/implant/revenge/microbomb/hunter(src)
-	src.implant.Add(B)
-	B.implanted = 1
-	B.implanted(src)
+	new /obj/item/implant/revenge/microbomb/hunter(src)
 
-	src.equip_if_possible(new /obj/item/clothing/under/gimmick/hunter(src), slot_w_uniform) // srcust be at the top of the list.
-	src.equip_if_possible(new /obj/item/clothing/mask/hunter(src), slot_wear_mask)
-	src.equip_if_possible(new /obj/item/storage/belt/hunter(src), slot_belt)
-	src.equip_if_possible(new /obj/item/clothing/shoes/cowboy/hunter(src), slot_shoes)
-	src.equip_if_possible(new /obj/item/device/radio/headset(src), slot_ears)
-	src.equip_if_possible(new /obj/item/storage/backpack(src), slot_back)
-	src.equip_if_possible(new /obj/item/tank/emergency_oxygen/extended(src), slot_l_store)
-	src.equip_if_possible(new /obj/item/cloaking_device/hunter(src), slot_r_store)
-	src.equip_if_possible(new /obj/item/knife/butcher/hunterspear(src), slot_in_backpack)
-	src.equip_if_possible(new /obj/item/gun/energy/plasma_gun/hunter(src), slot_in_backpack)
+	src.equip_if_possible(new /obj/item/clothing/under/gimmick/hunter(src), SLOT_W_UNIFORM) // srcust be at the top of the list.
+	src.equip_if_possible(new /obj/item/clothing/mask/hunter(src), SLOT_WEAR_MASK)
+	src.equip_if_possible(new /obj/item/storage/belt/hunter(src), SLOT_BELT)
+	src.equip_if_possible(new /obj/item/clothing/shoes/cowboy/hunter(src), SLOT_SHOES)
+	src.equip_if_possible(new /obj/item/device/radio/headset(src), SLOT_EARS)
+	src.equip_if_possible(new /obj/item/storage/backpack(src), SLOT_BACK)
+	src.equip_if_possible(new /obj/item/tank/emergency_oxygen/extended(src), SLOT_L_STORE)
+	src.equip_if_possible(new /obj/item/cloaking_device/hunter(src), SLOT_R_STORE)
+	src.equip_if_possible(new /obj/item/knife/butcher/hunterspear(src), SLOT_IN_BACKPACK)
+	src.equip_if_possible(new /obj/item/gun/energy/plasma_gun/hunter(src), SLOT_IN_BACKPACK)
 
 	src.set_face_icon_dirty()
 	src.set_body_icon_dirty()
@@ -381,5 +381,5 @@
 		if (src)
 			src.assign_gimmick_skull()
 
-	boutput(src, "<span class='notice'><h3>You have received your equipment. Let the hunt begin!</h3></span>")
+	boutput(src, SPAN_NOTICE("<h3>You have received your equipment. Let the hunt begin!</h3>"))
 	logTheThing(LOG_COMBAT, src, "transformed into a hunter at [log_loc(src)].")

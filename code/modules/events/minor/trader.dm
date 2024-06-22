@@ -95,7 +95,7 @@
 
 		end_location.color = null
 
-		start_location.move_contents_to(end_location, centcom_turf)
+		start_location.move_contents_to(end_location, centcom_turf, turf_to_skip=/turf/unsimulated/outdoors/grass, turftoleave=/turf/unsimulated/outdoors/grass)
 
 		return dest_turfs
 
@@ -116,20 +116,20 @@
 			if (istype(O, map_turf))
 				O.ReplaceWith(centcom_turf, FALSE, TRUE, FALSE, TRUE)
 
-		end_location.move_contents_to(start_location, map_turf)
+		end_location.move_contents_to(start_location, map_turf, turf_to_skip=global.map_settings.shuttle_map_turf, turftoleave=global.map_settings.shuttle_map_turf)
 
 		#ifdef UNDERWATER_MAP
 		start_location.color = OCEAN_COLOR
 		#endif
 
-		station_repair.repair_turfs(dest_turfs)
+		station_repair.repair_turfs(dest_turfs, force_floor=TRUE)
 
 /proc/get_hiding_jerk(var/atom/movable/container)
 	for(var/atom/movable/AM in container)
 		if(AM.contents.len) get_hiding_jerk(AM)
 		if(ismob(AM))
 			var/mob/M = AM
-			boutput(AM, "<span class='alert'><b>Your body is destroyed as the merchant shuttle passes [pick("an eldritch decomposure field", "a life negation ward", "a telekinetic assimilation plant", "a swarm of matter devouring nanomachines", "an angry Greek god", "a burnt-out coder", "a death ray fired millenia ago from a galaxy far, far away")].</b></span>")
+			boutput(AM, SPAN_ALERT("<b>Your body is destroyed as the merchant shuttle passes [pick("an eldritch decomposure field", "a life negation ward", "a telekinetic assimilation plant", "a swarm of matter devouring nanomachines", "an angry Greek god", "a burnt-out coder", "a death ray fired millenia ago from a galaxy far, far away")].</b>"))
 			if(isliving(M))
 				logTheThing(LOG_COMBAT, M, "was gibbed by trying to hide on a merchant shuttle.")
 			M.gib()

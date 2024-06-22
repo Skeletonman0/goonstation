@@ -506,7 +506,7 @@
 	name = "supply telepad"
 	desc = "It's a Nanotrasen 'Waterloo 1.0' cargo teleportation pad used to teleport goods instantly between distant locations. Requires a telecrystal to function."
 	density = 0
-	anchored = 1
+	anchored = ANCHORED
 	opacity = 0
 
 	var/has_crystal = 0
@@ -529,17 +529,17 @@
 
 	examine()
 		. = ..()
-		. += "<span class='notice'>The pad is currently at [charge]% charge.</span>"
+		. += SPAN_NOTICE("The pad is currently at [charge]% charge.")
 		if (has_crystal)
-			. += "<span class='notice'>The pad is complete with a telecrystal.</span>"
+			. += SPAN_NOTICE("The pad is complete with a telecrystal.")
 		else
-			. += "<span class='alert'>The pad's telecrystal socket is empty!</span>"
+			. += SPAN_ALERT("The pad's telecrystal socket is empty!")
 
 	attackby(var/obj/item/I, user)
 		if (istype(I, /obj/item/raw_material/telecrystal))
 			qdel(I)
 			has_crystal++
-			boutput(user, "<span class='notice'>You plug the telecrystal into the teleportation pad.</span>")
+			boutput(user, SPAN_NOTICE("You plug the telecrystal into the teleportation pad."))
 
 	ex_act()
 		return
@@ -548,15 +548,19 @@
 	bullet_act()
 		return
 
+TYPEINFO(/obj/supply_pad/incoming)
+	mats = 10
+
 /obj/supply_pad/incoming
 	name = "Incoming supply pad"
 	direction = 0
+
+TYPEINFO(/obj/supply_pad/outgoing)
 	mats = 10
 
 /obj/supply_pad/outgoing
 	name = "Outgoing supply pad"
 	direction = 1
-	mats = 10
 
 /obj/machinery/computer/special_supply
 	// This is a grade 1 workstation. Contains bare-bones supplies.
@@ -564,7 +568,7 @@
 	icon = 'icons/obj/computer.dmi'
 	icon_state = "QMcom"
 	density = 1
-	anchored = 1
+	anchored = ANCHORED
 	opacity = 0
 
 	var/obj/supply_pad/in_target
@@ -715,7 +719,7 @@
 						if (is_sellable(O))
 							CR = O
 						else if (O.density || isliving(O) || isitem(O))
-							message = "<span class='bad'>Please remove all objects and lifeforms not being sold from the telepad.</span>"
+							message = "<span class='bad'>Please remove all objects and lifeforms not being sold from the telepad.</spans>"
 							attack_hand(usr)
 							return
 					if (!CR)
@@ -726,7 +730,7 @@
 							if (!istype(Q))
 								Q.set_loc(T)
 								for (var/mob/M in viewers(Q))
-									boutput(M, "<span class='notice'>[Q] pops out of [CR]!</span>")
+									boutput(M, SPAN_NOTICE("[Q] pops out of [CR]!"))
 							else
 								profit += do_sell(Q)
 								qdel(Q)
