@@ -312,6 +312,10 @@ ABSTRACT_TYPE(/obj/item/parts/robot_parts/head)
 
 		qdel(src)
 
+	/// return an image in this proc to have it displayed on the robot above the paint
+	proc/on_display()
+		return null
+
 /obj/item/parts/robot_parts/head/standard
 	name = "standard cyborg head"
 	max_health = 160
@@ -370,6 +374,20 @@ ABSTRACT_TYPE(/obj/item/parts/robot_parts/head)
 	max_health = 150
 	visible_eyes = 0
 	robot_movement_modifier = /datum/movement_modifier/robot_part/light_head
+
+/obj/item/parts/robot_parts/head/fish
+	name = "cyborg screen head"
+	desc = "A somewhat fragile head unit that... seems to just be a fishtank?"
+	appearanceString = "fish"
+	icon_state = "head-fish"
+	material_amt = ROBOT_SCREEN_METAL_COST
+	max_health = 90
+	robot_movement_modifier = /datum/movement_modifier/robot_part/standard_head
+	visible_eyes = 0
+
+	// no painting the fishbowl okay
+	on_display(var/image/I)
+		return image('icons/mob/robots.dmi', "head-fish-nocolor")
 
 /obj/item/parts/robot_parts/head/screen
 	name = "cyborg screen head"

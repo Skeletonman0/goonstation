@@ -2680,6 +2680,12 @@
 				src.i_head = image('icons/mob/robots.dmi', "head-" + src.part_head.appearanceString)
 				if (color_matrix)
 					src.internal_paint_part(src.i_head, color_matrix)
+
+				// whatever the head wants to not get painted
+				var/image/other = src.part_head.on_display(src.i_head)
+				if (other)
+					src.i_head.overlays += other
+
 				if (src.part_head.visible_eyes && C)
 					var/icon/eyesovl = null
 					var/image/eye_light = null
