@@ -380,13 +380,12 @@ ABSTRACT_TYPE(/obj/item/parts/robot_parts/head)
 	desc = "A somewhat fragile head unit that... seems to just be a fishtank?"
 	appearanceString = "fish"
 	icon_state = "head-fish"
-	material_amt = ROBOT_SCREEN_METAL_COST
 	max_health = 90
 	robot_movement_modifier = /datum/movement_modifier/robot_part/standard_head
 	visible_eyes = 0
 
 	// no painting the fishbowl okay
-	on_display(var/image/I)
+	on_display()
 		return image('icons/mob/robots.dmi', "head-fish-nocolor")
 
 /obj/item/parts/robot_parts/head/screen

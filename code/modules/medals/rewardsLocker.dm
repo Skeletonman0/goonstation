@@ -1191,11 +1191,10 @@
 		else
 			boutput(activator, SPAN_ALERT("You need to be an AI to use this, you goof!"))
 
-/* needs a fishing related medal
-/datum/achievementReward/ai_fish
-	title = "(AI Face) Fish"
+/datum/achievementReward/fish_silicon
+	title = "(AI Face / Borg Head) Fish"
 	desc = "Turns you into a fish!"
-	required_medal = " put the fishing medal name here"
+	required_medal = "Gone fishin"
 
 	rewardActivate(var/mob/activator)
 		if (isAI(activator))
@@ -1208,9 +1207,23 @@
 			A.set_color("#111111")
 			A.update_appearance()
 			return 1
+		else if (isrobot(activator))
+			var/mob/living/silicon/robot/C = activator
+
+			var/obj/item/parts/robot_parts/head/old_head = C.part_head
+
+			C.part_head = new /obj/item/parts/robot_parts/head/fish(C)
+			C.part_head.brain = old_head.brain
+
+			old_head.brain?.set_loc(C.part_head)
+			old_head.brain = null
+			qdel(old_head)
+
+			C.update_appearance()
+			return 1
 		else
-			boutput(activator, SPAN_ALERT("You need to be an AI to use this, you goof!"))
-*/
+			boutput(activator, SPAN_ALERT("You need to be a silicon to use this, you goof!"))
+
 
 /datum/achievementReward/borg_automoton
 	title = "(Cyborg Skin) Automaton"
