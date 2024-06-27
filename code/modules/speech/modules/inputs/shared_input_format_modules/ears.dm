@@ -4,29 +4,31 @@
 /datum/shared_input_format_module/ai_ears/process(datum/say_message/message)
 
 	// Restrict this behavior to radio messages
-	if(message.relay_flags & SAY_RELAY_RADIO)
-		// Determine and format the speaker's displayed job title.
-		var/job_title = "Unknown"
-		if (ishuman(message.original_speaker))
-			var/mob/living/carbon/human/H = message.original_speaker
-			if (H.wear_id)
-				job_title = H.wear_id:assignment
-			else
-				job_title = "No ID"
+	if(!(message.relay_flags & SAY_RELAY_RADIO))
+		return
 
-		else if (isAI(message.original_speaker))
-			job_title = "AI"
+	// Determine and format the speaker's displayed job title.
+	var/job_title = "Unknown"
+	if (ishuman(message.original_speaker))
+		var/mob/living/carbon/human/H = message.original_speaker
+		if (H.wear_id)
+			job_title = H.wear_id:assignment
+		else
+			job_title = "No ID"
 
-		else if (isrobot(message.original_speaker))
-			job_title = "Cyborg"
+	else if (isAI(message.original_speaker))
+		job_title = "AI"
 
-		else if (istype(message.original_speaker, /obj/machinery/computer))
-			job_title = "Computer"
+	else if (isrobot(message.original_speaker))
+		job_title = "Cyborg"
 
-		message.speaker_to_display = message.real_ident
+	else if (istype(message.original_speaker, /obj/machinery/computer))
+		job_title = "Computer"
 
-		message.format_speaker_prefix += "<a href='?src=\ref[src];action=track;heard_name=[message.real_ident]'>"
-		message.format_verb_prefix = " ([job_title])</a>" + message.format_verb_prefix
+	message.speaker_to_display = message.real_ident
+
+	message.format_speaker_prefix += "<a href='?src=\ref[src];action=track;heard_name=[message.real_ident]'>"
+	message.format_verb_prefix = " ([job_title])</a>" + message.format_verb_prefix
 
 // I dislike implementing AI tracking here, however the alternative, performing the above formatting per listener and using
 // `/mob/living/silicon/Topic` would incur a performance cost.
