@@ -261,10 +261,11 @@
 			return 0.75 + movement_delay_modifier
 
 	say(message, flags, message_params, atom_listeners_override)
-		if (src.mainframe) //NEWSPEECH - this works
-			src.mainframe.say(message)
-		else
-			..(message)
+		if (src.mainframe)
+			src.mainframe.say(message, flags, message_params, atom_listeners_override)
+			return
+
+		. = ..()
 
 	say_radio()
 		src.mainframe.say_radio()
