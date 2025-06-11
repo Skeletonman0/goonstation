@@ -1,9 +1,8 @@
 // balance defines
-#define REBUILD_COST_OBJECT_METAL 0.9 // each of these measured in sheets.
-#define REBUILD_COST_OBJECT_CRYSTAL 1.5
-#define REBUILD_COST_TURF_METAL 1
-#define REBUILD_COST_TURF_CRYSTAL 0.5
-#define BAR_SHEET_VALUE 10
+#define REBUILD_COST_OBJECT_METAL 0.09 // measure in material
+#define REBUILD_COST_OBJECT_CRYSTAL 0.15
+#define REBUILD_COST_TURF_METAL 0.1
+#define REBUILD_COST_TURF_CRYSTAL 0.15
 // code defines
 #define SELECT_SKIP 0
 #define SELECT_FIRST_CORNER 1
@@ -19,6 +18,13 @@
 	anchored = ANCHORED
 	density = 0
 	layer = TURF_LAYER
+	plane = PLANE_ABOVE_LIGHTING
+	appearance_flags = KEEP_TOGETHER
+
+	New()
+		. = ..()
+		src.hologram_effect()
+		src.color = null
 
 /obj/effects/abcuMarker/red
 	desc = "Denotes an invalid tile."
@@ -47,8 +53,6 @@
 	var/build_end = 0
 	var/list/markers = list()
 	var/list/apc_list = list()
-	var/metal_owed = 0
-	var/crystal_owed = 0
 	var/tile_cost_processed = FALSE
 
 	var/datum/abcu_blueprint/current_bp = null
@@ -66,24 +70,40 @@
 		if (current_bp)
 			. += "<br>[SPAN_NOTICE("Someone has uploaded a blueprint named '[current_bp.room_name]'.")]"
 
+	proc/ensure_contents()
+		if (isnull(src.storage))
+			src.create_storage(/datum/storage/no_hud/machine, can_hold=list(/obj/item/material_piece), slots = INFINITY)
+	proc/add_contents(obj/item/W, mob/user = null)
+		src.ensure_contents()
+		src.storage.add_contents(W, user, visible=FALSE)
+
 	attackby(obj/item/W, mob/user)
-		if (!W.cant_drop && (istype(W, /obj/item/sheet) || istype(W, /obj/item/material_piece)))
+		if (!W.cant_drop && istype(W, /obj/item/material_piece))
 			boutput(user, SPAN_NOTICE("You insert the material into the machine."))
-			user.drop_item()
-			W.set_loc(src)
+			add_contents(W,user)
 			return
 		. = ..()
+
+	/// Safely gets our storage contents. In case someone does something like load materials into the machine before we have initialized our storage
+	/// Also ejects things w/o material or that aren't pieces, to ensure safety
+	proc/get_contents()
+		src.ensure_contents()
+		var/list/storage_contents = src.storage.get_contents()
+		for (var/obj/item/I as anything in storage_contents)
+			if (!istype(I, /obj/item/material_piece) || isnull(I.material))
+				// Invalid thing somehow, fuck
+				src.storage.transfer_stored_item(I, src.loc)
+		return storage_contents
 
 	MouseDrop_T(obj/item/W, mob/user)
 		if (!in_interact_range(src, user)  || BOUNDS_DIST(W, user) > 0 || !can_act(user))
 			return
 		else if(isitem(W))
-			if (!W.cant_drop && (istype(W, /obj/item/sheet) || istype(W, /obj/item/material_piece)))
+			if (!W.cant_drop && istype(W, /obj/item/material_piece))
 				boutput(user, SPAN_NOTICE("You insert [W] into the machine."))
-				W.set_loc(src)
+				add_contents(W,user)
 				return
 			return
-
 
 	attack_hand(mob/user)
 		if(src.building && !src.paused)
@@ -139,7 +159,7 @@
 				src.get_blueprint(user)
 
 			if("Dump Materials")
-				for(var/obj/o in src)
+				for(var/obj/o in get_contents())
 					if(o == src.current_bp) continue
 					o.set_loc(src.loc)
 
@@ -174,59 +194,23 @@
 			src.build_index++
 			return
 
-		// try to consume materials for this tile
-		if (!src.tile_cost_processed)
-			var/obj_count = length(tile.objects)
-			src.metal_owed += REBUILD_COST_TURF_METAL + REBUILD_COST_OBJECT_METAL * obj_count
-			src.crystal_owed += REBUILD_COST_TURF_CRYSTAL + REBUILD_COST_OBJECT_CRYSTAL * obj_count
-			src.tile_cost_processed = TRUE
-		for (var/obj/item in src)
-			if (src.metal_owed <= 0 && src.crystal_owed <= 0) break
-			if (item == src.current_bp) continue
+		// can we pay for it
+		if (tile.pay_for_tile(src))
+			// now build the tile if we paid for it
+			var/turf/pos = locate(text2num(tile.posx) + src.x,text2num(tile.posy) + src.y, src.z)
+			for(var/obj/O in src.markers)
+				if(O.loc == pos)
+					qdel(O)
+					break
 
-			if (istype(item, /obj/item/sheet))
-				var/obj/item/sheet/sheets = item
-				if (!sheets.material) continue
-				if (src.metal_owed && sheets.material.getMaterialFlags() & MATERIAL_METAL)
-					var/sheets_consumed = ceil(min(sheets.amount, src.metal_owed))
-					sheets.change_stack_amount(-sheets_consumed)
-					src.metal_owed -= sheets_consumed
-					continue
-				if (src.crystal_owed && sheets.material.getMaterialFlags() & MATERIAL_CRYSTAL)
-					var/sheets_consumed = ceil(min(sheets.amount, src.crystal_owed))
-					sheets.change_stack_amount(-sheets_consumed)
-					src.crystal_owed -= sheets_consumed
-					continue
+			src.make_tile(tile, pos)
+			src.build_index++
 
-			else if (istype(item, /obj/item/material_piece))
-				var/obj/item/material_piece/bars = item
-				if (!bars.material) continue
-				if (src.metal_owed && bars.material.getMaterialFlags() & MATERIAL_METAL)
-					var/bars_consumed = ceil(min(bars.amount, src.metal_owed / BAR_SHEET_VALUE))
-					bars.change_stack_amount(-bars_consumed)
-					src.metal_owed -= bars_consumed * BAR_SHEET_VALUE
-					continue
-				if (src.crystal_owed && bars.material.getMaterialFlags() & MATERIAL_CRYSTAL)
-					var/bars_consumed = ceil(min(bars.amount, src.crystal_owed / BAR_SHEET_VALUE))
-					bars.change_stack_amount(-bars_consumed)
-					src.crystal_owed -= bars_consumed * BAR_SHEET_VALUE
-					continue
-
-		if (src.metal_owed > 0 || src.crystal_owed > 0)
+		else
 			src.pause_build()
 			src.visible_message(SPAN_ALERT("[src] does not have enough materials to continue construction."))
 			playsound(src.loc, 'sound/machines/buzz-sigh.ogg', 20)
 			return
-		// now build the tile if we paid for it
-		var/turf/pos = locate(text2num(tile.posx) + src.x,text2num(tile.posy) + src.y, src.z)
-		for(var/obj/O in src.markers)
-			if(O.loc == pos)
-				qdel(O)
-				break
-
-		src.make_tile(tile, pos)
-		src.tile_cost_processed = FALSE
-		src.build_index++
 
 	proc/make_tile(var/datum/tileinfo/tile, var/turf/pos)
 		set waitfor = 0
@@ -245,7 +229,7 @@
 
 			if(tile.tiletype != null)
 				var/turf/new_tile = pos
-				new_tile.ReplaceWith(tile.tiletype)
+				new_tile.ReplaceWith(tile.tiletype,handle_air = 0)
 				new_tile.icon_state = tile.state
 				new_tile.set_dir(tile.direction)
 				new_tile.inherit_area()
@@ -303,31 +287,39 @@
 		src.visible_message(SPAN_NOTICE("[src] whirrs to a stop. The operation light flashes twice and turns off."))
 
 	proc/audit_inventory(mob/user)
-		var/metal_count = 0
-		var/crystal_count = 0
-		for(var/obj/O in src)
-			if(O == src.current_bp) continue
-			if (istype(O, /obj/item/sheet))
-				var/obj/item/sheet/sheets = O
-				if (!sheets.material) continue
-				if (sheets.material.getMaterialFlags() & MATERIAL_METAL)
-					metal_count += sheets.amount
-				if (sheets.material.getMaterialFlags() & MATERIAL_CRYSTAL)
-					crystal_count += sheets.amount
-			else if (istype(O, /obj/item/material_piece))
-				var/obj/item/material_piece/bars = O
-				if (!bars.material) continue
-				if (bars.material.getMaterialFlags() & MATERIAL_METAL)
-					metal_count += bars.amount * BAR_SHEET_VALUE
-				if (bars.material.getMaterialFlags() & MATERIAL_CRYSTAL)
-					crystal_count += bars.amount * BAR_SHEET_VALUE
-		if (user)
-			var/message = SPAN_NOTICE("The machine is holding [metal_count] metal, and [crystal_count] crystal, measured in sheets.")
-			if (src.current_bp)
-				message += "<br><span class='notice'>Its current blueprint requires [src.current_bp.cost_metal] metal,"
-				message += " and [src.current_bp.cost_crystal] crystal, measured in sheets.</span>"
-			boutput(user, message)
-		return list(metal_count, crystal_count)
+		if (!user) return
+
+		var/resource_string = ""
+		var/message = SPAN_NOTICE("[src] is holding the following materials:")
+
+		var/list/resources = list()
+		for(var/obj/item/material_piece/O in src.get_contents())
+			resources[O.material?.getName()] = O.amount
+		for (var/x in resources)
+			if (!x) continue
+			resource_string += SPAN_NOTICE("<br>[resources[x] == null ? 1 : round(resources[x],0.1)] [x]")
+
+		if (resource_string == "") resource_string = SPAN_NOTICE("<br>Nothing")
+
+		message += resource_string
+
+
+		if (src.current_bp)
+			message += SPAN_NOTICE("<br>[src]'s current blueprint requires:")
+
+			var/list/required = list()
+			for(var/datum/tileinfo/T in src.current_bp.roominfo)
+				var/mats_needed_tile = T.get_required_mats()
+				for (var/datum/manufacturing_requirement/resource in mats_needed_tile)
+					required[resource] += mats_needed_tile[resource]
+
+			for (var/x in required)
+				if (!x) continue
+				message += SPAN_NOTICE("<br>[required[x] == null ? 1 : round(required[x],0.1)] [x]")
+
+
+
+		boutput(user, message)
 
 	proc/unpause_build()
 		src.paused = FALSE
@@ -352,7 +344,11 @@
 		src.locked = TRUE
 		src.anchored = ANCHORED
 		src.invalid_count = 0
+		var/requirements = list()
 		for(var/datum/tileinfo/T in src.current_bp.roominfo)
+			var/mats_needed_tile = T.get_required_mats()
+			for (var/x in mats_needed_tile)
+				requirements[x] += mats_needed_tile[x]
 			var/turf/pos = locate(text2num(T.posx) + src.x,text2num(T.posy) + src.y, src.z)
 			var/obj/effects/abcuMarker/O = null
 
@@ -363,9 +359,22 @@
 			else
 				O = new/obj/effects/abcuMarker/red(pos)
 				src.invalid_count++
+			if (O)
+				var/obj/possible = T.tiletype
+				var/image/based = image(initial(possible.icon),T.state)
+				based.alpha = 70
+				based.blend_mode = BLEND_INSET_OVERLAY
+				O.overlays += based
+				for(var/datum/objectinfo/Oinfo in T.objects)
+					possible = Oinfo.objecttype
+					based = image(initial(possible.icon),Oinfo.icon_state,dir=Oinfo.direction)
+					based.alpha = 70
+					based.blend_mode = BLEND_INSET_OVERLAY
+					O.overlays += based
 
 			src.markers.Add(O)
-		boutput(user, SPAN_NOTICE("Building this will require [src.current_bp.cost_metal] metal and [src.current_bp.cost_crystal] glass sheets."))
+		// make sure they know the cost and what they have
+		src.audit_inventory(user)
 		src.visible_message("[src] locks into place and begins humming softly.")
 
 	proc/get_blueprint(mob/user, var/savepath = "")
@@ -381,22 +390,6 @@
 			src.current_bp = load
 			logTheThing(LOG_STATION, user, "[user] loaded blueprint [load.room_name] (authored by: [load.author]) in [src].") // no slurs kthx
 
-/datum/objectinfo
-	var/objecttype = null
-	var/direction = 0
-	var/layer = 0
-	var/px = 0
-	var/py = 0
-	var/icon_state = ""
-
-/datum/tileinfo
-	var/list/objects = new/list()
-	var/state = ""
-	var/direction = 0
-	var/tiletype = null
-	var/posx = 0
-	var/posy = 0
-	var/icon = ""
 
 /client/proc/adminCreateBlueprint()
 	set name = "Blueprint Create"
@@ -564,6 +557,78 @@
 #define WHITELIST_TURFS list(/turf/simulated)
 #define BLACKLIST_TURFS list(/turf/simulated/floor/auto/elevator_shaft, /turf/simulated/shuttle, /turf/simulated/floor/shuttle, /turf/simulated/wall/auto/shuttle)
 
+/datum/objectinfo
+	var/objecttype = null
+	var/direction = 0
+	var/layer = 0
+	var/px = 0
+	var/py = 0
+	var/icon_state = ""
+
+	proc/get_required_mats(var/current_cost)
+		. = current_cost
+		if (src.objecttype != null)
+			// are we whitelisted
+			if (src.objecttype in WHITELIST_OBJECTS)
+				// if we're whitelisted, we're allowed to use steel and glass instead
+				.[getManufacturingRequirement("metal")] += REBUILD_COST_OBJECT_METAL
+				.[getManufacturingRequirement("crystal")] += REBUILD_COST_OBJECT_CRYSTAL
+			else
+				var/typeinfo/obj/typeinfo = get_type_typeinfo(src.objecttype)
+
+				var/obj/potential = src.objecttype
+				// if this is true we're not building it
+				if (initial(potential.is_syndicate) != 0 || is_valid_abcu_object(src.objecttype) == FALSE) return .
+				else
+					for(var/req_id in typeinfo.mats)
+						var/amt = typeinfo.mats[req_id]
+						if(isnull(amt))
+							amt = 1
+						var/datum/manufacturing_requirement/R = getManufacturingRequirement(req_id)
+						.[R] += round((amt/10)*1.25,0.1) // inefficient at being a ruck kit, loses some of your mats
+/datum/tileinfo
+	var/list/objects = new/list()
+	var/state = ""
+	var/direction = 0
+	var/tiletype = null
+	var/posx = 0
+	var/posy = 0
+	var/icon = ""
+
+	proc/get_required_mats()
+		. = list()
+
+		// tile cost
+		if(src.tiletype != null)
+			.[getManufacturingRequirement("metal")] += REBUILD_COST_TURF_METAL
+			.[getManufacturingRequirement("crystal")] += REBUILD_COST_TURF_CRYSTAL
+
+		// plus the cost of all objects
+		for(var/datum/objectinfo/O in src.objects)
+			. = O.get_required_mats(.)
+
+	proc/pay_for_tile(var/obj/machinery/abcu/payer)
+		// we need to subtract the amount of mats from ourselves
+		var/list/mats_used = src.get_required_mats()
+		for (var/datum/manufacturing_requirement/R in mats_used)
+			var/mat_paid = FALSE
+			var/required_amount = mats_used[R]
+
+			for (var/obj/item/material_piece/P in payer.get_contents())
+				if (R.is_match(P.material) && P.amount >= required_amount)
+					// we pass the check, go do it
+					P.amount = round( (P.amount - required_amount), 0.1)
+					mat_paid = TRUE
+					if (P.amount <= 0)
+						qdel(P)
+					break
+
+			if (mat_paid == FALSE)
+				return FALSE
+
+		return TRUE
+
+
 /datum/abcu_blueprint
 	var/cost_metal = 0
 	var/cost_crystal = 0
@@ -637,8 +702,12 @@ proc/save_abcu_blueprint(mob/user, list/turf_list, var/use_whitelist = TRUE)
 		turf_count++
 
 		for(var/obj/o in curr)
-			if (use_whitelist && (!istypes(o, WHITELIST_OBJECTS) || istypes(o, BLACKLIST_OBJECTS)))
+			if (use_whitelist && istypes(o, BLACKLIST_OBJECTS))
 				continue
+			if (use_whitelist && (!istypes(o, WHITELIST_OBJECTS)))
+				var/typeinfo/obj/typeinfo = get_type_typeinfo(o)
+				// if this is true we're not building it
+				if (o.is_syndicate || !typeinfo.mats) continue
 
 			if(!is_valid_abcu_object(o))
 				continue
@@ -687,8 +756,6 @@ proc/load_abcu_blueprint(mob/user, var/savepath = "", var/use_whitelist = TRUE)
 		tf.state = save["state"]
 		tf.direction = save["dir"]
 		tf.icon = save["icon"]
-		bp.cost_metal += REBUILD_COST_TURF_METAL
-		bp.cost_crystal += REBUILD_COST_TURF_CRYSTAL
 		save.cd = "/tiles/[A]/objects"
 		turf_count++
 
@@ -701,6 +768,13 @@ proc/load_abcu_blueprint(mob/user, var/savepath = "", var/use_whitelist = TRUE)
 					if (ispath(object_type, whitelisted))
 						permitted = TRUE
 						break
+				if (!permitted)
+					var/typeinfo/obj/typeinfo = get_type_typeinfo(object_type)
+					// can we make an exception to whitelist only
+					var/obj/possible = object_type
+					if (!initial(possible.is_syndicate) && typeinfo.mats)
+						permitted = TRUE
+
 				for (var/blacklisted in BLACKLIST_OBJECTS)
 					if (ispath(object_type, blacklisted))
 						permitted = FALSE
@@ -715,15 +789,10 @@ proc/load_abcu_blueprint(mob/user, var/savepath = "", var/use_whitelist = TRUE)
 			O.px = save["pixelx"]
 			O.py = save["pixely"]
 			O.icon_state = save["icon_state"]
-			bp.cost_metal += REBUILD_COST_OBJECT_METAL
-			bp.cost_crystal += REBUILD_COST_OBJECT_CRYSTAL
 			tf.objects.Add(O)
 			obj_count++
 
 		bp.roominfo.Add(tf)
-
-	bp.cost_metal = round(bp.cost_metal)
-	bp.cost_crystal = round(bp.cost_crystal)
 
 	boutput(user, SPAN_NOTICE("Loaded blueprint [bp.room_name], with [turf_count] tile\s, and [obj_count] object\s."))
 	return bp
@@ -734,6 +803,8 @@ proc/is_valid_abcu_object(obj/O)
 		var/obj/machinery/door/door = O
 		if(door.hardened)
 			return FALSE
+	else if (istype(O,/obj/overlay) || istype(O,/obj/effect))
+		return FALSE
 	return TRUE
 
 #undef WHITELIST_OBJECTS
@@ -1095,7 +1166,6 @@ proc/delete_abcu_blueprint(mob/user, var/browse_all_users = FALSE)
 #undef REBUILD_COST_OBJECT_CRYSTAL
 #undef REBUILD_COST_TURF_METAL
 #undef REBUILD_COST_TURF_CRYSTAL
-#undef BAR_SHEET_VALUE
 #undef SELECT_SKIP
 #undef SELECT_FIRST_CORNER
 #undef DESELECT_FIRST_CORNER
