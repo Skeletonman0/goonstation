@@ -15,26 +15,26 @@
 		if (btype == 1)
 			// Vertical
 			while (count > 0)
-				var/obj/forcefield/event/B = new /obj/forcefield/event(locate(pickx,count,1),barrier_duration)
-				B.icon_state = "spat-v"
+				var/obj/forcefield/event/vertical/B = new /obj/forcefield/event(locate(pickx,count,1),barrier_duration)
 				count -= 1
 		else
 			// Horizontal
 			while (count > 0)
 				var/obj/forcefield/event/B = new /obj/forcefield/event(locate(count,picky,1),barrier_duration)
-				B.icon_state = "spat-h"
 				count -= 1
 
 /obj/forcefield/event
 	name = "Spatial Tear"
 	desc = "A breach in the spatial fabric. Extremely difficult to pass."
 	icon = 'icons/effects/effects.dmi'
-	icon_state = "spat-h"
+	icon_state = "new_spat-mid1"
 	anchored = ANCHORED
-	opacity = 1
+	opacity = 0
 	density = 1
 	var/stabilized = 0
 	plane = PLANE_ABOVE_LIGHTING
+	var/horizontal = TRUE
+	appearance_flags = KEEP_TOGETHER
 
 	New(var/loc,var/duration)
 		..()
@@ -42,12 +42,16 @@
 		//spatial interdictor: mitigate spatial tears
 		//consumes 500 units of charge (250,000 joules) per tear segment weakened
 		//weakened tears can be traversed, but inflict minor brute damage
+		src.UpdateIcon()
 		for_by_tcl(IX, /obj/machinery/interdictor)
 			if (IX.expend_interdict(500,src))
 				src.stabilize()
 				break
-		SPAWN(duration)
-			qdel(src)
+
+		if (duration)
+			// debug
+			SPAWN(duration)
+				qdel(src)
 
 	disposing()
 		STOP_TRACKING
@@ -69,16 +73,41 @@
 	meteorhit()
 		return
 
+	Cross(atom/movable/mover)
+		. = ..()
+		if (mover.throwing || istype(mover,/obj/projectile))
+			// haha NO
+			if (ismob(mover))
+				return FALSE
+			else
+				return TRUE
+		else
+			return FALSE
+
+	UpdateIcon()
+		. = ..()
+		if (prob(50))
+			src.icon_state = "new_spat-mid1"
+		else
+			src.icon_state = "new_spat-mid2"
+
+		var/image/I = image(src.icon,icon_state="new_spat-edge",dir=src.horizontal ? SOUTH : WEST, pixel_x=src.horizontal ? 0 : 32, pixel_y=src.horizontal ? 32 : 0)
+		src.UpdateOverlays(I, "edge1")
+		I = image(src.icon,icon_state="new_spat-edge",dir=src.horizontal ? NORTH : EAST, pixel_x=src.horizontal ? 0 : -32, pixel_y=src.horizontal ? -32 : 0)
+		src.UpdateOverlays(I, "edge2")
+
+
 	proc/try_pass(mob/user)
 		actions.start(new /datum/action/bar/icon/push_through_tear(user, src), user)
 
 	proc/stabilize()
 		src.alpha = 150
-		src.set_opacity(0)
 		src.stabilized = 1
 		src.name = "Stabilized Spatial Tear"
 		desc = "A breach in the spatial fabric, partially stabilized by an interdictor. Difficult to pass."
 
+/obj/forcefield/event/vertical
+	horizontal = FALSE
 
 /datum/action/bar/icon/push_through_tear
 	duration = 2 SECONDS
