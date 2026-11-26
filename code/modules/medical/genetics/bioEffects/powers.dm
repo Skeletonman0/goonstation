@@ -2754,3 +2754,186 @@ ABSTRACT_TYPE(/datum/bioEffect/power/critter)
 			fading = TRUE
 			animate(owner, time = 10, alpha = 255, easing = LINEAR_EASING)
 			fading = FALSE
+
+/datum/bioEffect/power/timestop
+	name = "Timestop"
+	desc = "Za Warudo."
+	id = "timestop"
+	cooldown = 0
+	occur_in_genepools = 0
+	probability = 0
+	scanner_visibility = 0
+	can_research = 0
+	can_make_injector = 0
+	can_copy = 0
+	can_reclaim = 0
+	can_scramble = 0
+	curable_by_mutadone = 0
+	ability_path = /datum/targetable/geneticsAbility/timestop
+
+/datum/targetable/geneticsAbility/timestop
+	name = "Timestop"
+	desc = "Za warudo."
+	icon_state = "timestop"
+	targeted = FALSE
+	can_act_check = FALSE
+	var/using = FALSE
+
+	// how much stamina to take per second of time
+	// double this is required to GET that second
+	var/stamina_cost = STAMINA_REGEN
+
+	// how much stamina you need to use the ability
+	var/min_stamina = STAMINA_SPRINT
+
+	proc/use_stamina(time_spent)
+		var/cost = src.linked_power.power > 1 ? src.stamina_cost/2 : src.stamina_cost
+
+		var/owed = owner.stamina - (time_spent / (1 SECOND)) * cost
+
+		// the stamina cost of the
+		if (owed < 0)
+			if (owed < STAMINA_NEG_CAP)
+				owed = STAMINA_NEG_CAP
+				owner.stamina = STAMINA_NEG_CAP
+
+			// 1/3 of the owed stamina, capped at 25 brute
+			var/damage = min(-owed/3,25)
+
+			owner.emote("scream")
+			playsound(owner.loc, 'sound/impact_sounds/Flesh_Tear_1.ogg', 100, 1)
+			owner.TakeDamage("chest", damage, 0, 0, DAMAGE_BLUNT)
+
+		else
+			owner.stamina = owed
+
+	proc/stamina_cost(stamina)
+		var/cost = src.linked_power.power > 1 ? src.stamina_cost : 2*src.stamina_cost
+		return (stamina / cost) * 2 SECONDS
+
+	cast_genetics(atom/target, misfire, params)
+		var/mob/living/owner
+		if (holder && isliving(holder.owner))
+			owner = holder.owner
+		else
+			boutput(owner, SPAN_ALERT("You lack the stamina to stop time."))
+			return FALSE
+
+		if (src.using)
+			boutput(owner, SPAN_ALERT("You're already expending stamina to stop time."))
+			return FALSE
+
+
+		// convert their stamina into time, stamina will be taken away when it ends
+		if(owner.stamina < src.min_stamina)
+			boutput(owner, SPAN_ALERT("You lack the stamina to stop time right now."))
+			return FALSE
+
+		var/max_time = src.stamina_cost(owner.stamina)
+
+		if (misfire)
+			max_time /= 2
+
+		src.using = TRUE
+
+		owner.AddComponent(/datum/component/afterimage, 10, 0.1 SECONDS)
+		playsound(owner.loc, "sound/effects/elec_bzzz.ogg", 25, 1, -1)
+		owner.say("ZA WARUDO, TOKI WO TOMARE!")
+
+		var/obj/itemspecialeffect/screech/roar_effect = new /obj/itemspecialeffect/screech
+		roar_effect.Scale(2,2)
+		roar_effect.color = "#FFFFFF"
+		roar_effect.setup(holder.owner.loc)
+
+		SPAWN(max_time)
+			src.using = FALSE
+			if (!QDELETED(owner))
+				var/datum/component/D = owner.GetComponent(/datum/component/afterimage)
+				D?.RemoveComponent()
+				src.use_stamina(max_time)
+
+		timestop(4, max_time)
+
+	proc/timestop(radius, time)
+		var/turf/center = get_turf(holder.owner)
+		for (var/turf/T in range(radius, center))
+			var/obj/effect/timefield/field = locate() in T
+			if (!field)
+				new /obj/effect/timefield(T, holder.owner, time)
+			else
+				field.extend(time, holder.owner)
+
+/obj/effect/timefield
+	name = "timefield"
+	desc = "/shrug"
+	density = 1
+	anchored = ANCHORED_ALWAYS
+	opacity = 0
+
+	pass_unstable = TRUE
+
+	var/list/immune = list()
+	var/duration = 0
+	var/starttime = 0
+	layer = LATTICE_LAYER
+	New(loc, immune, duration)
+		..(loc)
+		src.extend(duration, immune)
+
+	disposing()
+		. = ..()
+		src.immune = null
+		UnregisterSignal(src, COMSIG_ATOM_HITBY_PROJ)
+
+	Cross(atom/movable/mover)
+		if (mover in src.immune)
+			return TRUE
+		if (istype(mover, /obj/projectile))
+			// only allow it if its already inside
+			if (mover.hasStatus("timestop"))
+				return TRUE
+			return FALSE
+		if (!mover.hasStatus("timestop"))
+			return TRUE
+		return ..()
+
+	Crossed(atom/movable/mover)
+		. = ..()
+		if (mover in src.immune)
+			return
+		if (!mover.throwing)
+			// freeze it
+			var/dur = src.duration+src.starttime - TIME
+			if (dur)
+				mover.setStatusMin("timestop", dur)
+
+	Uncrossed(atom/movable/mover)
+		. = ..()
+		// we want to interrupt anything while time is paused
+		var/obj/effect/timefield/field = locate() in get_turf(mover)
+		if (!field)
+			mover.delStatus("timestop")
+
+
+	proc/freeze_all(turf/T)
+		T.setStatusMin("timestop", src.duration)
+		for(var/atom/movable/AM in T)
+			if (AM in immune)
+				continue
+			if (IS_OVERLAY_OR_EFFECT(AM))
+				continue
+			AM.setStatusMin("timestop", src.duration)
+
+	proc/extend(time, newowner)
+		src.duration = time // see below
+		src.starttime = TIME
+		src.immune += newowner
+
+		// refresh freeze
+		freeze_all(get_turf(src))
+
+		SPAWN(time)
+			src.immune -= immune
+			if (length(src.immune) == 0)
+				qdel(src)
+

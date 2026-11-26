@@ -4158,3 +4158,46 @@
 		owner.remove_filter("protection")
 		..()
 
+/datum/statusEffect/timestop
+	id = "timestop"
+	name = "Frozen Time" //I'm going to scream
+	desc = "You are completely paralyzed."
+	unique = 1
+	icon_state = "paralysis"
+
+	var/oldcolor = null
+	var/oldanchored = UNANCHORED
+
+	onAdd(optional=null)
+		. = ..()
+		if (!QDELETED(owner))
+			if (ismob(owner))
+				var/mob/mob_owner = owner
+				APPLY_ATOM_PROPERTY(mob_owner, PROP_MOB_CANTMOVE, src.type)
+				APPLY_ATOM_PROPERTY(mob_owner, PROP_MOB_CANTTURN, src.type)
+			else
+				if (ismovable(owner))
+					var/atom/movable/mov_owner = owner
+					src.oldanchored = mov_owner.anchored
+					mov_owner.anchored = ANCHORED_ALWAYS
+			src.oldcolor = owner.color
+			owner.color = COLOR_MATRIX_INVERSE
+
+	onRemove()
+		if (!QDELETED(owner))
+			if (ismob(owner))
+				var/mob/mob_owner = owner
+				REMOVE_ATOM_PROPERTY(mob_owner, PROP_MOB_CANTMOVE, src.type)
+				REMOVE_ATOM_PROPERTY(mob_owner, PROP_MOB_CANTTURN, src.type)
+			else
+				if (ismovable(owner))
+					var/atom/movable/mov_owner = owner
+					mov_owner.anchored = src.oldanchored
+			owner.color = src.oldcolor
+		. = ..()
+
+	onUpdate(timePassed)
+		if (!QDELETED(owner))
+			if (ismob(owner))
+				// monkey AI cheats.
+				owner.setStatusMin("paralysis", 1 SECOND)
